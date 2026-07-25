@@ -26,7 +26,10 @@ export default function AdminLogin({ onLoginSuccess }) {
     // Check approved staff list from AppContext
     const staffRecord = (approvedStaff || []).find(s => s.email.toLowerCase() === normalized);
 
-    if (staffRecord || normalized.includes('prasanth') || normalized.includes('bloodhunt') || normalized.includes('admin')) {
+    // If staff record exists and approved OR if initial setup
+    const isApproved = staffRecord?.status === 'approved' || (approvedStaff && approvedStaff.length === 0);
+
+    if (isApproved) {
       const assignedRole = staffRecord ? staffRecord.role : 'Super Admin';
       const sessionData = {
         email: normalized,
@@ -40,7 +43,7 @@ export default function AdminLogin({ onLoginSuccess }) {
     } else {
       // Access not yet approved -> Submit request for approval
       requestStaffAccess(normalized);
-      setPendingNotice(`⏳ Access Request Pending: Your request for "${normalized}" has been submitted to Super Admin. Ask Super Admin to approve your account under Settings -> Roles & Staff Permissions.`);
+      setPendingNotice(`⏳ Access Pending Approval: Your request for "${normalized}" has been submitted. Super Admin must approve your account under Settings -> Roles & Staff Permissions.`);
     }
   };
 
@@ -182,31 +185,6 @@ export default function AdminLogin({ onLoginSuccess }) {
         {/* Main Options */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           
-          {/* Quick 1-Click Login as Authorized Owner */}
-          <button
-            onClick={() => authenticateEmail('prasanth08-29@gmail.com')}
-            style={{
-              width: '100%',
-              padding: '0.85rem 1.25rem',
-              backgroundColor: '#2563eb',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '10px',
-              fontWeight: '700',
-              fontSize: '0.95rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.6rem',
-              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <CheckCircle2 size={18} />
-            <span>Sign in as prasanth08-29@gmail.com</span>
-          </button>
-
           {/* Google Sign-in Button */}
           <button
             onClick={handleGoogleSignIn}

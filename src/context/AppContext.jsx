@@ -372,9 +372,8 @@ export const AppProvider = ({ children }) => {
   const [blogs, setBlogs] = useState(() => getStorage('aeon_blogs', initialBlogs));
   const [leads, setLeads] = useState(() => getStorage('aeon_leads', initialLeads));
   const initialApprovedStaff = [
-    { email: 'prasanth08-29@gmail.com', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' },
-    { email: 'bloodhunt029@gmail.com', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' },
-    { email: 'admin@aeoncare.in', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' }
+    { email: 'admin@aeoncare.in', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' },
+    { email: 'support@aeoncare.in', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' }
   ];
 
   const [approvedStaff, setApprovedStaff] = useState(() => getStorage('aeon_approved_staff', initialApprovedStaff));
