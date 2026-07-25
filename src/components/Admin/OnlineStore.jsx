@@ -10,8 +10,8 @@ import {
 
 export default function OnlineStore() {
   const { 
-    layout, updateLayout, resetLayout, blogs, addBlog, deleteBlog, 
-    faqs, addFAQ, deleteFAQ, products, storeSettings 
+    layout, updateLayout, blogs, addBlog, deleteBlog, 
+    faqs, addFAQ, deleteFAQ, storeSettings 
   } = useContext(AppContext);
   
   const [showFullStorePreview, setShowFullStorePreview] = useState(false);
@@ -343,32 +343,6 @@ export default function OnlineStore() {
     alert('Theme settings saved and synced successfully to the live storefront!');
   };
 
-  const handleResetToDefault = () => {
-    if (window.confirm('Are you sure you want to reset all layout theme settings back to default?')) {
-      resetLayout();
-      setLogoText('AeonCare');
-      setAnnouncementBar('🚚 Free Express Delivery in Chennai on Orders above ₹2,000!');
-      setHeroTitle('Caring for your family, right at home.');
-      setHeroSubtitle('Buy premium medical equipment, mobility aids, clinical monitors and home-care consumables with same-day doorstep setup.');
-      setBannerTitle('PURCHASE WITH CONFIDENCE.');
-      setBannerSubtitle('Visit Our Showroom For A Complimentary Test Drive And Find Your Perfect Fit');
-      setBannerImage('');
-      setThemeColors('teal');
-      setSectionsOrderList(['hero', 'trust', 'collections', 'banner', 'featured', 'video', 'faq', 'blog', 'cta']);
-      setHiddenSections([]);
-      setSectionSizes({});
-      setImageBannerImage('');
-      setImageBannerTitle('');
-      setImageBannerSubtitle('');
-      setColWithImageImage('');
-      setColWithImageTitle('');
-      setColWithImageCategory('Mobility Aid');
-      setRichTextHeading('');
-      setRichTextBody('');
-      alert('Theme layout has been reset to default values!');
-    }
-  };
-
   // Section List Mutation Helpers
   const shiftSectionUp = (idx, e) => {
     e.stopPropagation();
@@ -522,14 +496,7 @@ export default function OnlineStore() {
           </button>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <button 
-            onClick={handleResetToDefault}
-            style={{ backgroundColor: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1', padding: '0.45rem 0.85rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer' }}
-            title="Reset theme layout back to factory defaults"
-          >
-            Reset Default
-          </button>
+        <div>
           <button 
             onClick={handleSaveAll}
             style={{ backgroundColor: '#2563eb', color: '#ffffff', border: 'none', padding: '0.45rem 1.25rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer' }}
