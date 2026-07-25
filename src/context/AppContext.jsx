@@ -384,6 +384,9 @@ export const AppProvider = ({ children }) => {
   useEffect(() => { localStorage.setItem('aeon_products', JSON.stringify(products)); }, [products]);
   useEffect(() => { localStorage.setItem('aeon_customers', JSON.stringify(customers)); }, [customers]);
   useEffect(() => { localStorage.setItem('aeon_orders', JSON.stringify(orders)); }, [orders]);
+  useEffect(() => { localStorage.setItem('aeon_discounts', JSON.stringify(discounts)); }, [discounts]);
+  useEffect(() => { localStorage.setItem('aeon_faqs', JSON.stringify(faqs)); }, [faqs]);
+  useEffect(() => { localStorage.setItem('aeon_blogs', JSON.stringify(blogs)); }, [blogs]);
   useEffect(() => { localStorage.setItem('aeon_settings', JSON.stringify(storeSettings)); }, [storeSettings]);
   useEffect(() => { localStorage.setItem('aeon_layout', JSON.stringify(layout)); }, [layout]);
   useEffect(() => { localStorage.setItem('aeon_cart', JSON.stringify(cart)); }, [cart]);
