@@ -32,8 +32,37 @@ import {
 function AppContent() {
   const { layout, userRole, orders, trackPageView } = useContext(AppContext);
   
-  // Navigation states
-  const [viewMode, setViewMode] = useState('storefront'); // storefront | admin
+  // Navigation states (detect /admin route from URL)
+  const [viewMode, setViewModeState] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.toLowerCase().startsWith('/admin')) {
+      return 'admin';
+    }
+    return 'storefront';
+  });
+
+  const setViewMode = (mode) => {
+    setViewModeState(mode);
+    if (typeof window !== 'undefined') {
+      const targetPath = mode === 'admin' ? '/admin' : '/';
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState(null, '', targetPath);
+      }
+    }
+  };
+
+  // Sync route on browser back/forward buttons
+  React.useEffect(() => {
+    const handlePopState = () => {
+      if (window.location.pathname.toLowerCase().startsWith('/admin')) {
+        setViewModeState('admin');
+      } else {
+        setViewModeState('storefront');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const [activeTab, setActiveTab] = useState('home'); // home | catalog | services | blog | userPortal | checkout
   const [activeAdminTab, setActiveAdminTab] = useState('dashboard'); // dashboard | orders | products | customers | marketing | discounts | storefront | roles
   
@@ -157,8 +186,17 @@ function AppContent() {
                   </p>
                 </div>
               </div>
-              <div style={{ maxWidth: '1280px', margin: '2rem auto 0', borderTop: '1px solid #1e293b', paddingTop: '1.5rem', textAlign: 'center', fontSize: '0.75rem' }}>
-                © 2026 AeonCare. Partner of AeonCare.in. India CDSCO labeling compliant. All rights reserved.
+              <div style={{ maxWidth: '1280px', margin: '2rem auto 0', borderTop: '1px solid #1e293b', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', fontSize: '0.75rem' }}>
+                <span>© 2026 AeonCare. Partner of AeonCare.in. India CDSCO labeling compliant. All rights reserved.</span>
+                <a 
+                  href="/admin" 
+                  onClick={(e) => { e.preventDefault(); setViewMode('admin'); }} 
+                  style={{ color: '#475569', textDecoration: 'none', transition: 'color 0.2s ease', cursor: 'pointer' }}
+                  onMouseOver={(e) => e.currentTarget.style.color = '#94a3b8'}
+                  onMouseOut={(e) => e.currentTarget.style.color = '#475569'}
+                >
+                  Staff Portal
+                </a>
               </div>
             </footer>
           )}

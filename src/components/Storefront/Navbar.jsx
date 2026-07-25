@@ -100,24 +100,6 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
 
   return (
     <header className="animate-fade-in">
-      {/* Dynamic Top Announcement Bar */}
-      <div className="system-banner">
-        <div className="mode-indicator">
-          <div className="pulse-indicator"></div>
-          <span>{storeSettings?.storeName || 'Store'} Storefront (Active Customer View)</span>
-        </div>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <span style={{ color: '#94a3b8' }}>Logged in as: <strong>{userRole}</strong></span>
-          <button 
-            className="btn btn-secondary" 
-            style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', borderRadius: '4px' }}
-            onClick={() => setViewMode('admin')}
-          >
-            Switch to Admin Panel →
-          </button>
-        </div>
-      </div>
-
       {!layout?.hiddenSections?.includes('announcementBar') && (
         <div style={{ backgroundColor: 'hsl(var(--primary))', color: 'white', fontSize: '0.8rem', padding: '0.4rem 1rem', textAlign: 'center', fontWeight: '500' }}>
           {layout.announcementBar}
