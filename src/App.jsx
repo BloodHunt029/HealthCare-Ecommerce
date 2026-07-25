@@ -22,11 +22,12 @@ import RolesSettings, { RoleAccessWrapper } from './components/Admin/RolesSettin
 import StoreSettings from './components/Admin/StoreSettings';
 import ContentCMS from './components/Admin/ContentCMS';
 import MarketsManager from './components/Admin/MarketsManager';
+import AdminLogin from './components/Admin/AdminLogin';
 
 import { 
   ShieldCheck, LayoutDashboard, ShoppingBag, FolderHeart, 
   Users, TicketPercent, Globe, Award, HelpCircle, ShieldAlert,
-  MessageSquare, BookOpen, ArrowLeft, Settings
+  MessageSquare, BookOpen, ArrowLeft, Settings, LogOut
 } from 'lucide-react';
 
 function AppContent() {
@@ -62,6 +63,21 @@ function AppContent() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // Admin Authentication Session State
+  const [adminAuthSession, setAdminAuthSession] = useState(() => {
+    try {
+      const saved = localStorage.getItem('aeon_admin_session');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const handleAdminSignOut = () => {
+    localStorage.removeItem('aeon_admin_session');
+    setAdminAuthSession(null);
+  };
 
   const [activeTab, setActiveTab] = useState('home'); // home | catalog | services | blog | userPortal | checkout
   const [activeAdminTab, setActiveAdminTab] = useState('dashboard'); // dashboard | orders | products | customers | marketing | discounts | storefront | roles
@@ -213,15 +229,13 @@ function AppContent() {
         </>
       ) : (
         /* ================= ADMIN BACK-OFFICE MODE ================= */
-        <>
-          {/* Admin Mode Top Header */}
-          <div className="system-banner" style={{ backgroundColor: '#1e293b', borderBottom: '1px solid #475569' }}>
-            <div className="mode-indicator">
-              <span style={{ display: 'inline-block', backgroundColor: 'hsl(var(--primary))', color: 'white', borderRadius: '4px', padding: '2px 4px', fontWeight: 'bold', fontSize: '0.7rem' }}>ADMIN</span>
-              <span>AeonCare Control Panel (Staff Management)</span>
-            </div>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <span style={{ color: '#cbd5e1' }}>Session Role: <strong>{userRole}</strong></span>
+        !adminAuthSession ? (
+          <>
+            <div className="system-banner" style={{ backgroundColor: '#1e293b', borderBottom: '1px solid #475569' }}>
+              <div className="mode-indicator">
+                <span style={{ display: 'inline-block', backgroundColor: 'hsl(var(--primary))', color: 'white', borderRadius: '4px', padding: '2px 4px', fontWeight: 'bold', fontSize: '0.7rem' }}>ADMIN AUTH</span>
+                <span>AeonCare Control Panel Staff Login</span>
+              </div>
               <button 
                 className="btn btn-primary" 
                 style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', borderRadius: '4px' }}
@@ -230,7 +244,37 @@ function AppContent() {
                 ← Return to Storefront
               </button>
             </div>
-          </div>
+            <AdminLogin onLoginSuccess={(session) => setAdminAuthSession(session)} />
+          </>
+        ) : (
+          <>
+            {/* Admin Mode Top Header */}
+            <div className="system-banner" style={{ backgroundColor: '#1e293b', borderBottom: '1px solid #475569' }}>
+              <div className="mode-indicator">
+                <span style={{ display: 'inline-block', backgroundColor: 'hsl(var(--primary))', color: 'white', borderRadius: '4px', padding: '2px 4px', fontWeight: 'bold', fontSize: '0.7rem' }}>ADMIN</span>
+                <span>AeonCare Control Panel</span>
+              </div>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <span style={{ color: '#cbd5e1', fontSize: '0.78rem' }}>
+                  Signed in: <strong style={{ color: '#60a5fa' }}>{adminAuthSession.email}</strong> ({userRole})
+                </span>
+                <button 
+                  className="btn btn-secondary" 
+                  style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                  onClick={handleAdminSignOut}
+                  title="Sign out of Admin Session"
+                >
+                  <LogOut size={12} /> Sign Out
+                </button>
+                <button 
+                  className="btn btn-primary" 
+                  style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', borderRadius: '4px' }}
+                  onClick={() => setViewMode('storefront')}
+                >
+                  ← Return to Storefront
+                </button>
+              </div>
+            </div>
 
           <div className="admin-layout">
             {/* Sidebar */}
@@ -494,7 +538,8 @@ function AppContent() {
             </main>
           </div>
         </>
-      )}
+      )
+    )}
 
     </div>
   );

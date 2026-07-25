@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, doc, setDoc, onSnapshot, getDoc } from 'firebase/firestore';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 
 // Firebase configuration using environment variables with fallbacks
 const firebaseConfig = {
@@ -14,5 +15,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const db = getFirestore(app);
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
 
-export { doc, setDoc, onSnapshot, getDoc };
+export { doc, setDoc, onSnapshot, getDoc, signInWithPopup, signOut, onAuthStateChanged };
