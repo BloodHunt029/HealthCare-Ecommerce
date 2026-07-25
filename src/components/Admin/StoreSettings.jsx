@@ -3,11 +3,14 @@ import { AppContext } from '../../context/AppContext';
 import { 
   Globe, MapPin, Percent, DollarSign, Save, 
   CheckCircle2, Building, CreditCard, 
-  ChevronRight, Settings, MessageSquare
+  ChevronRight, Settings, MessageSquare, RotateCcw, RefreshCw, AlertTriangle
 } from 'lucide-react';
 
 export default function StoreSettings() {
-  const { storeSettings, updateStoreSettings } = useContext(AppContext);
+  const { 
+    storeSettings, updateStoreSettings, resetStoreSettings, 
+    resetProducts, resetAllStoreData, resetOrders, resetBlogs, resetFaqs, resetDiscounts 
+  } = useContext(AppContext);
 
   // Side Menu Active Tab State: 'payments' | 'general' | 'domain' | 'location' | 'taxes' | 'shipping' | 'whatsapp'
   const [activeSettingsTab, setActiveSettingsTab] = useState('payments');
@@ -102,7 +105,8 @@ export default function StoreSettings() {
     { id: 'domain', label: 'Custom Domain & SEO', desc: 'Domain Link & Canonical URL', icon: Globe },
     { id: 'location', label: 'Store Location', desc: 'Physical Address & City', icon: MapPin },
     { id: 'taxes', label: 'Taxes & GST', desc: 'GSTIN & Tax Pricing Mode', icon: Percent },
-    { id: 'shipping', label: 'Currency & Shipping', desc: 'Defaults & Shipping Limits', icon: DollarSign }
+    { id: 'shipping', label: 'Currency & Shipping', desc: 'Defaults & Shipping Limits', icon: DollarSign },
+    { id: 'reset', label: 'Store Reset & Restore', desc: 'Factory Reset Products, Settings & Store Data', icon: RotateCcw, badge: 'System' }
   ];
 
   return (
@@ -622,6 +626,87 @@ export default function StoreSettings() {
                   <label className="form-label">Free Express Shipping Threshold ({currencySymbol})</label>
                   <input type="number" className="form-input" value={freeShippingThreshold} onChange={(e) => setFreeShippingThreshold(e.target.value)} />
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* 7. STORE RESET & RESTORE */}
+          {activeSettingsTab === 'reset' && (
+            <div className="card animate-fade-in" style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
+                <RotateCcw size={20} style={{ color: '#dc2626' }} />
+                <h3 style={{ fontSize: '1.05rem', fontWeight: '800', color: '#1e293b', margin: 0 }}>Factory Reset & Data Restore Center</h3>
+              </div>
+
+              <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.5rem' }}>
+                Reset individual modules or execute a complete Shopify-style store reset back to factory defaults. All saved state automatically syncs across your devices and browsers.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {/* 1. Reset Store Settings */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: '700', color: '#1e293b' }}>Reset Store Settings & Gateways</h4>
+                    <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: '#64748b' }}>Restores default store name, phone, Razorpay/PayPal keys, and currency defaults.</p>
+                  </div>
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary"
+                    style={{ fontSize: '0.78rem', fontWeight: '700' }}
+                    onClick={() => {
+                      if (window.confirm('Reset store settings and payment gateways to defaults?')) {
+                        resetStoreSettings();
+                        alert('Store settings have been reset to defaults!');
+                      }
+                    }}
+                  >
+                    Reset Settings
+                  </button>
+                </div>
+
+                {/* 2. Reset Products Catalog */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: '700', color: '#1e293b' }}>Reset Products Catalog</h4>
+                    <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: '#64748b' }}>Restores initial sample products list, stock limits, and specifications.</p>
+                  </div>
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary"
+                    style={{ fontSize: '0.78rem', fontWeight: '700' }}
+                    onClick={() => {
+                      if (window.confirm('Reset products catalog to original initial sample products?')) {
+                        resetProducts();
+                        alert('Products catalog reset to defaults!');
+                      }
+                    }}
+                  >
+                    Reset Products
+                  </button>
+                </div>
+
+                {/* 3. Master Store Reset */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#fef2f2', borderRadius: '8px', border: '1px solid #fecdd3' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: '800', color: '#991b1b', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <AlertTriangle size={16} /> Complete Store Reset (Shopify Factory Reset)
+                    </h4>
+                    <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: '#b91c1c' }}>Resets ALL products, orders, customers, FAQs, blogs, settings, and storefront layout to fresh defaults.</p>
+                  </div>
+                  <button 
+                    type="button" 
+                    style={{ backgroundColor: '#dc2626', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '800', cursor: 'pointer' }}
+                    onClick={() => {
+                      if (window.confirm('CRITICAL WARNING: This will reset ALL products, orders, blogs, FAQs, settings, and theme layout back to clean factory state. Proceed?')) {
+                        resetAllStoreData();
+                        alert('Full store factory reset complete!');
+                      }
+                    }}
+                  >
+                    Reset Entire Store
+                  </button>
+                </div>
+
               </div>
             </div>
           )}

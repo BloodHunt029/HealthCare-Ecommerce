@@ -429,6 +429,64 @@ export const AppProvider = ({ children }) => {
     saveKey('aeon_settings', initialStoreSettings);
   };
 
+  const resetProducts = () => {
+    setProducts(initialProducts);
+    saveKey('aeon_products', initialProducts);
+  };
+
+  const resetCustomers = () => {
+    setCustomers(initialCustomers);
+    saveKey('aeon_customers', initialCustomers);
+  };
+
+  const resetOrders = () => {
+    setOrders(initialOrders);
+    saveKey('aeon_orders', initialOrders);
+  };
+
+  const resetDiscounts = () => {
+    setDiscounts(initialDiscounts);
+    saveKey('aeon_discounts', initialDiscounts);
+  };
+
+  const resetFaqs = () => {
+    setFaqs(initialFAQs);
+    saveKey('aeon_faqs', initialFAQs);
+  };
+
+  const resetBlogs = () => {
+    setBlogs(initialBlogs);
+    saveKey('aeon_blogs', initialBlogs);
+  };
+
+  const resetLeads = () => {
+    setLeads(initialLeads);
+    saveKey('aeon_leads', initialLeads);
+  };
+
+  const resetAllStoreData = () => {
+    setProducts(initialProducts);
+    saveKey('aeon_products', initialProducts);
+    setCustomers(initialCustomers);
+    saveKey('aeon_customers', initialCustomers);
+    setOrders(initialOrders);
+    saveKey('aeon_orders', initialOrders);
+    setDiscounts(initialDiscounts);
+    saveKey('aeon_discounts', initialDiscounts);
+    setFaqs(initialFAQs);
+    saveKey('aeon_faqs', initialFAQs);
+    setBlogs(initialBlogs);
+    saveKey('aeon_blogs', initialBlogs);
+    setLeads(initialLeads);
+    saveKey('aeon_leads', initialLeads);
+    setStoreSettings(initialStoreSettings);
+    saveKey('aeon_settings', initialStoreSettings);
+    setLayout(initialLayout);
+    saveKey('aeon_layout', initialLayout);
+    setCart([]);
+    saveKey('aeon_cart', []);
+  };
+
   // Cart actions
   const addToCart = (product, qty = 1, options = {}) => {
     setCart(prev => {
@@ -614,17 +672,18 @@ export const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider value={{
-      products, setProducts,
-      customers, setCustomers,
-      orders, setOrders, createOrder, updateOrderStatus, updatePaymentStatus,
-      discounts, setDiscounts,
-      faqs, setFaqs, addFAQ, deleteFAQ,
-      blogs, setBlogs, addBlog, deleteBlog,
+      products, setProducts, resetProducts,
+      customers, setCustomers, resetCustomers,
+      orders, setOrders, createOrder, updateOrderStatus, updatePaymentStatus, resetOrders,
+      discounts, setDiscounts, resetDiscounts,
+      faqs, setFaqs, addFAQ, deleteFAQ, resetFaqs,
+      blogs, setBlogs, addBlog, deleteBlog, resetBlogs,
       storeSettings, setStoreSettings, updateStoreSettings, resetStoreSettings,
       layout, setLayout, updateLayout, resetLayout,
       cart, addToCart, removeFromCart, updateCartQty, clearCart,
       analytics, activeUtm, trackPageView, notificationLogs, triggerOrderNotification,
-      leads, setLeads,
+      leads, setLeads, resetLeads,
+      resetAllStoreData,
       userRole, setUserRole
     }}>
       {children}
