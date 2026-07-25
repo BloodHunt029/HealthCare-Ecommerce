@@ -36,6 +36,12 @@ export default function OnlineStore() {
   const [themeColors, setThemeColors] = useState(layout.themeColors || 'teal');
   const [promoVideoUrl, setPromoVideoUrl] = useState(layout.promoVideoUrl || '');
   const [footerText, setFooterText] = useState(layout.footerText || 'Trusted home patient care support, mobility aids, clinical diagnostic devices sales and supply hub in Chennai.');
+  const [footerSupportTitle, setFooterSupportTitle] = useState(layout.footerSupportTitle || 'Support Hub');
+  const [footerContactTitle, setFooterContactTitle] = useState(layout.footerContactTitle || 'Contact Info');
+  const [footerContactAddress, setFooterContactAddress] = useState(layout.footerContactAddress || 'Aeon Healthcare Pvt Ltd, Besant Nagar, Chennai, TN 600090');
+  const [footerContactPhone, setFooterContactPhone] = useState(layout.footerContactPhone || '+91 98401 23456');
+  const [footerContactEmail, setFooterContactEmail] = useState(layout.footerContactEmail || 'support@aeoncare.in');
+  const [footerCopyrightText, setFooterCopyrightText] = useState(layout.footerCopyrightText || '© 2026 AeonCare. Partner of AeonCare.in. India CDSCO labeling compliant. All rights reserved.');
   const [navigationTabs, setNavigationTabs] = useState(layout.navigationTabs || [
     { id: 'home', label: 'Home' },
     { id: 'catalog', label: 'Shop Catalog' },
@@ -327,6 +333,12 @@ export default function OnlineStore() {
       themeColors,
       promoVideoUrl,
       footerText,
+      footerSupportTitle,
+      footerContactTitle,
+      footerContactAddress,
+      footerContactPhone,
+      footerContactEmail,
+      footerCopyrightText,
       sectionsOrder: sectionsOrderList,
       hiddenSections,
       sectionSizes,
@@ -1319,13 +1331,81 @@ export default function OnlineStore() {
                   <div>
                     {renderVisibilityBanner('footer', 'Footer & Copyright Group')}
                     {renderSectionSizeControls('footer')}
+                    
                     <div className="form-group">
-                      <label className="form-label">Footer Description Copy</label>
+                      <label className="form-label">Footer Description / About Copy</label>
                       <textarea 
                         className="form-input" 
-                        style={{ minHeight: '80px', fontFamily: 'inherit' }} 
+                        style={{ minHeight: '75px', fontFamily: 'inherit' }} 
                         value={footerText} 
                         onChange={(e) => setFooterText(e.target.value)}
+                        placeholder="Enter store description for the footer..."
+                      ></textarea>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Support Column Heading</label>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        value={footerSupportTitle} 
+                        onChange={(e) => setFooterSupportTitle(e.target.value)}
+                        placeholder="e.g. Support Hub"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Contact Column Heading</label>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        value={footerContactTitle} 
+                        onChange={(e) => setFooterContactTitle(e.target.value)}
+                        placeholder="e.g. Contact Info"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Company Address Line</label>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        value={footerContactAddress} 
+                        onChange={(e) => setFooterContactAddress(e.target.value)}
+                        placeholder="e.g. Aeon Healthcare Pvt Ltd, Besant Nagar, Chennai, TN 600090"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Helpline Phone Number</label>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        value={footerContactPhone} 
+                        onChange={(e) => setFooterContactPhone(e.target.value)}
+                        placeholder="e.g. +91 98401 23456"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Support Email Address</label>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        value={footerContactEmail} 
+                        onChange={(e) => setFooterContactEmail(e.target.value)}
+                        placeholder="e.g. support@aeoncare.in"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Copyright & Compliance Notice</label>
+                      <textarea 
+                        className="form-input" 
+                        style={{ minHeight: '65px', fontFamily: 'inherit' }} 
+                        value={footerCopyrightText} 
+                        onChange={(e) => setFooterCopyrightText(e.target.value)}
+                        placeholder="e.g. © 2026 AeonCare. Partner of AeonCare.in. India CDSCO labeling compliant. All rights reserved."
                       ></textarea>
                     </div>
                   </div>
@@ -1474,6 +1554,12 @@ export default function OnlineStore() {
             themeColors,
             promoVideoUrl,
             footerText,
+            footerSupportTitle,
+            footerContactTitle,
+            footerContactAddress,
+            footerContactPhone,
+            footerContactEmail,
+            footerCopyrightText,
             sectionsOrder: sectionsOrderList,
             hiddenSections,
             sectionSizes,

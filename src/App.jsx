@@ -161,14 +161,25 @@ function AppContent() {
 
           {/* Storefront Footer */}
           {!layout?.hiddenSections?.includes('footer') && (
-            <footer style={{ backgroundColor: '#0f172a', color: '#94a3b8', padding: '3rem 1.5rem', borderTop: '1px solid hsl(var(--border))' }}>
-              <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2rem' }}>
+            <footer style={{ 
+              backgroundColor: '#0f172a', 
+              color: '#94a3b8', 
+              padding: `${layout.sectionSizes?.footer?.paddingY !== undefined ? layout.sectionSizes.footer.paddingY : 48}px 1.5rem`, 
+              borderTop: '1px solid hsl(var(--border))' 
+            }}>
+              <div style={{ 
+                maxWidth: layout.sectionSizes?.footer?.isFullWidth ? '100%' : `${layout.sectionSizes?.footer?.width || 1280}px`, 
+                margin: '0 auto', 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+                gap: '2rem' 
+              }}>
                 <div>
-                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1.2rem' }}>AeonCare</h4>
+                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1.2rem' }}>{layout.logoText || 'AeonCare'}</h4>
                   <p style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>{layout.footerText || 'Trusted home patient care support, mobility aids, clinical diagnostic devices sales and supply hub in Chennai.'}</p>
                 </div>
                 <div>
-                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>Support Hub</h4>
+                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>{layout.footerSupportTitle || 'Support Hub'}</h4>
                   <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem' }}>
                     <li><a href="#tel" onClick={() => setActiveTab('blog')}>FAQ Helpdesk</a></li>
                     <li><a href="#tel" onClick={() => setActiveTab('services')}>Request Home Setup</a></li>
@@ -177,17 +188,16 @@ function AppContent() {
                   </ul>
                 </div>
                 <div>
-                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>Contact Info</h4>
-                  <p style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>
-                    Aeon Healthcare Pvt Ltd<br/>
-                    Besant Nagar, Chennai, TN 600090<br/>
-                    Helpline: +91 98401 23456<br/>
-                    Email: support@aeoncare.in
+                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>{layout.footerContactTitle || 'Contact Info'}</h4>
+                  <p style={{ fontSize: '0.85rem', lineHeight: '1.6', whitespace: 'pre-line' }}>
+                    {layout.footerContactAddress || 'Aeon Healthcare Pvt Ltd, Besant Nagar, Chennai, TN 600090'}<br/>
+                    Helpline: {layout.footerContactPhone || '+91 98401 23456'}<br/>
+                    Email: {layout.footerContactEmail || 'support@aeoncare.in'}
                   </p>
                 </div>
               </div>
-              <div style={{ maxWidth: '1280px', margin: '2rem auto 0', borderTop: '1px solid #1e293b', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', fontSize: '0.75rem' }}>
-                <span>© 2026 AeonCare. Partner of AeonCare.in. India CDSCO labeling compliant. All rights reserved.</span>
+              <div style={{ maxWidth: layout.sectionSizes?.footer?.isFullWidth ? '100%' : `${layout.sectionSizes?.footer?.width || 1280}px`, margin: '2rem auto 0', borderTop: '1px solid #1e293b', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', fontSize: '0.75rem' }}>
+                <span>{layout.footerCopyrightText || '© 2026 AeonCare. Partner of AeonCare.in. India CDSCO labeling compliant. All rights reserved.'}</span>
                 <a 
                   href="/admin" 
                   onClick={(e) => { e.preventDefault(); setViewMode('admin'); }} 
