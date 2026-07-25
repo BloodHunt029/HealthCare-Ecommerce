@@ -371,6 +371,14 @@ export const AppProvider = ({ children }) => {
   const [faqs, setFaqs] = useState(() => getStorage('aeon_faqs', initialFAQs));
   const [blogs, setBlogs] = useState(() => getStorage('aeon_blogs', initialBlogs));
   const [leads, setLeads] = useState(() => getStorage('aeon_leads', initialLeads));
+  const initialApprovedStaff = [
+    { email: 'prasanth08-29@gmail.com', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' },
+    { email: 'bloodhunt029@gmail.com', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' },
+    { email: 'admin@aeoncare.in', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' }
+  ];
+
+  const [approvedStaff, setApprovedStaff] = useState(() => getStorage('aeon_approved_staff', initialApprovedStaff));
+  const [pendingRequests, setPendingRequests] = useState(() => getStorage('aeon_pending_requests', []));
   const [userRole, setUserRole] = useState('Super Admin');
 
   const [storeSettings, setStoreSettings] = useState(() => getStorage('aeon_settings', initialStoreSettings));
@@ -415,6 +423,45 @@ export const AppProvider = ({ children }) => {
   useEffect(() => { saveKey('aeon_layout', layout); }, [layout]);
   useEffect(() => { saveKey('aeon_cart', cart); }, [cart]);
   useEffect(() => { saveKey('aeon_leads', leads); }, [leads]);
+
+  useEffect(() => { saveKey('aeon_approved_staff', approvedStaff); }, [approvedStaff]);
+  useEffect(() => { saveKey('aeon_pending_requests', pendingRequests); }, [pendingRequests]);
+
+  const requestStaffAccess = (email) => {
+    const norm = email.toLowerCase().trim();
+    if (!norm) return;
+    if (approvedStaff.some(s => s.email.toLowerCase() === norm)) return;
+    if (pendingRequests.some(r => r.email.toLowerCase() === norm)) return;
+
+    setPendingRequests(prev => [
+      ...prev,
+      { email: norm, requestedAt: new Date().toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }), status: 'pending' }
+    ]);
+  };
+
+  const approveStaffRequest = (email, assignedRole = 'Store/Catalog Manager') => {
+    const norm = email.toLowerCase().trim();
+    setPendingRequests(prev => prev.filter(r => r.email.toLowerCase() !== norm));
+    setApprovedStaff(prev => {
+      const existingIndex = prev.findIndex(s => s.email.toLowerCase() === norm);
+      if (existingIndex >= 0) {
+        const copy = [...prev];
+        copy[existingIndex] = { ...copy[existingIndex], role: assignedRole, status: 'approved' };
+        return copy;
+      }
+      return [...prev, { email: norm, role: assignedRole, status: 'approved', addedAt: new Date().toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) }];
+    });
+  };
+
+  const rejectStaffRequest = (email) => {
+    const norm = email.toLowerCase().trim();
+    setPendingRequests(prev => prev.filter(r => r.email.toLowerCase() !== norm));
+  };
+
+  const removeApprovedStaff = (email) => {
+    const norm = email.toLowerCase().trim();
+    setApprovedStaff(prev => prev.filter(s => s.email.toLowerCase() !== norm));
+  };
 
   const updateStoreSettings = (newSettings) => setStoreSettings(prev => ({ ...prev, ...newSettings }));
   const updateLayout = (newLayout) => setLayout(prev => ({ ...prev, ...newLayout }));
@@ -684,7 +731,8 @@ export const AppProvider = ({ children }) => {
       analytics, activeUtm, trackPageView, notificationLogs, triggerOrderNotification,
       leads, setLeads, resetLeads,
       resetAllStoreData,
-      userRole, setUserRole
+      userRole, setUserRole,
+      approvedStaff, pendingRequests, requestStaffAccess, approveStaffRequest, rejectStaffRequest, removeApprovedStaff
     }}>
       {children}
     </AppContext.Provider>

@@ -4,21 +4,14 @@ import { auth, googleProvider, signInWithPopup } from '../../config/firebase';
 import { ShieldCheck, AlertCircle, CheckCircle2, UserCheck, ArrowRight, Mail, Key } from 'lucide-react';
 
 export default function AdminLogin({ onLoginSuccess }) {
-  const { storeSettings, setUserRole } = useContext(AppContext);
+  const { storeSettings, setUserRole, approvedStaff, requestStaffAccess } = useContext(AppContext);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [pendingNotice, setPendingNotice] = useState('');
   const [gmailInput, setGmailInput] = useState('prasanth08-29@gmail.com');
   const [showEmailInput, setShowEmailInput] = useState(false);
   const [showPasscode, setShowPasscode] = useState(false);
   const [passcode, setPasscode] = useState('');
-
-  // Whitelisted approved staff Gmail addresses
-  const allowedAdminEmails = storeSettings?.allowedAdminEmails || [
-    'prasanth08-29@gmail.com',
-    'bloodhunt029@gmail.com',
-    'admin@aeoncare.in',
-    'support@aeoncare.in'
-  ];
 
   const authenticateEmail = (emailAddress) => {
     const normalized = (emailAddress || '').toLowerCase().trim();
@@ -27,26 +20,27 @@ export default function AdminLogin({ onLoginSuccess }) {
       return;
     }
 
-    // Check if approved email or contains owner handles
-    const isApproved = allowedAdminEmails.some(email => email.toLowerCase() === normalized) ||
-                       normalized.includes('prasanth') ||
-                       normalized.includes('bloodhunt') ||
-                       normalized.includes('admin') ||
-                       allowedAdminEmails.length === 0;
+    setErrorMsg('');
+    setPendingNotice('');
 
-    if (isApproved) {
+    // Check approved staff list from AppContext
+    const staffRecord = (approvedStaff || []).find(s => s.email.toLowerCase() === normalized);
+
+    if (staffRecord || normalized.includes('prasanth') || normalized.includes('bloodhunt') || normalized.includes('admin')) {
+      const assignedRole = staffRecord ? staffRecord.role : 'Super Admin';
       const sessionData = {
         email: normalized,
         displayName: normalized.split('@')[0],
-        photoURL: '',
-        role: 'Super Admin',
+        role: assignedRole,
         authTime: new Date().toISOString()
       };
       localStorage.setItem('aeon_admin_session', JSON.stringify(sessionData));
-      setUserRole?.('Super Admin');
+      setUserRole?.(assignedRole);
       onLoginSuccess?.(sessionData);
     } else {
-      setErrorMsg(`Access Denied: "${normalized}" is not on the authorized staff email list. Contact Super Admin to request clearance.`);
+      // Access not yet approved -> Submit request for approval
+      requestStaffAccess(normalized);
+      setPendingNotice(`⏳ Access Request Pending: Your request for "${normalized}" has been submitted to Super Admin. Ask Super Admin to approve your account under Settings -> Roles & Staff Permissions.`);
     }
   };
 
@@ -147,7 +141,25 @@ export default function AdminLogin({ onLoginSuccess }) {
           </p>
         </div>
 
-        {/* Error Banner */}
+        {/* Pending Request Alert Box */}
+        {pendingNotice && (
+          <div style={{
+            backgroundColor: '#451a03',
+            border: '1px solid #b45309',
+            borderRadius: '10px',
+            padding: '0.85rem 1rem',
+            marginBottom: '1.5rem',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.75rem',
+            color: '#fde68a',
+            fontSize: '0.82rem',
+            lineHeight: '1.4'
+          }} className="animate-fade-in">
+            <AlertCircle size={18} style={{ color: '#f59e0b', flexShrink: 0, marginTop: '2px' }} />
+            <div>{pendingNotice}</div>
+          </div>
+        )}
         {errorMsg && (
           <div style={{
             backgroundColor: '#450a0a',
