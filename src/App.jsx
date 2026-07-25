@@ -399,15 +399,6 @@ function AppContent() {
                 <span>Online Store</span>
               </button>
 
-              {/* Roles Settings */}
-              <button
-                className={`admin-sidebar-link ${activeAdminTab === 'roles' ? 'active' : ''}`}
-                onClick={() => setActiveAdminTab('roles')}
-              >
-                <HelpCircle size={18} />
-                <span>Roles Settings</span>
-              </button>
-
               {/* Store Settings */}
               <button
                 className={`admin-sidebar-link ${activeAdminTab === 'settings' ? 'active' : ''}`}
@@ -494,11 +485,6 @@ function AppContent() {
                     </RoleAccessWrapper>
                   )}
 
-                  {activeAdminTab === 'roles' && (
-                    <RoleAccessWrapper allowedRoles={['Super Admin']} currentRole={userRole}>
-                      <RolesSettings />
-                    </RoleAccessWrapper>
-                  )}
 
                   {activeAdminTab === 'settings' && (
                     <RoleAccessWrapper allowedRoles={['Super Admin']} currentRole={userRole}>
