@@ -3,7 +3,7 @@ import { AppContext } from '../../context/AppContext';
 import { Shield, Users, Activity, Lock, Unlock } from 'lucide-react';
 
 export default function RolesSettings() {
-  const { userRole, setUserRole, resetToDefaults } = useContext(AppContext);
+  const { userRole, setUserRole } = useContext(AppContext);
 
   const rolesList = [
     { name: 'Super Admin', desc: 'Full administrative access to settings, inventory, refunds, discounts, layouts, and audit logs.', color: 'hsl(var(--primary))' },
@@ -78,22 +78,6 @@ export default function RolesSettings() {
 
         {/* Right Side: Audit Log & Data Storage Card */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          <div className="card" style={{ backgroundColor: 'white' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              💾 Persistent Local Storage
-            </h3>
-            <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-muted))', marginBottom: '1rem' }}>
-              All inventory, prices, layout edits, orders, and telemetry sessions are saved to browser local storage and will persist across terminal restarts.
-            </p>
-            <button 
-              className="btn btn-outline" 
-              style={{ fontSize: '0.8rem', color: 'hsl(var(--destructive))', borderColor: 'hsl(var(--destructive) / 0.3)' }}
-              onClick={resetToDefaults}
-            >
-              🔄 Reset Store Data to Defaults
-            </button>
-          </div>
 
           {/* Audit Logs */}
           <div className="card">

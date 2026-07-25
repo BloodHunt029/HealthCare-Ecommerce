@@ -1,9 +1,10 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
+import RolesSettings from './RolesSettings';
 import { 
   Globe, MapPin, Percent, DollarSign, Save, 
   CheckCircle2, Building, CreditCard, 
-  ChevronRight, Settings, MessageSquare, RotateCcw, RefreshCw, AlertTriangle
+  ChevronRight, Settings, MessageSquare, Shield
 } from 'lucide-react';
 
 export default function StoreSettings() {
@@ -102,7 +103,8 @@ export default function StoreSettings() {
     { id: 'domain', label: 'Custom Domain & SEO', desc: 'Domain Link & Canonical URL', icon: Globe },
     { id: 'location', label: 'Store Location', desc: 'Physical Address & City', icon: MapPin },
     { id: 'taxes', label: 'Taxes & GST', desc: 'GSTIN & Tax Pricing Mode', icon: Percent },
-    { id: 'shipping', label: 'Currency & Shipping', desc: 'Defaults & Shipping Limits', icon: DollarSign }
+    { id: 'shipping', label: 'Currency & Shipping', desc: 'Defaults & Shipping Limits', icon: DollarSign },
+    { id: 'roles', label: 'Roles & Staff Permissions', desc: 'Manage Staff Scopes & Access', icon: Shield, badge: 'Security' }
   ];
 
   return (
@@ -623,6 +625,13 @@ export default function StoreSettings() {
                   <input type="number" className="form-input" value={freeShippingThreshold} onChange={(e) => setFreeShippingThreshold(e.target.value)} />
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* 7. ROLES & STAFF PERMISSIONS */}
+          {activeSettingsTab === 'roles' && (
+            <div className="animate-fade-in">
+              <RolesSettings />
             </div>
           )}
 
