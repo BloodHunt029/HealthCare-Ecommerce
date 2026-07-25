@@ -419,6 +419,16 @@ export const AppProvider = ({ children }) => {
   const updateStoreSettings = (newSettings) => setStoreSettings(prev => ({ ...prev, ...newSettings }));
   const updateLayout = (newLayout) => setLayout(prev => ({ ...prev, ...newLayout }));
 
+  const resetLayout = () => {
+    setLayout(initialLayout);
+    saveKey('aeon_layout', initialLayout);
+  };
+
+  const resetStoreSettings = () => {
+    setStoreSettings(initialStoreSettings);
+    saveKey('aeon_settings', initialStoreSettings);
+  };
+
   // Cart actions
   const addToCart = (product, qty = 1, options = {}) => {
     setCart(prev => {
@@ -610,8 +620,8 @@ export const AppProvider = ({ children }) => {
       discounts, setDiscounts,
       faqs, setFaqs, addFAQ, deleteFAQ,
       blogs, setBlogs, addBlog, deleteBlog,
-      storeSettings, setStoreSettings, updateStoreSettings,
-      layout, setLayout, updateLayout,
+      storeSettings, setStoreSettings, updateStoreSettings, resetStoreSettings,
+      layout, setLayout, updateLayout, resetLayout,
       cart, addToCart, removeFromCart, updateCartQty, clearCart,
       analytics, activeUtm, trackPageView, notificationLogs, triggerOrderNotification,
       leads, setLeads,
