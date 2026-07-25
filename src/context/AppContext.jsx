@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { db, doc, setDoc, onSnapshot } from '../config/firebase';
 
 export const AppContext = createContext();
 
@@ -380,17 +381,40 @@ export const AppProvider = ({ children }) => {
   const [analytics, setAnalytics] = useState(initialAnalytics);
   const [notificationLogs, setNotificationLogs] = useState([]);
 
-  // Save to LocalStorage
-  useEffect(() => { localStorage.setItem('aeon_products', JSON.stringify(products)); }, [products]);
-  useEffect(() => { localStorage.setItem('aeon_customers', JSON.stringify(customers)); }, [customers]);
-  useEffect(() => { localStorage.setItem('aeon_orders', JSON.stringify(orders)); }, [orders]);
-  useEffect(() => { localStorage.setItem('aeon_discounts', JSON.stringify(discounts)); }, [discounts]);
-  useEffect(() => { localStorage.setItem('aeon_faqs', JSON.stringify(faqs)); }, [faqs]);
-  useEffect(() => { localStorage.setItem('aeon_blogs', JSON.stringify(blogs)); }, [blogs]);
-  useEffect(() => { localStorage.setItem('aeon_settings', JSON.stringify(storeSettings)); }, [storeSettings]);
-  useEffect(() => { localStorage.setItem('aeon_layout', JSON.stringify(layout)); }, [layout]);
-  useEffect(() => { localStorage.setItem('aeon_cart', JSON.stringify(cart)); }, [cart]);
-  useEffect(() => { localStorage.setItem('aeon_leads', JSON.stringify(leads)); }, [leads]);
+  // Helper function to save to LocalStorage and Cloud Firestore
+  const saveKey = (key, data) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+      if (import.meta.env.VITE_FIREBASE_PROJECT_ID) {
+        setDoc(doc(db, 'healthcare_store', key), { data, updatedAt: new Date().toISOString() }).catch(() => {});
+      }
+    } catch (e) {
+      console.warn(`Error saving ${key}:`, e);
+    }
+  };
+
+  // Realtime Cloud Firestore listener when env vars exist
+  useEffect(() => {
+    if (!import.meta.env.VITE_FIREBASE_PROJECT_ID) return;
+    const unsubLayout = onSnapshot(doc(db, 'healthcare_store', 'aeon_layout'), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().data) {
+        setLayout(prev => ({ ...prev, ...docSnap.data().data }));
+      }
+    }, () => {});
+    return () => unsubLayout();
+  }, []);
+
+  // Save to LocalStorage & Firestore
+  useEffect(() => { saveKey('aeon_products', products); }, [products]);
+  useEffect(() => { saveKey('aeon_customers', customers); }, [customers]);
+  useEffect(() => { saveKey('aeon_orders', orders); }, [orders]);
+  useEffect(() => { saveKey('aeon_discounts', discounts); }, [discounts]);
+  useEffect(() => { saveKey('aeon_faqs', faqs); }, [faqs]);
+  useEffect(() => { saveKey('aeon_blogs', blogs); }, [blogs]);
+  useEffect(() => { saveKey('aeon_settings', storeSettings); }, [storeSettings]);
+  useEffect(() => { saveKey('aeon_layout', layout); }, [layout]);
+  useEffect(() => { saveKey('aeon_cart', cart); }, [cart]);
+  useEffect(() => { saveKey('aeon_leads', leads); }, [leads]);
 
   const updateStoreSettings = (newSettings) => setStoreSettings(prev => ({ ...prev, ...newSettings }));
   const updateLayout = (newLayout) => setLayout(prev => ({ ...prev, ...newLayout }));
