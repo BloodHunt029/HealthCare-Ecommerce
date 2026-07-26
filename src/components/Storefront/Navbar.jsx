@@ -117,7 +117,7 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
               <ShieldCheck size={24} />
             </span>
             <span style={{ fontSize: '1.5rem', fontWeight: '800', color: 'hsl(var(--primary))', letterSpacing: '-0.03em' }}>
-              {storeSettings?.storeName || layout.logoText || 'Store'}
+              {layout?.logoText || storeSettings?.storeName || 'AeonCare'}
             </span>
           </div>
 

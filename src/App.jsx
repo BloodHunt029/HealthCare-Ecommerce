@@ -191,8 +191,8 @@ function AppContent() {
                 gap: '2rem' 
               }}>
                 <div>
-                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1.2rem' }}>{storeSettings?.storeName || layout?.logoText || 'AeonCare'}</h4>
-                  <p style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>{storeSettings?.slogan || layout?.footerText || 'Trusted home patient care support, mobility aids, clinical diagnostic devices sales and supply hub in Chennai.'}</p>
+                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1.2rem' }}>{layout?.logoText || storeSettings?.storeName || 'AeonCare'}</h4>
+                  <p style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>{layout?.footerText || storeSettings?.slogan || 'Trusted home patient care support, mobility aids, clinical diagnostic devices sales and supply hub in Chennai.'}</p>
                 </div>
                 <div>
                   <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>{layout?.footerSupportTitle || 'Support Hub'}</h4>
