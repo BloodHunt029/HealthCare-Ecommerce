@@ -27,7 +27,7 @@ import AdminLogin from './components/Admin/AdminLogin';
 import { 
   ShieldCheck, LayoutDashboard, ShoppingBag, FolderHeart, 
   Users, TicketPercent, Globe, Award, HelpCircle, ShieldAlert,
-  MessageSquare, BookOpen, ArrowLeft, Settings, LogOut
+  MessageSquare, BookOpen, ArrowLeft, Settings, LogOut, Plus
 } from 'lucide-react';
 
 function AppContent() {
