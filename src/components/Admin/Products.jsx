@@ -7,13 +7,20 @@ import {
 } from 'lucide-react';
 
 export default function Products() {
-  const { products, addProduct, updateProduct, deleteProduct, storeSettings } = useContext(AppContext);
+  const { products, addProduct, updateProduct, deleteProduct, storeSettings, layout } = useContext(AppContext);
   
   // Navigation & list filters
   const [selectedProductId, setSelectedProductId] = useState('');
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
+
+  // Dynamically compile all active collections from layout collectionsList & existing products
+  const availableCollections = Array.from(new Set([
+    ...(layout?.collectionsList || []).map(c => c.name),
+    ...products.map(p => p.category).filter(Boolean),
+    'Home Care', 'Mobility Aid', 'Hospital Bed', 'Respiratory Care', 'Diagnostics', 'Surgicals & PPE', 'Rehab and Ortho', 'Hospital Supplies'
+  ]));
 
   // Shopify-style state fields
   const [title, setTitle] = useState('');
@@ -742,17 +749,33 @@ export default function Products() {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Collections / Category</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                    <label className="form-label" style={{ margin: 0 }}>Collections / Category</label>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        const customCat = prompt("Enter new Collection / Category name:");
+                        if (customCat && customCat.trim()) {
+                          setCategory(customCat.trim());
+                        }
+                      }}
+                      style={{ fontSize: '0.72rem', color: '#2563eb', border: 'none', background: 'transparent', cursor: 'pointer', fontWeight: '700' }}
+                    >
+                      + Create New
+                    </button>
+                  </div>
                   <select 
                     className="form-input" 
                     value={category} 
                     onChange={(e) => setCategory(e.target.value)}
                     style={{ fontSize: '0.85rem' }}
                   >
-                    <option value="Home Care">Home Care</option>
-                    <option value="Mobility Aid">Mobility Aid</option>
-                    <option value="Medical Devices">Medical Devices</option>
-                    <option value="Surgicals & PPE">Surgicals & PPE</option>
+                    {!availableCollections.includes(category) && category && (
+                      <option value={category}>{category}</option>
+                    )}
+                    {availableCollections.map(colName => (
+                      <option key={colName} value={colName}>{colName}</option>
+                    ))}
                   </select>
                 </div>
 
