@@ -471,20 +471,12 @@ export const AppProvider = ({ children }) => {
     };
   }, []);
 
-  // Save changes to LocalStorage & Firestore when state changes (after initial sync)
-  useEffect(() => { saveKey('aeon_products', products); }, [products]);
-  useEffect(() => { saveKey('aeon_customers', customers); }, [customers]);
-  useEffect(() => { saveKey('aeon_orders', orders); }, [orders]);
-  useEffect(() => { saveKey('aeon_discounts', discounts); }, [discounts]);
-  useEffect(() => { saveKey('aeon_faqs', faqs); }, [faqs]);
-  useEffect(() => { saveKey('aeon_blogs', blogs); }, [blogs]);
-  useEffect(() => { saveKey('aeon_settings', storeSettings); }, [storeSettings]);
-  useEffect(() => { saveKey('aeon_layout', layout); }, [layout]);
-  useEffect(() => { saveKey('aeon_cart', cart); }, [cart]);
-  useEffect(() => { saveKey('aeon_leads', leads); }, [leads]);
-
-  useEffect(() => { saveKey('aeon_approved_staff', approvedStaff); }, [approvedStaff]);
-  useEffect(() => { saveKey('aeon_pending_requests', pendingRequests); }, [pendingRequests]);
+  // Keep cart strictly in local browser storage
+  useEffect(() => {
+    try {
+      localStorage.setItem('aeon_cart', JSON.stringify(cart));
+    } catch (e) {}
+  }, [cart]);
 
   const requestStaffAccess = (email) => {
     const norm = email.toLowerCase().trim();
@@ -525,19 +517,31 @@ export const AppProvider = ({ children }) => {
   const updateStoreSettings = (newSettings) => {
     setStoreSettings(prev => {
       const updated = { ...prev, ...newSettings };
-      setLayout(lPrev => ({
-        ...lPrev,
-        logoText: updated.storeName || lPrev.logoText,
-        heroTitle: updated.slogan ? updated.slogan : lPrev.heroTitle,
-        footerText: updated.slogan ? `${updated.slogan} Premier home healthcare, clinical devices & medical equipment supply in ${updated.city || 'Chennai'}.` : lPrev.footerText,
-        footerContactAddress: `${updated.storeName || 'AeonCare'}, ${updated.addressLine1 || ''}${updated.addressLine2 ? ', ' + updated.addressLine2 : ''}, ${updated.city || ''}, ${updated.state || ''} ${updated.pincode || ''}`.trim(),
-        footerContactPhone: updated.storePhone || lPrev.footerContactPhone,
-        footerContactEmail: updated.storeEmail || lPrev.footerContactEmail
-      }));
+      setLayout(lPrev => {
+        const mergedL = {
+          ...lPrev,
+          logoText: updated.storeName || lPrev.logoText,
+          heroTitle: updated.slogan ? updated.slogan : lPrev.heroTitle,
+          footerText: updated.slogan ? `${updated.slogan} Premier home healthcare, clinical devices & medical equipment supply in ${updated.city || 'Chennai'}.` : lPrev.footerText,
+          footerContactAddress: `${updated.storeName || 'AeonCare'}, ${updated.addressLine1 || ''}${updated.addressLine2 ? ', ' + updated.addressLine2 : ''}, ${updated.city || ''}, ${updated.state || ''} ${updated.pincode || ''}`.trim(),
+          footerContactPhone: updated.storePhone || lPrev.footerContactPhone,
+          footerContactEmail: updated.storeEmail || lPrev.footerContactEmail
+        };
+        saveKey('aeon_layout', mergedL);
+        return mergedL;
+      });
+      saveKey('aeon_settings', updated);
       return updated;
     });
   };
-  const updateLayout = (newLayout) => setLayout(prev => ({ ...prev, ...newLayout }));
+
+  const updateLayout = (newLayout) => {
+    setLayout(prev => {
+      const updated = { ...prev, ...newLayout };
+      saveKey('aeon_layout', updated);
+      return updated;
+    });
+  };
 
   const resetLayout = () => {
     setLayout(initialLayout);

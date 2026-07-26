@@ -15,7 +15,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 async function checkDocs() {
-  const keys = ['aeon_settings', 'aeon_layout'];
+  const keys = ['aeon_settings', 'aeon_layout', 'aeon_products'];
   for (const key of keys) {
     try {
       const docRef = doc(db, 'healthcare_store', key);
