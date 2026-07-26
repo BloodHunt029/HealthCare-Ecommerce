@@ -602,39 +602,50 @@ function CollectionsManager() {
   };
 
   const handleSaveCollectionDetails = () => {
-    if (!editColName.trim()) {
-      alert('Please enter a valid collection name!');
-      return;
-    }
+    const targetName = editColName.trim() || collections[editingIndex]?.name || 'Collection';
     const updatedColls = [...collections];
     updatedColls[editingIndex] = { 
       ...updatedColls[editingIndex],
-      name: editColName.trim(), 
-      slug: editColName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      name: targetName, 
+      slug: targetName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
       image: editColImage 
     };
     updateLayout({ collectionsList: updatedColls });
+    saveKey('aeon_layout', { collectionsList: updatedColls });
     alert('Collection details saved successfully!');
   };
 
-  const handleOpenProductSelector = (colName) => {
-    // Collect IDs of products that belong to this category
+  const handleOpenProductSelector = () => {
+    const targetName = editColName.trim() || collections[editingIndex]?.name || '';
     const currentProductIds = products
-      .filter(p => p.category.toLowerCase() === colName.toLowerCase())
+      .filter(p => p.category && p.category.toLowerCase().trim() === targetName.toLowerCase().trim())
       .map(p => p.id);
     setTempSelectedIds(currentProductIds);
     setModalSearch('');
     setIsModalOpen(true);
   };
 
-  const handleApplyProductsToCollection = (colName) => {
+  const handleApplyProductsToCollection = () => {
+    const targetName = editColName.trim() || collections[editingIndex]?.name || 'Collection';
+    
+    // Save collection details first
+    const updatedColls = [...collections];
+    updatedColls[editingIndex] = { 
+      ...updatedColls[editingIndex],
+      name: targetName, 
+      slug: targetName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      image: editColImage 
+    };
+    updateLayout({ collectionsList: updatedColls });
+    saveKey('aeon_layout', { collectionsList: updatedColls });
+
     // Single pass batch update to update products list cleanly
     const updatedProducts = products.map(p => {
       const isSelected = tempSelectedIds.includes(p.id);
-      const currentlyInCol = p.category && p.category.toLowerCase().trim() === colName.toLowerCase().trim();
+      const currentlyInCol = p.category && p.category.toLowerCase().trim() === targetName.toLowerCase().trim();
 
       if (isSelected && !currentlyInCol) {
-        return { ...p, category: colName };
+        return { ...p, category: targetName };
       } else if (!isSelected && currentlyInCol) {
         return { ...p, category: 'Home Care' };
       }
@@ -644,7 +655,7 @@ function CollectionsManager() {
     setProducts(updatedProducts);
     saveKey('aeon_products', updatedProducts);
     setIsModalOpen(false);
-    alert(`Successfully synced products for collection "${colName}"!`);
+    alert(`Successfully linked ${tempSelectedIds.length} product(s) to collection "${targetName}"!`);
   };
 
   const toggleModalProduct = (id) => {
@@ -779,7 +790,7 @@ function CollectionsManager() {
                   <button 
                     className="btn btn-outline" 
                     style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem' }}
-                    onClick={() => handleOpenProductSelector(collections[editingIndex].name)}
+                    onClick={handleOpenProductSelector}
                   >
                     Select products to include
                   </button>
@@ -788,14 +799,14 @@ function CollectionsManager() {
                 {/* List currently selected products */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {products
-                    .filter(p => p.category.toLowerCase() === collections[editingIndex].name.toLowerCase())
+                    .filter(p => p.category && p.category.toLowerCase().trim() === (editColName.trim() || collections[editingIndex]?.name || '').toLowerCase().trim())
                     .map(p => (
                       <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' }}>
                         <img src={p.image} alt={p.title} style={{ width: '36px', height: '36px', objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: '4px' }} />
                         <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#334155' }}>{p.title}</span>
                       </div>
                     ))}
-                  {products.filter(p => p.category.toLowerCase() === collections[editingIndex].name.toLowerCase()).length === 0 && (
+                  {products.filter(p => p.category && p.category.toLowerCase().trim() === (editColName.trim() || collections[editingIndex]?.name || '').toLowerCase().trim()).length === 0 && (
                     <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic' }}>No products linked to this collection yet.</span>
                   )}
                 </div>
@@ -976,7 +987,7 @@ function CollectionsManager() {
                 {/* Modal Footer */}
                 <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', backgroundColor: '#f8fafc' }}>
                   <button className="btn btn-outline" style={{ padding: '0.4rem 1.25rem' }} onClick={() => setIsModalOpen(false)}>Cancel</button>
-                  <button className="btn btn-primary" style={{ padding: '0.4rem 1.25rem' }} onClick={() => handleApplyProductsToCollection(collections[editingIndex].name)}>Add</button>
+                  <button className="btn btn-primary" style={{ padding: '0.4rem 1.25rem' }} onClick={handleApplyProductsToCollection}>Add</button>
                 </div>
 
               </div>
