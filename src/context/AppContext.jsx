@@ -403,7 +403,7 @@ export const AppProvider = ({ children }) => {
   const isInitialSyncDone = useRef(false);
 
   // Helper function to save to LocalStorage and Cloud Firestore safely
-  const saveKey = (key, data, forceCloud = false) => {
+  const saveKey = (key, data) => {
     try {
       localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {
@@ -411,8 +411,7 @@ export const AppProvider = ({ children }) => {
     }
 
     try {
-      // Only write to Cloud Firestore if initial sync from database has completed or forceCloud is true
-      if (db && (isInitialSyncDone.current || forceCloud)) {
+      if (db) {
         setDoc(doc(db, 'healthcare_store', key), { data, updatedAt: new Date().toISOString() }).catch((err) => {
           console.warn(`Firestore save error for ${key}:`, err);
         });
