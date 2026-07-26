@@ -1,10 +1,12 @@
 import React, { createContext, useState, useEffect, useRef } from 'react';
 import { db, doc, setDoc, onSnapshot } from '../config/firebase';
+import importedProductsData from '../data/importedProducts.json';
 
 export const AppContext = createContext();
 
 // Dynamic Sample Data
 const initialProducts = [
+  ...(Array.isArray(importedProductsData) ? importedProductsData : []),
   {
     id: 'p1',
     title: 'Premium Electric Hospital Bed (5 Function)',
@@ -434,10 +436,15 @@ export const AppProvider = ({ children }) => {
       const unsub = onSnapshot(doc(db, 'healthcare_store', key), (docSnap) => {
         if (docSnap.exists() && docSnap.data()?.data) {
           const cloudData = docSnap.data().data;
-          setter(cloudData);
-          try {
-            localStorage.setItem(key, JSON.stringify(cloudData));
-          } catch (err) {}
+          const localSaved = getStorage(key, null);
+          if (key === 'aeon_products' && Array.isArray(cloudData) && cloudData.length < 50 && Array.isArray(localSaved) && localSaved.length >= 50) {
+            setter(localSaved);
+          } else {
+            setter(cloudData);
+            try {
+              localStorage.setItem(key, JSON.stringify(cloudData));
+            } catch (err) {}
+          }
         } else if (!docSnap.exists() && fallbackData && isInitialSyncDone.current) {
           // Initialize document in Cloud Firestore if it does not exist yet
           setDoc(doc(db, 'healthcare_store', key), { data: fallbackData, updatedAt: new Date().toISOString() }).catch(() => {});
