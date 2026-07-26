@@ -63,9 +63,12 @@ export default function OnlineStore() {
   // Section Sizes & Spacing State
   const [sectionSizes, setSectionSizes] = useState(layout.sectionSizes || {});
 
-  // Sync layout form state whenever context updates from Firestore
+  const isInitialized = useRef(false);
+
+  // Sync layout form state once when context updates from Firestore
   useEffect(() => {
-    if (layout) {
+    if (layout && (!isInitialized.current || layout.updatedAt)) {
+      isInitialized.current = true;
       setLogoText(layout.logoText || 'AeonCare');
       setAnnouncementBar(layout.announcementBar || '');
       setHeroTitle(layout.heroTitle || '');

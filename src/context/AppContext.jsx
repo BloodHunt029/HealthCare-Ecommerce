@@ -406,6 +406,11 @@ export const AppProvider = ({ children }) => {
   const saveKey = (key, data) => {
     try {
       localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {
+      console.warn(`LocalStorage save notice for ${key}:`, e);
+    }
+
+    try {
       // Only write to Cloud Firestore if initial sync from database has completed
       if (db && isInitialSyncDone.current) {
         setDoc(doc(db, 'healthcare_store', key), { data, updatedAt: new Date().toISOString() }).catch((err) => {
@@ -413,7 +418,7 @@ export const AppProvider = ({ children }) => {
         });
       }
     } catch (e) {
-      console.warn(`Error saving ${key}:`, e);
+      console.warn(`Firestore setDoc error for ${key}:`, e);
     }
   };
 

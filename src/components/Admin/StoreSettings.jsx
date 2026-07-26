@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { AppContext } from '../../context/AppContext';
 import RolesSettings from './RolesSettings';
 import { 
@@ -56,9 +56,12 @@ export default function StoreSettings() {
 
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  // Sync form inputs with context updates from Firestore
+  const isInitialized = useRef(false);
+
+  // Sync form inputs once with context updates from Firestore
   useEffect(() => {
-    if (storeSettings) {
+    if (storeSettings && (!isInitialized.current || storeSettings.updatedAt)) {
+      isInitialized.current = true;
       setStoreName(storeSettings.storeName || 'AeonCare');
       setSlogan(storeSettings.slogan || 'Caring for your family, right at home.');
       setStoreEmail(storeSettings.storeEmail || 'support@aeoncare.in');
