@@ -550,12 +550,14 @@ function CollectionsManager() {
   const collections = layout.collectionsList || [];
   
   const [editingIndex, setEditingIndex] = useState(null);
+  const [editColName, setEditColName] = useState('');
+  const [editColImage, setEditColImage] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalSearch, setModalSearch] = useState('');
   const [tempSelectedIds, setTempSelectedIds] = useState([]);
 
   // JPG File Uploader inside Collection editor
-  const handleJpgCollectionUpload = (e, callback) => {
+  const handleJpgCollectionUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     if (file.type !== 'image/jpeg' && !file.name.toLowerCase().endsWith('.jpg') && !file.name.toLowerCase().endsWith('.jpeg')) {
@@ -564,14 +566,53 @@ function CollectionsManager() {
     }
     const reader = new FileReader();
     reader.onload = (evt) => {
-      callback(evt.target.result);
+      setEditColImage(evt.target.result);
     };
     reader.readAsDataURL(file);
   };
 
-  const handleSaveCollectionDetails = (index, name, image) => {
+  const handleStartEdit = (idx) => {
+    setEditingIndex(idx);
+    setEditColName(collections[idx]?.name || '');
+    setEditColImage(collections[idx]?.image || '');
+  };
+
+  const handleCreateCollection = () => {
+    const newName = `New Collection ${collections.length + 1}`;
+    const newCol = { 
+      name: newName, 
+      slug: newName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''), 
+      image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200' 
+    };
+    const updated = [...collections, newCol];
+    updateLayout({ collectionsList: updated });
+    const newIdx = updated.length - 1;
+    setEditingIndex(newIdx);
+    setEditColName(newCol.name);
+    setEditColImage(newCol.image);
+  };
+
+  const handleDeleteCollection = (idxToDelete) => {
+    const colToDeleteName = collections[idxToDelete]?.name;
+    if (window.confirm(`Are you sure you want to delete collection "${colToDeleteName}"?`)) {
+      const updated = collections.filter((_, i) => i !== idxToDelete);
+      updateLayout({ collectionsList: updated });
+      setEditingIndex(null);
+    }
+  };
+
+  const handleSaveCollectionDetails = () => {
+    if (!editColName.trim()) {
+      alert('Please enter a valid collection name!');
+      return;
+    }
     const updatedColls = [...collections];
-    updatedColls[index] = { name, image };
+    updatedColls[editingIndex] = { 
+      ...updatedColls[editingIndex],
+      name: editColName.trim(), 
+      slug: editColName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      image: editColImage 
+    };
     updateLayout({ collectionsList: updatedColls });
     alert('Collection details saved successfully!');
   };
@@ -616,9 +657,18 @@ function CollectionsManager() {
       {editingIndex === null ? (
         /* ================= COLLECTIONS OVERVIEW ================= */
         <>
-          <div style={{ marginBottom: '2rem' }}>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#1e293b' }}>Collections</h1>
-            <p style={{ color: 'hsl(var(--text-muted))', fontSize: '0.875rem' }}>Organize store products into collections featured on the storefront.</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div>
+              <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#1e293b' }}>Collections</h1>
+              <p style={{ color: 'hsl(var(--text-muted))', fontSize: '0.875rem' }}>Organize store products into collections featured on the storefront.</p>
+            </div>
+            <button 
+              className="btn btn-primary" 
+              onClick={handleCreateCollection}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <Plus size={16} /> Create collection
+            </button>
           </div>
 
           <div className="grid-auto">
@@ -647,7 +697,7 @@ function CollectionsManager() {
                   <button 
                     className="btn btn-outline" 
                     style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem' }} 
-                    onClick={() => setEditingIndex(idx)}
+                    onClick={() => handleStartEdit(idx)}
                   >
                     Edit Collection
                   </button>
@@ -673,12 +723,21 @@ function CollectionsManager() {
                 Collection details
               </h1>
             </div>
-            <button 
-              className="btn btn-primary" 
-              onClick={() => handleSaveCollectionDetails(editingIndex, collections[editingIndex].name, collections[editingIndex].image)}
-            >
-              Save details
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              <button 
+                className="btn btn-outline" 
+                onClick={() => handleDeleteCollection(editingIndex)}
+                style={{ color: '#ef4444', borderColor: '#fecdd3' }}
+              >
+                Delete collection
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleSaveCollectionDetails}
+              >
+                Save details
+              </button>
+            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
@@ -693,12 +752,8 @@ function CollectionsManager() {
                   <input 
                     type="text" 
                     className="form-input" 
-                    value={collections[editingIndex].name}
-                    onChange={(e) => {
-                      const updated = [...collections];
-                      updated[editingIndex].name = e.target.value;
-                      updateLayout({ collectionsList: updated });
-                    }}
+                    value={editColName}
+                    onChange={(e) => setEditColName(e.target.value)}
                   />
                 </div>
 
@@ -707,15 +762,11 @@ function CollectionsManager() {
                   <input 
                     type="file" 
                     accept=".jpg,.jpeg"
-                    onChange={(e) => handleJpgCollectionUpload(e, (dataUrl) => {
-                      const updated = [...collections];
-                      updated[editingIndex].image = dataUrl;
-                      updateLayout({ collectionsList: updated });
-                    })}
+                    onChange={handleJpgCollectionUpload}
                     style={{ fontSize: '0.75rem', marginTop: '0.5rem', display: 'block' }}
                   />
-                  {collections[editingIndex].image && (
-                    <img src={collections[editingIndex].image} alt="Cover Preview" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: '6px', marginTop: '0.75rem' }} />
+                  {editColImage && (
+                    <img src={editColImage} alt="Cover Preview" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: '6px', marginTop: '0.75rem' }} />
                   )}
                 </div>
               </div>
