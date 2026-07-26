@@ -85,13 +85,13 @@ export default function OnlineStore() {
         setCollectionsList(layout.collectionsList || []);
         setThemeColors(layout.themeColors || 'teal');
         setPromoVideoUrl(layout.promoVideoUrl || '');
-        setFooterText(layout.footerText || '');
-        setFooterSupportTitle(layout.footerSupportTitle || '');
-        setFooterContactTitle(layout.footerContactTitle || '');
-        setFooterContactAddress(layout.footerContactAddress || '');
-        setFooterContactPhone(layout.footerContactPhone || '');
-        setFooterContactEmail(layout.footerContactEmail || '');
-        setFooterCopyrightText(layout.footerCopyrightText || '');
+        setFooterText(layout.footerText || storeSettings?.slogan || 'Trusted home patient care support, mobility aids, clinical diagnostic devices sales and supply hub in Chennai.');
+        setFooterSupportTitle(layout.footerSupportTitle || 'Support Hub');
+        setFooterContactTitle(layout.footerContactTitle || 'Contact Info');
+        setFooterContactAddress(layout.footerContactAddress || (storeSettings?.addressLine1 ? `${storeSettings.storeName}, ${storeSettings.addressLine1}, ${storeSettings.addressLine2 ? storeSettings.addressLine2 + ', ' : ''}${storeSettings.city}, ${storeSettings.state} - ${storeSettings.pincode}` : 'Aeon Healthcare Pvt Ltd, Besant Nagar, Chennai, TN 600090'));
+        setFooterContactPhone(layout.footerContactPhone || storeSettings?.storePhone || '+91 98401 23456');
+        setFooterContactEmail(layout.footerContactEmail || storeSettings?.storeEmail || 'support@aeoncare.in');
+        setFooterCopyrightText(layout.footerCopyrightText || '© 2026 AeonCare. Partner of AeonCare.in. India CDSCO labeling compliant. All rights reserved.');
         setNavigationTabs(layout.navigationTabs || []);
         setSectionsOrderList(layout.sectionsOrder || ['hero', 'trust', 'collections', 'featured', 'video', 'blog']);
         setHiddenSections(layout.hiddenSections || []);
@@ -1661,8 +1661,8 @@ export default function OnlineStore() {
                       gap: '2rem' 
                     }}>
                       <div>
-                        <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1.2rem' }}>{storeSettings?.storeName || liveEditingLayout?.logoText || 'AeonCare'}</h4>
-                        <p style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>{storeSettings?.slogan || liveEditingLayout?.footerText || 'Trusted home patient care support, mobility aids, clinical diagnostic devices sales and supply hub in Chennai.'}</p>
+                        <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1.2rem' }}>{liveEditingLayout?.logoText || storeSettings?.storeName || 'AeonCare'}</h4>
+                        <p style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>{liveEditingLayout?.footerText || storeSettings?.slogan || 'Trusted home patient care support, mobility aids, clinical diagnostic devices sales and supply hub in Chennai.'}</p>
                       </div>
                       <div>
                         <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>{liveEditingLayout?.footerSupportTitle || 'Support Hub'}</h4>
@@ -1676,9 +1676,9 @@ export default function OnlineStore() {
                       <div>
                         <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>{liveEditingLayout?.footerContactTitle || 'Contact Info'}</h4>
                         <p style={{ fontSize: '0.85rem', lineHeight: '1.6', whitespace: 'pre-line' }}>
-                          {storeSettings?.addressLine1 ? `${storeSettings.storeName}\n${storeSettings.addressLine1}, ${storeSettings.addressLine2 ? storeSettings.addressLine2 + ', ' : ''}${storeSettings.city}, ${storeSettings.state} - ${storeSettings.pincode}` : (liveEditingLayout?.footerContactAddress || 'Aeon Healthcare Pvt Ltd, Besant Nagar, Chennai, TN 600090')}<br/>
-                          Helpline: {storeSettings?.storePhone || liveEditingLayout?.footerContactPhone || '+91 98401 23456'}<br/>
-                          Email: {storeSettings?.storeEmail || liveEditingLayout?.footerContactEmail || 'support@aeoncare.in'}
+                          {liveEditingLayout?.footerContactAddress || (storeSettings?.addressLine1 ? `${storeSettings.storeName}\n${storeSettings.addressLine1}, ${storeSettings.addressLine2 ? storeSettings.addressLine2 + ', ' : ''}${storeSettings.city}, ${storeSettings.state} - ${storeSettings.pincode}` : 'Aeon Healthcare Pvt Ltd, Besant Nagar, Chennai, TN 600090')}<br/>
+                          Helpline: {liveEditingLayout?.footerContactPhone || storeSettings?.storePhone || '+91 98401 23456'}<br/>
+                          Email: {liveEditingLayout?.footerContactEmail || storeSettings?.storeEmail || 'support@aeoncare.in'}
                         </p>
                       </div>
                     </div>

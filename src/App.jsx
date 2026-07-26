@@ -206,9 +206,9 @@ function AppContent() {
                 <div>
                   <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>{layout?.footerContactTitle || 'Contact Info'}</h4>
                   <p style={{ fontSize: '0.85rem', lineHeight: '1.6', whitespace: 'pre-line' }}>
-                    {storeSettings?.addressLine1 ? `${storeSettings.storeName}\n${storeSettings.addressLine1}, ${storeSettings.addressLine2 ? storeSettings.addressLine2 + ', ' : ''}${storeSettings.city}, ${storeSettings.state} - ${storeSettings.pincode}` : (layout?.footerContactAddress || 'Aeon Healthcare Pvt Ltd, Besant Nagar, Chennai, TN 600090')}<br/>
-                    Helpline: {storeSettings?.storePhone || layout?.footerContactPhone || '+91 98401 23456'}<br/>
-                    Email: {storeSettings?.storeEmail || layout?.footerContactEmail || 'support@aeoncare.in'}
+                    {layout?.footerContactAddress || (storeSettings?.addressLine1 ? `${storeSettings.storeName}\n${storeSettings.addressLine1}, ${storeSettings.addressLine2 ? storeSettings.addressLine2 + ', ' : ''}${storeSettings.city}, ${storeSettings.state} - ${storeSettings.pincode}` : 'Aeon Healthcare Pvt Ltd, Besant Nagar, Chennai, TN 600090')}<br/>
+                    Helpline: {layout?.footerContactPhone || storeSettings?.storePhone || '+91 98401 23456'}<br/>
+                    Email: {layout?.footerContactEmail || storeSettings?.storeEmail || 'support@aeoncare.in'}
                   </p>
                 </div>
               </div>
