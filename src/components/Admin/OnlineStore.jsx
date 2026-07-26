@@ -63,6 +63,41 @@ export default function OnlineStore() {
   // Section Sizes & Spacing State
   const [sectionSizes, setSectionSizes] = useState(layout.sectionSizes || {});
 
+  // Sync layout form state whenever context updates from Firestore
+  useEffect(() => {
+    if (layout) {
+      setLogoText(layout.logoText || 'AeonCare');
+      setAnnouncementBar(layout.announcementBar || '');
+      setHeroTitle(layout.heroTitle || '');
+      setHeroSubtitle(layout.heroSubtitle || '');
+      setBannerTitle(layout.bannerTitle || '');
+      setBannerSubtitle(layout.bannerSubtitle || '');
+      setBannerImage(layout.bannerImage || '');
+      setCollectionsList(layout.collectionsList || []);
+      setThemeColors(layout.themeColors || 'teal');
+      setPromoVideoUrl(layout.promoVideoUrl || '');
+      setFooterText(layout.footerText || '');
+      setFooterSupportTitle(layout.footerSupportTitle || '');
+      setFooterContactTitle(layout.footerContactTitle || '');
+      setFooterContactAddress(layout.footerContactAddress || '');
+      setFooterContactPhone(layout.footerContactPhone || '');
+      setFooterContactEmail(layout.footerContactEmail || '');
+      setFooterCopyrightText(layout.footerCopyrightText || '');
+      setNavigationTabs(layout.navigationTabs || []);
+      setSectionsOrderList(layout.sectionsOrder || ['hero', 'trust', 'collections', 'featured', 'video', 'blog']);
+      setHiddenSections(layout.hiddenSections || []);
+      setImageBannerImage(layout.imageBannerImage || '');
+      setImageBannerTitle(layout.imageBannerTitle || '');
+      setImageBannerSubtitle(layout.imageBannerSubtitle || '');
+      setColWithImageImage(layout.colWithImageImage || '');
+      setColWithImageTitle(layout.colWithImageTitle || '');
+      setColWithImageCategory(layout.colWithImageCategory || 'Mobility Aid');
+      setRichTextHeading(layout.richTextHeading || '');
+      setRichTextBody(layout.richTextBody || '');
+      setSectionSizes(layout.sectionSizes || {});
+    }
+  }, [layout]);
+
   // FAQ local form state
   const [faqQ, setFaqQ] = useState('');
   const [faqAns, setFaqAns] = useState('');

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../../context/AppContext';
 import RolesSettings from './RolesSettings';
 import { 
@@ -55,6 +55,43 @@ export default function StoreSettings() {
   const [upiId, setUpiId] = useState(storeSettings?.upiId || 'aeoncare@okicici');
 
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  // Sync form inputs with context updates from Firestore
+  useEffect(() => {
+    if (storeSettings) {
+      setStoreName(storeSettings.storeName || 'AeonCare');
+      setSlogan(storeSettings.slogan || 'Caring for your family, right at home.');
+      setStoreEmail(storeSettings.storeEmail || 'support@aeoncare.in');
+      setStorePhone(storeSettings.storePhone || '+91 98401 23456');
+      setWhatsappPhone(storeSettings.whatsappPhone || '+919840123456');
+      setDomain(storeSettings.domain || 'aeoncare.in');
+      setAddressLine1(storeSettings.addressLine1 || '114 First Floor, Mount Poonamallee High Rd');
+      setAddressLine2(storeSettings.addressLine2 || 'Porur');
+      setCity(storeSettings.city || 'Chennai');
+      setState(storeSettings.state || 'Tamil Nadu');
+      setPincode(storeSettings.pincode || '600089');
+      setCountry(storeSettings.country || 'India');
+      setTaxRate(storeSettings.taxRate || 12);
+      setGstNumber(storeSettings.gstNumber || '33AAAAA0000A1Z5');
+      setTaxMode(storeSettings.taxMode || 'inclusive');
+      setCurrencySymbol(storeSettings.currencySymbol || '₹');
+      setCurrencyCode(storeSettings.currencyCode || 'INR');
+      setFreeShippingThreshold(storeSettings.freeShippingThreshold || 2000);
+      setEnableRazorpay(storeSettings.enableRazorpay !== undefined ? storeSettings.enableRazorpay : true);
+      setRazorpayKeyId(storeSettings.razorpayKeyId || 'rzp_test_98401234567890');
+      setRazorpayKeySecret(storeSettings.razorpayKeySecret || 'secret_key_demo_razorpay');
+      setRazorpayMode(storeSettings.razorpayMode || 'test');
+      setRazorpayMerchantName(storeSettings.razorpayMerchantName || 'AeonCare Healthcare Supply');
+      setEnablePayPal(storeSettings.enablePayPal !== undefined ? storeSettings.enablePayPal : true);
+      setPaypalClientId(storeSettings.paypalClientId || 'client_id_paypal_aeoncare_98401');
+      setPaypalSecretKey(storeSettings.paypalSecretKey || 'secret_key_paypal_aeoncare_98401');
+      setPaypalMode(storeSettings.paypalMode || 'sandbox');
+      setPaypalCurrency(storeSettings.paypalCurrency || 'USD');
+      setEnableCod(storeSettings.enableCod !== undefined ? storeSettings.enableCod : true);
+      setEnableUpiDirect(storeSettings.enableUpiDirect !== undefined ? storeSettings.enableUpiDirect : true);
+      setUpiId(storeSettings.upiId || 'aeoncare@okicici');
+    }
+  }, [storeSettings]);
 
   const handleSaveSettings = (e) => {
     if (e) e.preventDefault();
