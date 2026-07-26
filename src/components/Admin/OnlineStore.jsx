@@ -482,20 +482,21 @@ export default function OnlineStore() {
     }
   };
 
-  // Add section options list
+  // Add section options list (Matching exact Shopify taxonomy)
   const sectionOptions = [
-    { type: 'banner', name: 'Confidence Promo Slider Banner', category: 'Images', desc: 'Promo slider banner with background image, title, and CTA.' },
-    { type: 'image_banner', name: 'Image banner', category: 'Images', desc: 'Large image with overlay text and shop CTA buttons.' },
-    { type: 'collection_with_image', name: 'Collection with image', category: 'Images', desc: 'Prominent collection products side-by-side with an uploaded banner.' },
-    { type: 'logo_list', name: 'Logo list', category: 'Images', desc: 'Display hospital, clinic, or distribution brand partner logos.' },
-    { type: 'collections', name: 'Circular collections list', category: 'Template Blocks', desc: 'Circle category navigation row.' },
-    { type: 'featured', name: 'Featured collection grid', category: 'Template Blocks', desc: 'Top grid listing catalog items.' },
-    { type: 'video', name: 'Video Showcase (YouTube)', category: 'Template Blocks', desc: 'Responsive YouTube frame.' },
-    { type: 'faq', name: 'Frequently Asked Questions', category: 'Template Blocks', desc: 'Accordion item listings.' },
-    { type: 'blog', name: 'Caregiver Blog Posts', category: 'Template Blocks', desc: 'Horizontal summary cards.' },
-    { type: 'rich_text', name: 'Rich text details', category: 'Template Blocks', desc: 'Focused paragraph box.' },
-    { type: 'hero', name: 'Hero header banner', category: 'Template Blocks', desc: 'Primary landing section.' },
-    { type: 'cta', name: 'Call to Action Consultation', category: 'Template Blocks', desc: 'Consultation hotline banner.' }
+    { type: 'banner', name: 'Image with text overlay / Slider', category: 'Banners', desc: 'Promo slider banner with background image, title, and action buttons.' },
+    { type: 'image_banner', name: 'Image banner', category: 'Banners', desc: 'Large image banner with overlay text and direct shop catalog link.' },
+    { type: 'cta', name: 'Contact form / Consultation', category: 'Call to action', desc: 'Patient consultation hotline banner & lead form.' },
+    { type: 'collections', name: 'Collection list', category: 'Collections', desc: 'Circular category navigation row for fast medical equipment browsing.' },
+    { type: 'collection_with_image', name: 'Collection with image', category: 'Collections', desc: 'Featured category showcase side-by-side with an uploaded banner.' },
+    { type: 'featured', name: 'Featured collection', category: 'Collections', desc: 'Top grid listing curated catalog items.' },
+    { type: 'blog', name: 'Caregiver Blog posts', category: 'Content', desc: 'Horizontal medical advice and care guide summary cards.' },
+    { type: 'rich_text', name: 'Rich text', category: 'Content', desc: 'Focused brand mission, sterilization standards, or custom paragraph box.' },
+    { type: 'logo_list', name: 'Logo list', category: 'Media', desc: 'Display clinical partner, hospital, or brand logos.' },
+    { type: 'video', name: 'Video Showcase', category: 'Media', desc: 'Embed responsive product demo or hospital setup YouTube video.' },
+    { type: 'hero', name: 'Hero header banner', category: 'Products', desc: 'Primary landing section highlighting home healthcare solutions.' },
+    { type: 'faq', name: 'Frequently Asked Questions', category: 'Trust & social proof', desc: 'Accordion listings for rental deposits, setup, and home delivery.' },
+    { type: 'trust', name: 'Trust & Security Badges', category: 'Trust & social proof', desc: 'CDSCO compliance, free delivery, and sanitized equipment badges.' }
   ];
 
   const filteredOptions = sectionOptions.filter(opt => 
@@ -1533,46 +1534,34 @@ export default function OnlineStore() {
             <div style={{ overflowY: 'auto', flex: 1, padding: '0.5rem 0' }}>
               {addMenuTab === 'sections' ? (
                 <>
-                  {/* Category: Images sub-menu */}
-                  <div style={{ padding: '0.25rem 0.75rem', fontSize: '0.65rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Images & Banners
-                  </div>
-                  {filteredOptions.filter(o => o.category === 'Images').map(opt => (
-                    <div 
-                      key={opt.type} 
-                      onClick={() => handleAddSection(opt.type)}
-                      style={{ padding: '0.5rem 0.75rem', cursor: 'pointer', display: 'flex', gap: '0.5rem', transition: 'all 0.1s' }}
-                      className="card-hover"
-                    >
-                      <ImageIcon size={16} style={{ color: '#2563eb', marginTop: '2px' }} />
-                      <div>
-                        <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#1e293b' }}>{opt.name}</div>
-                        <div style={{ fontSize: '0.65rem', color: '#64748b' }}>{opt.desc}</div>
+                  {['Banners', 'Call to action', 'Collections', 'Content', 'Media', 'Products', 'Trust & social proof'].map(categoryName => {
+                    const categoryItems = filteredOptions.filter(o => o.category === categoryName);
+                    if (categoryItems.length === 0) return null;
+                    return (
+                      <div key={categoryName}>
+                        <div style={{ padding: '0.5rem 0.75rem 0.25rem', fontSize: '0.65rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', borderTop: '1px solid #f1f5f9', marginTop: '0.25rem' }}>
+                          {categoryName}
+                        </div>
+                        {categoryItems.map(opt => (
+                          <div 
+                            key={opt.type} 
+                            onClick={() => handleAddSection(opt.type)}
+                            style={{ padding: '0.5rem 0.75rem', cursor: 'pointer', display: 'flex', gap: '0.5rem', transition: 'all 0.1s', borderRadius: '4px' }}
+                            className="card-hover"
+                          >
+                            <Layers size={15} style={{ color: '#2563eb', marginTop: '2px', flexShrink: 0 }} />
+                            <div>
+                              <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#1e293b' }}>{opt.name}</div>
+                              <div style={{ fontSize: '0.65rem', color: '#64748b', lineHeight: '1.3' }}>{opt.desc}</div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  ))}
-
-                  {/* Category: Template Blocks */}
-                  <div style={{ padding: '0.5rem 0.75rem 0.25rem', fontSize: '0.65rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', borderTop: '1px solid #f1f5f9', marginTop: '0.25rem' }}>
-                    Template Blocks
-                  </div>
-                  {filteredOptions.filter(o => o.category === 'Template Blocks').map(opt => (
-                    <div 
-                      key={opt.type} 
-                      onClick={() => handleAddSection(opt.type)}
-                      style={{ padding: '0.5rem 0.75rem', cursor: 'pointer', display: 'flex', gap: '0.5rem', transition: 'all 0.1s' }}
-                      className="card-hover"
-                    >
-                      <Layers size={16} style={{ color: '#64748b', marginTop: '2px' }} />
-                      <div>
-                        <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#1e293b' }}>{opt.name}</div>
-                        <div style={{ fontSize: '0.65rem', color: '#64748b' }}>{opt.desc}</div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
 
                   {filteredOptions.length === 0 && (
-                    <div style={{ padding: '1rem', textAlign: 'center', fontSize: '0.75rem', color: '#64748b' }}>No matching sections.</div>
+                    <div style={{ padding: '1rem', textAlign: 'center', fontSize: '0.75rem', color: '#64748b' }}>No matching sections found.</div>
                   )}
                 </>
               ) : (
