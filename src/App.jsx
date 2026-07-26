@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 function AppContent() {
-  const { layout, userRole, orders, trackPageView } = useContext(AppContext);
+  const { layout, storeSettings, userRole, orders, trackPageView } = useContext(AppContext);
   
   // Navigation states (detect /admin route from URL)
   const [viewMode, setViewModeState] = useState(() => {
@@ -191,11 +191,11 @@ function AppContent() {
                 gap: '2rem' 
               }}>
                 <div>
-                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1.2rem' }}>{layout.logoText || 'AeonCare'}</h4>
-                  <p style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>{layout.footerText || 'Trusted home patient care support, mobility aids, clinical diagnostic devices sales and supply hub in Chennai.'}</p>
+                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1.2rem' }}>{storeSettings?.storeName || layout?.logoText || 'AeonCare'}</h4>
+                  <p style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>{storeSettings?.slogan || layout?.footerText || 'Trusted home patient care support, mobility aids, clinical diagnostic devices sales and supply hub in Chennai.'}</p>
                 </div>
                 <div>
-                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>{layout.footerSupportTitle || 'Support Hub'}</h4>
+                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>{layout?.footerSupportTitle || 'Support Hub'}</h4>
                   <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem' }}>
                     <li><a href="#tel" onClick={() => setActiveTab('blog')}>FAQ Helpdesk</a></li>
                     <li><a href="#tel" onClick={() => setActiveTab('services')}>Request Home Setup</a></li>
@@ -204,11 +204,11 @@ function AppContent() {
                   </ul>
                 </div>
                 <div>
-                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>{layout.footerContactTitle || 'Contact Info'}</h4>
+                  <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>{layout?.footerContactTitle || 'Contact Info'}</h4>
                   <p style={{ fontSize: '0.85rem', lineHeight: '1.6', whitespace: 'pre-line' }}>
-                    {layout.footerContactAddress || 'Aeon Healthcare Pvt Ltd, Besant Nagar, Chennai, TN 600090'}<br/>
-                    Helpline: {layout.footerContactPhone || '+91 98401 23456'}<br/>
-                    Email: {layout.footerContactEmail || 'support@aeoncare.in'}
+                    {storeSettings?.addressLine1 ? `${storeSettings.storeName}\n${storeSettings.addressLine1}, ${storeSettings.addressLine2 ? storeSettings.addressLine2 + ', ' : ''}${storeSettings.city}, ${storeSettings.state} - ${storeSettings.pincode}` : (layout?.footerContactAddress || 'Aeon Healthcare Pvt Ltd, Besant Nagar, Chennai, TN 600090')}<br/>
+                    Helpline: {storeSettings?.storePhone || layout?.footerContactPhone || '+91 98401 23456'}<br/>
+                    Email: {storeSettings?.storeEmail || layout?.footerContactEmail || 'support@aeoncare.in'}
                   </p>
                 </div>
               </div>

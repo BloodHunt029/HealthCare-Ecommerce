@@ -156,9 +156,9 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
 
           {/* Support Widget & Action Indicators */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-            <a href="tel:+919840123456" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '600', color: 'hsl(var(--text-main))' }} className="btn-ghost btn" title="Call Us Support">
+            <a href={`tel:${storeSettings?.storePhone || '+919840123456'}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '600', color: 'hsl(var(--text-main))' }} className="btn-ghost btn" title="Call Us Support">
               <Phone size={18} style={{ color: 'hsl(var(--primary))' }} />
-              <span className="hide-mobile">Call Support</span>
+              <span className="hide-mobile">{storeSettings?.storePhone ? `Call ${storeSettings.storePhone}` : 'Call Support'}</span>
             </a>
 
             <button 

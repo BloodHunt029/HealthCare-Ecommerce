@@ -520,7 +520,21 @@ export const AppProvider = ({ children }) => {
     setApprovedStaff(prev => prev.filter(s => s.email.toLowerCase() !== norm));
   };
 
-  const updateStoreSettings = (newSettings) => setStoreSettings(prev => ({ ...prev, ...newSettings }));
+  const updateStoreSettings = (newSettings) => {
+    setStoreSettings(prev => {
+      const updated = { ...prev, ...newSettings };
+      setLayout(lPrev => ({
+        ...lPrev,
+        logoText: updated.storeName || lPrev.logoText,
+        heroTitle: updated.slogan ? updated.slogan : lPrev.heroTitle,
+        footerText: updated.slogan ? `${updated.slogan} Premier home healthcare, clinical devices & medical equipment supply in ${updated.city || 'Chennai'}.` : lPrev.footerText,
+        footerContactAddress: `${updated.storeName || 'AeonCare'}, ${updated.addressLine1 || ''}${updated.addressLine2 ? ', ' + updated.addressLine2 : ''}, ${updated.city || ''}, ${updated.state || ''} ${updated.pincode || ''}`.trim(),
+        footerContactPhone: updated.storePhone || lPrev.footerContactPhone,
+        footerContactEmail: updated.storeEmail || lPrev.footerContactEmail
+      }));
+      return updated;
+    });
+  };
   const updateLayout = (newLayout) => setLayout(prev => ({ ...prev, ...newLayout }));
 
   const resetLayout = () => {
