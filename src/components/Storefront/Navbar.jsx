@@ -2,8 +2,9 @@ import React, { useState, useContext, useRef, useEffect } from 'react';
 import { AppContext } from '../../context/AppContext';
 import { Search, ShoppingCart, User, Phone, MessageSquare, ShieldCheck, Heart, LogOut } from 'lucide-react';
 
-export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCartOpen }) {
-  const { layout, products, cart, userRole, storeSettings } = useContext(AppContext);
+export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCartOpen, layoutOverride }) {
+  const { layout: contextLayout, products, cart, userRole, storeSettings } = useContext(AppContext);
+  const layout = layoutOverride || contextLayout;
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState([]);

@@ -1,6 +1,7 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
 import { AppContext } from '../../context/AppContext';
 import Home from '../Storefront/Home';
+import Navbar from '../Storefront/Navbar';
 import { 
   Save, Smartphone, Monitor, ChevronRight, Image as ImageIcon, 
   Sliders, Type, FileText, HelpCircle, Palette, Layers, ShoppingCart,
@@ -1634,11 +1635,60 @@ export default function OnlineStore() {
                 transition: 'all 0.3s ease-in-out',
                 position: 'relative'
               }}>
+                <Navbar 
+                  activeTab="home" 
+                  setActiveTab={() => {}} 
+                  setViewMode={() => {}} 
+                  toggleCartOpen={() => {}} 
+                  layoutOverride={liveEditingLayout} 
+                />
                 <Home 
                   setActiveTab={() => {}} 
                   setSelectedProductId={() => {}} 
                   layoutOverride={liveEditingLayout} 
+                  isMobileViewport={viewportMode === 'mobile'} 
                 />
+                {!liveEditingLayout?.hiddenSections?.includes('footer') && (
+                  <footer style={{ 
+                    backgroundColor: '#0f172a', 
+                    color: '#94a3b8', 
+                    padding: `${liveEditingLayout.sectionSizes?.footer?.paddingY !== undefined ? liveEditingLayout.sectionSizes.footer.paddingY : 48}px 1.5rem`, 
+                    borderTop: '1px solid hsl(var(--border))' 
+                  }}>
+                    <div style={{ 
+                      maxWidth: liveEditingLayout.sectionSizes?.footer?.isFullWidth ? '100%' : `${liveEditingLayout.sectionSizes?.footer?.width || 1280}px`, 
+                      margin: '0 auto', 
+                      display: 'grid', 
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+                      gap: '2rem' 
+                    }}>
+                      <div>
+                        <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1.2rem' }}>{storeSettings?.storeName || liveEditingLayout?.logoText || 'AeonCare'}</h4>
+                        <p style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>{storeSettings?.slogan || liveEditingLayout?.footerText || 'Trusted home patient care support, mobility aids, clinical diagnostic devices sales and supply hub in Chennai.'}</p>
+                      </div>
+                      <div>
+                        <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>{liveEditingLayout?.footerSupportTitle || 'Support Hub'}</h4>
+                        <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem' }}>
+                          <li><a href="#tel" onClick={(e) => e.preventDefault()}>FAQ Helpdesk</a></li>
+                          <li><a href="#tel" onClick={(e) => e.preventDefault()}>Request Home Setup</a></li>
+                          <li><a href="#tel" onClick={(e) => e.preventDefault()}>Refund Policy</a></li>
+                          <li><a href="#tel" onClick={(e) => e.preventDefault()}>Terms & Conditions</a></li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem' }}>{liveEditingLayout?.footerContactTitle || 'Contact Info'}</h4>
+                        <p style={{ fontSize: '0.85rem', lineHeight: '1.6', whitespace: 'pre-line' }}>
+                          {storeSettings?.addressLine1 ? `${storeSettings.storeName}\n${storeSettings.addressLine1}, ${storeSettings.addressLine2 ? storeSettings.addressLine2 + ', ' : ''}${storeSettings.city}, ${storeSettings.state} - ${storeSettings.pincode}` : (liveEditingLayout?.footerContactAddress || 'Aeon Healthcare Pvt Ltd, Besant Nagar, Chennai, TN 600090')}<br/>
+                          Helpline: {storeSettings?.storePhone || liveEditingLayout?.footerContactPhone || '+91 98401 23456'}<br/>
+                          Email: {storeSettings?.storeEmail || liveEditingLayout?.footerContactEmail || 'support@aeoncare.in'}
+                        </p>
+                      </div>
+                    </div>
+                    <div style={{ maxWidth: liveEditingLayout.sectionSizes?.footer?.isFullWidth ? '100%' : `${liveEditingLayout.sectionSizes?.footer?.width || 1280}px`, margin: '2rem auto 0', borderTop: '1px solid #1e293b', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', fontSize: '0.75rem' }}>
+                      <span>{liveEditingLayout?.footerCopyrightText || '© 2026 AeonCare. Partner of AeonCare.in. India CDSCO labeling compliant. All rights reserved.'}</span>
+                    </div>
+                  </footer>
+                )}
               </div>
             </div>
           );
