@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useRef } from 'react';
 import { db, doc, setDoc, onSnapshot } from '../config/firebase';
 
 export const AppContext = createContext();
@@ -372,11 +372,23 @@ export const AppProvider = ({ children }) => {
   const [blogs, setBlogs] = useState(() => getStorage('aeon_blogs', initialBlogs));
   const [leads, setLeads] = useState(() => getStorage('aeon_leads', initialLeads));
   const initialApprovedStaff = [
+    { email: 'bloodhunt029@gmail.com', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' },
+    { email: 'prasanth08-29@gmail.com', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' },
     { email: 'admin@aeoncare.in', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' },
     { email: 'support@aeoncare.in', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' }
   ];
 
-  const [approvedStaff, setApprovedStaff] = useState(() => getStorage('aeon_approved_staff', initialApprovedStaff));
+  const [approvedStaff, setApprovedStaff] = useState(() => {
+    const saved = getStorage('aeon_approved_staff', initialApprovedStaff);
+    const defaults = ['bloodhunt029@gmail.com', 'prasanth08-29@gmail.com', 'admin@aeoncare.in', 'support@aeoncare.in'];
+    let updated = Array.isArray(saved) ? [...saved] : [];
+    defaults.forEach(email => {
+      if (!updated.some(s => s?.email?.toLowerCase() === email.toLowerCase())) {
+        updated.push({ email, role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' });
+      }
+    });
+    return updated;
+  });
   const [pendingRequests, setPendingRequests] = useState(() => getStorage('aeon_pending_requests', []));
   const [userRole, setUserRole] = useState('Super Admin');
 
@@ -388,30 +400,71 @@ export const AppProvider = ({ children }) => {
   const [analytics, setAnalytics] = useState(initialAnalytics);
   const [notificationLogs, setNotificationLogs] = useState([]);
 
-  // Helper function to save to LocalStorage and Cloud Firestore
+  const isInitialSyncDone = useRef(false);
+
+  // Helper function to save to LocalStorage and Cloud Firestore safely
   const saveKey = (key, data) => {
     try {
       localStorage.setItem(key, JSON.stringify(data));
-      if (import.meta.env.VITE_FIREBASE_PROJECT_ID) {
-        setDoc(doc(db, 'healthcare_store', key), { data, updatedAt: new Date().toISOString() }).catch(() => {});
+      // Only write to Cloud Firestore if initial sync from database has completed
+      if (db && isInitialSyncDone.current) {
+        setDoc(doc(db, 'healthcare_store', key), { data, updatedAt: new Date().toISOString() }).catch((err) => {
+          console.warn(`Firestore save error for ${key}:`, err);
+        });
       }
     } catch (e) {
       console.warn(`Error saving ${key}:`, e);
     }
   };
 
-  // Realtime Cloud Firestore listener when env vars exist
+  // Realtime Cloud Firestore listeners for all store datasets
   useEffect(() => {
-    if (!import.meta.env.VITE_FIREBASE_PROJECT_ID) return;
-    const unsubLayout = onSnapshot(doc(db, 'healthcare_store', 'aeon_layout'), (docSnap) => {
-      if (docSnap.exists() && docSnap.data().data) {
-        setLayout(prev => ({ ...prev, ...docSnap.data().data }));
-      }
-    }, () => {});
-    return () => unsubLayout();
+    if (!db) {
+      isInitialSyncDone.current = true;
+      return;
+    }
+
+    const unsubscribes = [];
+
+    const syncDoc = (key, setter) => {
+      const unsub = onSnapshot(doc(db, 'healthcare_store', key), (docSnap) => {
+        if (docSnap.exists() && docSnap.data()?.data) {
+          const cloudData = docSnap.data().data;
+          setter(cloudData);
+          try {
+            localStorage.setItem(key, JSON.stringify(cloudData));
+          } catch (err) {}
+        }
+      }, (err) => {
+        console.warn(`Firestore snapshot sync error for ${key}:`, err);
+      });
+      unsubscribes.push(unsub);
+    };
+
+    syncDoc('aeon_products', setProducts);
+    syncDoc('aeon_customers', setCustomers);
+    syncDoc('aeon_orders', setOrders);
+    syncDoc('aeon_discounts', setDiscounts);
+    syncDoc('aeon_faqs', setFaqs);
+    syncDoc('aeon_blogs', setBlogs);
+    syncDoc('aeon_leads', setLeads);
+    syncDoc('aeon_settings', setStoreSettings);
+    syncDoc('aeon_layout', setLayout);
+    syncDoc('aeon_approved_staff', setApprovedStaff);
+    syncDoc('aeon_pending_requests', setPendingRequests);
+
+    // Allow database writes 1 second after initializing listeners
+    const timer = setTimeout(() => {
+      isInitialSyncDone.current = true;
+    }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+      unsubscribes.forEach(unsub => unsub());
+    };
   }, []);
 
-  // Save to LocalStorage & Firestore
+  // Save changes to LocalStorage & Firestore when state changes (after initial sync)
   useEffect(() => { saveKey('aeon_products', products); }, [products]);
   useEffect(() => { saveKey('aeon_customers', customers); }, [customers]);
   useEffect(() => { saveKey('aeon_orders', orders); }, [orders]);

@@ -2,14 +2,15 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, doc, setDoc, onSnapshot, getDoc } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 
-// Firebase configuration using environment variables with fallbacks
+// Firebase configuration using environment variables with actual project fallbacks
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDemoKeyForHealthcareEcommerce123",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "healthcare-ecommerce-demo.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "healthcare-ecommerce-demo",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "healthcare-ecommerce-demo.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789012",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789012:web:demo1234567890"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCDBRZKkcrlvHp5Hkf9zautKWVc_pZuG-U",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "healthcareecommerce.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "healthcareecommerce",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "healthcareecommerce.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "75076647381",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:75076647381:web:ba870772ef37678eaae55c",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-WK0N92BLVT"
 };
 
 // Initialize Firebase

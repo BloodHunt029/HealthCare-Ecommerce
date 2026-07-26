@@ -23,14 +23,18 @@ export default function AdminLogin({ onLoginSuccess }) {
     setErrorMsg('');
     setPendingNotice('');
 
+    // Master Super Admin whitelist - guaranteed access
+    const masterAdmins = ['bloodhunt029@gmail.com', 'prasanth08-29@gmail.com', 'admin@aeoncare.in', 'support@aeoncare.in'];
+    const isMasterAdmin = masterAdmins.includes(normalized);
+
     // Check approved staff list from AppContext
     const staffRecord = (approvedStaff || []).find(s => s.email.toLowerCase() === normalized);
 
-    // If staff record exists and approved OR if initial setup
-    const isApproved = staffRecord?.status === 'approved' || (approvedStaff && approvedStaff.length === 0);
+    // If staff record exists and approved OR if master admin OR if initial setup
+    const isApproved = isMasterAdmin || staffRecord?.status === 'approved' || (!approvedStaff || approvedStaff.length === 0);
 
     if (isApproved) {
-      const assignedRole = staffRecord ? staffRecord.role : 'Super Admin';
+      const assignedRole = (staffRecord && staffRecord.role) ? staffRecord.role : 'Super Admin';
       const sessionData = {
         email: normalized,
         displayName: normalized.split('@')[0],
