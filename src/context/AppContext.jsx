@@ -790,9 +790,64 @@ export const AppProvider = ({ children }) => {
     }));
   };
 
+  // Product CRUD & Batch Import Actions
+  const addProduct = (prodData) => {
+    setProducts(prev => {
+      const newProduct = {
+        id: prodData.id || `p_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        ...prodData
+      };
+      const updated = [newProduct, ...prev];
+      saveKey('aeon_products', updated);
+      return updated;
+    });
+  };
+
+  const updateProduct = (updatedProd) => {
+    setProducts(prev => {
+      const updated = prev.map(p => p.id === updatedProd.id ? { ...p, ...updatedProd } : p);
+      saveKey('aeon_products', updated);
+      return updated;
+    });
+  };
+
+  const deleteProduct = (id) => {
+    setProducts(prev => {
+      const updated = prev.filter(p => p.id !== id);
+      saveKey('aeon_products', updated);
+      return updated;
+    });
+  };
+
+  const importProducts = (newProductsList) => {
+    setProducts(prev => {
+      const updatedList = [...prev];
+      newProductsList.forEach(newProd => {
+        const existingIndex = updatedList.findIndex(
+          p => (p.sku && newProd.sku && String(p.sku).toLowerCase() === String(newProd.sku).toLowerCase()) ||
+               (p.handle && newProd.handle && String(p.handle).toLowerCase() === String(newProd.handle).toLowerCase())
+        );
+
+        const prodWithId = {
+          id: existingIndex >= 0 ? updatedList[existingIndex].id : `p_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          ...newProd
+        };
+
+        if (existingIndex >= 0) {
+          updatedList[existingIndex] = prodWithId;
+        } else {
+          updatedList.unshift(prodWithId);
+        }
+      });
+
+      saveKey('aeon_products', updatedList);
+      return updatedList;
+    });
+  };
+
   return (
     <AppContext.Provider value={{
-      products, setProducts, resetProducts,
+      products, setProducts, addProduct, updateProduct, deleteProduct, importProducts, resetProducts,
       customers, setCustomers, resetCustomers,
       orders, setOrders, createOrder, updateOrderStatus, updatePaymentStatus, resetOrders,
       discounts, setDiscounts, resetDiscounts,

@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 
 export default function Products() {
-  const { products, addProduct, updateProduct, deleteProduct, storeSettings, layout } = useContext(AppContext);
+  const { products, addProduct, updateProduct, deleteProduct, importProducts, storeSettings, layout } = useContext(AppContext);
   
   // Navigation & list filters
   const [selectedProductId, setSelectedProductId] = useState('');
@@ -509,13 +509,10 @@ export default function Products() {
   const handleExecuteImport = () => {
     if (importedParsedRows.length === 0) return;
     
-    let addedCount = 0;
-    importedParsedRows.forEach(newProd => {
-      addProduct(newProd);
-      addedCount++;
-    });
+    const count = importedParsedRows.length;
+    importProducts(importedParsedRows);
 
-    alert(`Success! Imported ${addedCount} products into your catalog.`);
+    alert(`Success! Imported ${count} products into your catalog.`);
     setIsImportModalOpen(false);
     setImportFile(null);
     setImportedParsedRows([]);
