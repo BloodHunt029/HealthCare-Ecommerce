@@ -546,7 +546,7 @@ function AppContent() {
 }
 
 function CollectionsManager() {
-  const { layout, updateLayout, products, updateProduct } = useContext(AppContext);
+  const { layout, updateLayout, products, setProducts, updateProduct } = useContext(AppContext);
   const collections = layout.collectionsList || [];
   
   const [editingIndex, setEditingIndex] = useState(null);
@@ -611,7 +611,6 @@ function CollectionsManager() {
       image: editColImage 
     };
     updateLayout({ collectionsList: updatedColls });
-    saveKey('aeon_layout', { collectionsList: updatedColls });
     alert('Collection details saved successfully!');
   };
 
@@ -637,7 +636,6 @@ function CollectionsManager() {
       image: editColImage 
     };
     updateLayout({ collectionsList: updatedColls });
-    saveKey('aeon_layout', { collectionsList: updatedColls });
 
     // Single pass batch update to update products list cleanly
     const updatedProducts = products.map(p => {
@@ -653,7 +651,6 @@ function CollectionsManager() {
     });
 
     setProducts(updatedProducts);
-    saveKey('aeon_products', updatedProducts);
     setIsModalOpen(false);
     alert(`Successfully linked ${tempSelectedIds.length} product(s) to collection "${targetName}"!`);
   };
