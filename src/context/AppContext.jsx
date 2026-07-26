@@ -403,7 +403,7 @@ export const AppProvider = ({ children }) => {
   const isInitialSyncDone = useRef(false);
 
   // Helper function to save to LocalStorage and Cloud Firestore safely
-  const saveKey = (key, data) => {
+  const saveKey = (key, data, forceCloud = false) => {
     try {
       localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {
@@ -411,8 +411,8 @@ export const AppProvider = ({ children }) => {
     }
 
     try {
-      // Only write to Cloud Firestore if initial sync from database has completed
-      if (db && isInitialSyncDone.current) {
+      // Only write to Cloud Firestore if initial sync from database has completed or forceCloud is true
+      if (db && (isInitialSyncDone.current || forceCloud)) {
         setDoc(doc(db, 'healthcare_store', key), { data, updatedAt: new Date().toISOString() }).catch((err) => {
           console.warn(`Firestore save error for ${key}:`, err);
         });
@@ -431,7 +431,7 @@ export const AppProvider = ({ children }) => {
 
     const unsubscribes = [];
 
-    const syncDoc = (key, setter) => {
+    const syncDoc = (key, setter, fallbackData) => {
       const unsub = onSnapshot(doc(db, 'healthcare_store', key), (docSnap) => {
         if (docSnap.exists() && docSnap.data()?.data) {
           const cloudData = docSnap.data().data;
@@ -439,6 +439,9 @@ export const AppProvider = ({ children }) => {
           try {
             localStorage.setItem(key, JSON.stringify(cloudData));
           } catch (err) {}
+        } else if (!docSnap.exists() && fallbackData && isInitialSyncDone.current) {
+          // Initialize document in Cloud Firestore if it does not exist yet
+          setDoc(doc(db, 'healthcare_store', key), { data: fallbackData, updatedAt: new Date().toISOString() }).catch(() => {});
         }
       }, (err) => {
         console.warn(`Firestore snapshot sync error for ${key}:`, err);
@@ -446,22 +449,22 @@ export const AppProvider = ({ children }) => {
       unsubscribes.push(unsub);
     };
 
-    syncDoc('aeon_products', setProducts);
-    syncDoc('aeon_customers', setCustomers);
-    syncDoc('aeon_orders', setOrders);
-    syncDoc('aeon_discounts', setDiscounts);
-    syncDoc('aeon_faqs', setFaqs);
-    syncDoc('aeon_blogs', setBlogs);
-    syncDoc('aeon_leads', setLeads);
-    syncDoc('aeon_settings', setStoreSettings);
-    syncDoc('aeon_layout', setLayout);
-    syncDoc('aeon_approved_staff', setApprovedStaff);
-    syncDoc('aeon_pending_requests', setPendingRequests);
+    syncDoc('aeon_products', setProducts, initialProducts);
+    syncDoc('aeon_customers', setCustomers, initialCustomers);
+    syncDoc('aeon_orders', setOrders, initialOrders);
+    syncDoc('aeon_discounts', setDiscounts, initialDiscounts);
+    syncDoc('aeon_faqs', setFaqs, initialFAQs);
+    syncDoc('aeon_blogs', setBlogs, initialBlogs);
+    syncDoc('aeon_leads', setLeads, initialLeads);
+    syncDoc('aeon_settings', setStoreSettings, initialStoreSettings);
+    syncDoc('aeon_layout', setLayout, initialLayout);
+    syncDoc('aeon_approved_staff', setApprovedStaff, initialApprovedStaff);
+    syncDoc('aeon_pending_requests', setPendingRequests, []);
 
-    // Allow database writes 1 second after initializing listeners
+    // Allow database writes 300ms after initializing listeners
     const timer = setTimeout(() => {
       isInitialSyncDone.current = true;
-    }, 1000);
+    }, 300);
 
     return () => {
       clearTimeout(timer);

@@ -337,22 +337,34 @@ export default function OnlineStore() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // JPG File Uploader Helper
+  // Image File Uploader Helper with Canvas Compression (Fits within Firestore 1MB limits)
   const handleJpgUpload = (e, callback) => {
     const file = e.target.files[0];
     if (!file) return;
     
-    // Validate image/jpeg
-    const fileType = file.type;
     const fileName = file.name.toLowerCase();
-    if (fileType !== 'image/jpeg' && !fileName.endsWith('.jpg') && !fileName.endsWith('.jpeg')) {
-      alert('Invalid file format. Please upload JPG/JPEG files only!');
+    if (!file.type.startsWith('image/') && !fileName.endsWith('.jpg') && !fileName.endsWith('.jpeg') && !fileName.endsWith('.png') && !fileName.endsWith('.webp')) {
+      alert('Invalid file format. Please upload image files (JPG/PNG/WEBP)!');
       return;
     }
     
     const reader = new FileReader();
     reader.onload = (evt) => {
-      callback(evt.target.result); // Base64 data string
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1000;
+        const scale = Math.min(1, MAX_WIDTH / img.width);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        callback(compressedBase64);
+      };
+      img.src = evt.target.result;
     };
     reader.readAsDataURL(file);
   };
