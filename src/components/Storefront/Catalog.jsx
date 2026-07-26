@@ -3,7 +3,7 @@ import { AppContext } from '../../context/AppContext';
 import { Search, Star, ShoppingCart, X, LayoutGrid, List, SlidersHorizontal } from 'lucide-react';
 
 export default function Catalog({ selectedProductId, setSelectedProductId, initialSearchVal }) {
-  const { products, addToCart } = useContext(AppContext);
+  const { products, addToCart, layout } = useContext(AppContext);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [priceFilter, setPriceFilter] = useState('All');
   const [selectedBrand, setSelectedBrand] = useState('All');
@@ -46,7 +46,10 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
     }
   }, [initialSearchVal]);
 
-  const categories = ['All', 'Home Care', 'Mobility Aid', 'Medical Devices', 'Surgicals & PPE'];
+  const categories = ['All', ...Array.from(new Set([
+    ...(layout?.collectionsList || []).map(c => c.name),
+    ...products.map(p => p.category).filter(Boolean)
+  ]))];
   const brands = ['All', 'CareQuip', 'Vissco', 'Accu-Chek', 'Seni', 'Dyna', 'AEONCARE'];
 
   // Category Description Maps matching AeonCare DTC theme
@@ -61,7 +64,7 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
   // Filter logic
   const filteredProducts = products.filter(p => {
     // Category filter
-    if (selectedCategory !== 'All' && p.category !== selectedCategory) return false;
+    if (selectedCategory !== 'All' && (!p.category || p.category.toLowerCase().trim() !== selectedCategory.toLowerCase().trim())) return false;
     
     // Brand filter
     if (selectedBrand !== 'All' && p.brand.toUpperCase() !== selectedBrand.toUpperCase()) return false;

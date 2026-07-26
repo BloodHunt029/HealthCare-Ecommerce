@@ -628,20 +628,21 @@ function CollectionsManager() {
   };
 
   const handleApplyProductsToCollection = (colName) => {
-    // Loop through all products and adjust their categories
-    products.forEach(p => {
+    // Single pass batch update to update products list cleanly
+    const updatedProducts = products.map(p => {
       const isSelected = tempSelectedIds.includes(p.id);
-      const currentlyInCol = p.category.toLowerCase() === colName.toLowerCase();
-      
+      const currentlyInCol = p.category && p.category.toLowerCase().trim() === colName.toLowerCase().trim();
+
       if (isSelected && !currentlyInCol) {
-        // Link to this collection
-        updateProduct({ ...p, category: colName });
+        return { ...p, category: colName };
       } else if (!isSelected && currentlyInCol) {
-        // Remove from this collection, assign to Home Care by default
-        updateProduct({ ...p, category: 'Home Care' });
+        return { ...p, category: 'Home Care' };
       }
+      return p;
     });
-    
+
+    setProducts(updatedProducts);
+    saveKey('aeon_products', updatedProducts);
     setIsModalOpen(false);
     alert(`Successfully synced products for collection "${colName}"!`);
   };
