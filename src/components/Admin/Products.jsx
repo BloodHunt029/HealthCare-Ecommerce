@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
 import { 
-  Plus, Edit2, Trash2, Search, Eye, Save, ArrowLeft, Upload, 
+  Plus, Edit2, Trash2, Search, Eye, Save, ArrowLeft, Upload, Download, FileText, CheckCircle,
   Settings, HelpCircle, Check, Sparkles, Bold, Italic, Underline, 
   Link, Image, Code, List, Table
 } from 'lucide-react';
@@ -237,6 +237,291 @@ export default function Products() {
     }
   };
 
+  // CSV Import Modal & Parsing state
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importedParsedRows, setImportedParsedRows] = useState([]);
+  const [importStatusMsg, setImportStatusMsg] = useState('');
+
+  // Official Shopify CSV Template Column Headers
+  const SHOPIFY_CSV_HEADERS = [
+    'Handle', 'Title', 'Body (HTML)', 'Vendor', 'Product Category', 'Type', 'Tags', 'Published',
+    'Option1 Name', 'Option1 Value', 'Option1 Linked To', 'Option2 Name', 'Option2 Value', 'Option2 Linked To',
+    'Option3 Name', 'Option3 Value', 'Option3 Linked To', 'Variant SKU', 'Variant Grams', 'Variant Inventory Tracker',
+    'Variant Inventory Qty', 'Variant Inventory Policy', 'Variant Fulfillment Service', 'Variant Price', 'Variant Compare At Price',
+    'Variant Requires Shipping', 'Variant Taxable', 'Unit Price Total Measure', 'Unit Price Total Measure Unit',
+    'Unit Price Base Measure', 'Unit Price Base Measure Unit', 'Variant Barcode', 'Image Src', 'Image Position',
+    'Image Alt Text', 'Gift Card', 'SEO Title', 'SEO Description', 'Google Shopping / Google Product Category',
+    'Google Shopping / Gender', 'Google Shopping / Age Group', 'Google Shopping / MPN', 'Google Shopping / Condition',
+    'Google Shopping / Custom Product', 'Google Shopping / Custom Label 0', 'Google Shopping / Custom Label 1',
+    'Google Shopping / Custom Label 2', 'Google Shopping / Custom Label 3', 'Google Shopping / Custom Label 4',
+    'Google: Custom Product (product.metafields.mm-google-shopping.custom_product)',
+    'Product rating count (product.metafields.reviews.rating_count)',
+    'Absorbency level (product.metafields.shopify.absorbency-level)',
+    'Accessory size (product.metafields.shopify.accessory-size)',
+    'Age group (product.metafields.shopify.age-group)',
+    'Attachment type (product.metafields.shopify.attachment-type)',
+    'Bedding size (product.metafields.shopify.bedding-size)',
+    'Body area (product.metafields.shopify.body-area)',
+    'Closure type (product.metafields.shopify.closure-type)',
+    'Color (product.metafields.shopify.color-pattern)',
+    'Compatible patient profile (product.metafields.shopify.compatible-patient-profile)',
+    'Control type (product.metafields.shopify.control-type)',
+    'Diaper size (product.metafields.shopify.diaper-size)',
+    'Diaper type (product.metafields.shopify.diaper-type)',
+    'Display technology (product.metafields.shopify.display-technology)',
+    'Disposable glove features (product.metafields.shopify.disposable-glove-features)',
+    'Evaporation technology (product.metafields.shopify.evaporation-technology)',
+    'Fabric (product.metafields.shopify.fabric)',
+    'Furniture/Fixture material (product.metafields.shopify.furniture-fixture-material)',
+    'Handwear material (product.metafields.shopify.handwear-material)',
+    'Material (product.metafields.shopify.material)',
+    'Mobility/Accessibility equipment features (product.metafields.shopify.mobility-accessibility-equipment-features)',
+    'Mounting type (product.metafields.shopify.mounting-type)',
+    'Nebulizer design (product.metafields.shopify.nebulizer-design)',
+    'Nebulizer technology (product.metafields.shopify.nebulizer-technology)',
+    'Power source (product.metafields.shopify.power-source)',
+    'Size (product.metafields.shopify.size)',
+    'Stair lifts control type (product.metafields.shopify.stair-lifts-control-type)',
+    'Staircase type (product.metafields.shopify.staircase-type)',
+    'Support/Brace material (product.metafields.shopify.support-brace-material)',
+    'Target gender (product.metafields.shopify.target-gender)',
+    'Temperature measurement (product.metafields.shopify.temperature-measurement)',
+    'Test sample (product.metafields.shopify.test-sample)',
+    'Transfer boards surface type (product.metafields.shopify.transfer-boards-surface-type)',
+    'Treatment objective (product.metafields.shopify.treatment-objective)',
+    'Usage type (product.metafields.shopify.usage-type)',
+    'Wheelchair type (product.metafields.shopify.wheelchair-type)',
+    'Variant Image', 'Variant Weight Unit', 'Variant Tax Code', 'Cost per item', 'Status'
+  ];
+
+  const escapeCsvVal = (val) => {
+    if (val === null || val === undefined) return '""';
+    const cleanStr = String(val).replace(/"/g, '""');
+    return `"${cleanStr}"`;
+  };
+
+  // Export active catalog to Shopify CSV template
+  const handleExportProductsCsv = () => {
+    let csvStr = SHOPIFY_CSV_HEADERS.map(escapeCsvVal).join(',') + '\r\n';
+
+    products.forEach(p => {
+      const row = new Array(SHOPIFY_CSV_HEADERS.length).fill('""');
+      row[0] = escapeCsvVal(p.handle || p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+      row[1] = escapeCsvVal(p.title || '');
+      row[2] = escapeCsvVal(p.description || '');
+      row[3] = escapeCsvVal(p.brand || 'AEONCARE');
+      row[4] = escapeCsvVal(p.category || 'Home Care');
+      row[5] = escapeCsvVal(p.category || 'Home Care');
+      row[6] = escapeCsvVal(p.tags || 'medical');
+      row[7] = escapeCsvVal(p.status === 'Draft' ? 'FALSE' : 'TRUE');
+      row[8] = escapeCsvVal('Title');
+      row[9] = escapeCsvVal('Default Title');
+      row[17] = escapeCsvVal(p.sku || `AC${Math.floor(1000 + Math.random() * 9000)}`);
+      row[20] = escapeCsvVal(p.stock !== undefined ? p.stock : 10);
+      row[23] = escapeCsvVal(p.price || 0);
+      row[24] = escapeCsvVal(p.mrp || 0);
+      row[31] = escapeCsvVal(p.barcode || '');
+      row[32] = escapeCsvVal(Array.isArray(p.images) ? p.images[0] : (p.image || ''));
+      row[89] = escapeCsvVal(p.costPrice || 0);
+      row[90] = escapeCsvVal(p.status ? p.status.toLowerCase() : 'active');
+
+      csvStr += row.join(',') + '\r\n';
+    });
+
+    const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `products_export_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Download empty/sample Shopify CSV template
+  const handleDownloadSampleCsv = () => {
+    let csvStr = SHOPIFY_CSV_HEADERS.map(escapeCsvVal).join(',') + '\r\n';
+
+    // Sample Row 1
+    const row1 = new Array(SHOPIFY_CSV_HEADERS.length).fill('""');
+    row1[0] = escapeCsvVal('oxygen-concentrator-5l');
+    row1[1] = escapeCsvVal('Oxygen Concentrator 5L');
+    row1[2] = escapeCsvVal('<p>Medical grade 5L continuous oxygen concentrator.</p>');
+    row1[3] = escapeCsvVal('AEONCARE');
+    row1[4] = escapeCsvVal('Medical Devices');
+    row1[5] = escapeCsvVal('Medical Devices');
+    row1[6] = escapeCsvVal('oxygen, respiratory');
+    row1[7] = escapeCsvVal('TRUE');
+    row1[8] = escapeCsvVal('Title');
+    row1[9] = escapeCsvVal('Default Title');
+    row1[17] = escapeCsvVal('OX-CONC-5L');
+    row1[20] = escapeCsvVal('15');
+    row1[23] = escapeCsvVal('34999');
+    row1[24] = escapeCsvVal('45000');
+    row1[31] = escapeCsvVal('8901234567890');
+    row1[32] = escapeCsvVal('https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600');
+    row1[89] = escapeCsvVal('28000');
+    row1[90] = escapeCsvVal('active');
+    csvStr += row1.join(',') + '\r\n';
+
+    const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `shopify_products_template.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Robust CSV parser supporting quotes and newlines
+  const parseCsvText = (text) => {
+    const lines = [];
+    let curLine = [];
+    let curVal = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          curVal += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        curLine.push(curVal.trim());
+        curVal = '';
+      } else if ((char === '\r' || char === '\n') && !inQuotes) {
+        if (char === '\r' && nextChar === '\n') i++;
+        curLine.push(curVal.trim());
+        if (curLine.some(c => c !== '')) lines.push(curLine);
+        curLine = [];
+        curVal = '';
+      } else {
+        curVal += char;
+      }
+    }
+    if (curVal || curLine.length > 0) {
+      curLine.push(curVal.trim());
+      if (curLine.some(c => c !== '')) lines.push(curLine);
+    }
+    return lines;
+  };
+
+  // Handle uploaded CSV file parsing
+  const handleSelectCsvFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImportFile(file);
+    setImportStatusMsg('Parsing CSV rows...');
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const rawText = evt.target.result;
+        const rows = parseCsvText(rawText);
+        if (rows.length < 2) {
+          setImportStatusMsg('CSV file is empty or missing data rows.');
+          setImportedParsedRows([]);
+          return;
+        }
+
+        const headers = rows[0].map(h => h.toLowerCase().trim());
+        const findColIdx = (possibleNames) => {
+          for (const name of possibleNames) {
+            const idx = headers.findIndex(h => h === name.toLowerCase());
+            if (idx !== -1) return idx;
+          }
+          return -1;
+        };
+
+        const handleIdx = findColIdx(['handle']);
+        const titleIdx = findColIdx(['title']);
+        const bodyIdx = findColIdx(['body (html)', 'description', 'body']);
+        const vendorIdx = findColIdx(['vendor', 'brand']);
+        const catIdx = findColIdx(['product category', 'type', 'category']);
+        const skuIdx = findColIdx(['variant sku', 'sku']);
+        const qtyIdx = findColIdx(['variant inventory qty', 'inventory qty', 'stock']);
+        const priceIdx = findColIdx(['variant price', 'price']);
+        const mrpIdx = findColIdx(['variant compare at price', 'compare at price', 'mrp']);
+        const barcodeIdx = findColIdx(['variant barcode', 'barcode']);
+        const imgIdx = findColIdx(['image src', 'image', 'variant image']);
+        const costIdx = findColIdx(['cost per item', 'cost']);
+        const statusIdx = findColIdx(['status']);
+
+        const parsedProducts = [];
+        for (let i = 1; i < rows.length; i++) {
+          const r = rows[i];
+          const rawTitle = titleIdx !== -1 ? r[titleIdx] : '';
+          if (!rawTitle) continue;
+
+          const rawHandle = handleIdx !== -1 ? r[handleIdx] : rawTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+          const rawPrice = priceIdx !== -1 ? parseFloat(r[priceIdx]) || 0 : 0;
+          const rawMrp = mrpIdx !== -1 ? parseFloat(r[mrpIdx]) || Math.round(rawPrice * 1.2) : Math.round(rawPrice * 1.2);
+          const rawCost = costIdx !== -1 ? parseFloat(r[costIdx]) || 0 : 0;
+          const rawQty = qtyIdx !== -1 ? parseInt(r[qtyIdx], 10) || 10 : 10;
+          const rawImage = imgIdx !== -1 && r[imgIdx] ? r[imgIdx] : 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600';
+          const rawCategory = catIdx !== -1 && r[catIdx] ? r[catIdx] : 'Home Care';
+          const rawVendor = vendorIdx !== -1 && r[vendorIdx] ? r[vendorIdx] : 'AEONCARE';
+          const rawSku = skuIdx !== -1 && r[skuIdx] ? r[skuIdx] : `AC${Math.floor(1000 + Math.random() * 9000)}`;
+          const rawBarcode = barcodeIdx !== -1 ? r[barcodeIdx] : '';
+          const rawDesc = bodyIdx !== -1 ? r[bodyIdx] : `<p>${rawTitle}</p>`;
+          const rawStatus = statusIdx !== -1 && r[statusIdx]?.toLowerCase() === 'draft' ? 'Draft' : 'Active';
+
+          parsedProducts.push({
+            title: rawTitle,
+            handle: rawHandle,
+            description: rawDesc,
+            price: rawPrice,
+            mrp: rawMrp,
+            costPrice: rawCost,
+            category: rawCategory,
+            brand: rawVendor,
+            sku: rawSku,
+            barcode: rawBarcode,
+            stock: rawQty,
+            status: rawStatus,
+            images: [rawImage],
+            image: rawImage,
+            rating: 4.8,
+            reviewsCount: 12,
+            allowBackorder: true,
+            specificationsText: '• High clinical grade durability\n• Certified patient safety'
+          });
+        }
+
+        setImportedParsedRows(parsedProducts);
+        setImportStatusMsg(`Successfully parsed ${parsedProducts.length} product(s) from CSV.`);
+      } catch (err) {
+        console.error(err);
+        setImportStatusMsg('Error parsing CSV file format.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  // Confirm and Execute Import into AppContext & Firestore
+  const handleExecuteImport = () => {
+    if (importedParsedRows.length === 0) return;
+    
+    let addedCount = 0;
+    importedParsedRows.forEach(newProd => {
+      addProduct(newProd);
+      addedCount++;
+    });
+
+    alert(`Success! Imported ${addedCount} products into your catalog.`);
+    setIsImportModalOpen(false);
+    setImportFile(null);
+    setImportedParsedRows([]);
+    setImportStatusMsg('');
+  };
+
   const filteredProducts = products.filter(p => {
     if (categoryFilter !== 'All' && p.category !== categoryFilter) return false;
     if (searchQuery.trim().length > 0) {
@@ -256,14 +541,40 @@ export default function Products() {
       {!(selectedProductId || isAddingNew) ? (
         /* ================= INVENTORY LIST VIEW ================= */
         <>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#1e293b' }}>Products</h1>
-              <p style={{ color: 'hsl(var(--text-muted))', fontSize: '0.85rem' }}>Manage catalog items, barcodes, backorders, and specifications.</p>
+              <p style={{ color: 'hsl(var(--text-muted))', fontSize: '0.85rem' }}>Manage catalog items, barcodes, CSV import/export, and specifications.</p>
             </div>
-            <button className="btn btn-primary" onClick={handleStartAdd}>
-              <Plus size={16} /> Add Product
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <button 
+                className="btn btn-outline" 
+                onClick={handleDownloadSampleCsv} 
+                title="Download Shopify sample CSV template"
+                style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <Download size={14} /> Sample CSV
+              </button>
+              <button 
+                className="btn btn-outline" 
+                onClick={handleExportProductsCsv}
+                title="Export catalog products to CSV"
+                style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <Upload size={14} style={{ transform: 'rotate(180deg)' }} /> Export CSV
+              </button>
+              <button 
+                className="btn btn-outline" 
+                onClick={() => setIsImportModalOpen(true)}
+                title="Import products from CSV template"
+                style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <Upload size={14} /> Import CSV
+              </button>
+              <button className="btn btn-primary" onClick={handleStartAdd} style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Plus size={16} /> Add Product
+              </button>
+            </div>
           </div>
 
           <div className="card" style={{ padding: '1.25rem' }}>
@@ -858,6 +1169,128 @@ export default function Products() {
 
             <div style={{ textAlign: 'right', marginTop: '1.5rem' }}>
               <button className="btn btn-primary" onClick={() => setShowImageModal(false)}>Done</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import Products CSV Modal */}
+      {isImportModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1.5rem'
+        }}>
+          <div className="card" style={{ maxWidth: '620px', width: '100%', backgroundColor: '#ffffff', padding: '1.75rem', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: '800', margin: 0, color: '#1e293b' }}>Import Products by CSV</h3>
+                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Upload products using the official Shopify CSV export/import format</span>
+              </div>
+              <button className="btn btn-ghost" onClick={() => setIsImportModalOpen(false)} style={{ padding: '4px 8px', fontSize: '1rem' }}>✕</button>
+            </div>
+
+            <div style={{ backgroundColor: '#f8fafc', border: '2px dashed #cbd5e1', borderRadius: '8px', padding: '1.5rem', textAlign: 'center', marginBottom: '1.25rem' }}>
+              <FileText size={36} style={{ color: '#64748b', margin: '0 auto 0.5rem' }} />
+              <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#334155', marginBottom: '0.25rem' }}>
+                {importFile ? importFile.name : 'Select or drag your CSV file here'}
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: '1rem' }}>
+                Supports standard Shopify CSV column headers (Handle, Title, Body, Vendor, Category, Price, SKU, Barcode, Image Src, Stock).
+              </div>
+
+              <input 
+                type="file" 
+                accept=".csv" 
+                onChange={handleSelectCsvFile}
+                style={{ display: 'none' }}
+                id="csvFileInput"
+              />
+              <label 
+                htmlFor="csvFileInput" 
+                className="btn btn-outline" 
+                style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}
+              >
+                <Upload size={14} /> Browse CSV File
+              </label>
+            </div>
+
+            {importStatusMsg && (
+              <div style={{ 
+                padding: '0.75rem 1rem', 
+                borderRadius: '6px', 
+                fontSize: '0.78rem', 
+                fontWeight: '600', 
+                marginBottom: '1.25rem',
+                backgroundColor: importedParsedRows.length > 0 ? '#f0fdf4' : '#fff1f2',
+                color: importedParsedRows.length > 0 ? '#166534' : '#9f1239',
+                border: importedParsedRows.length > 0 ? '1px solid #bbf7d0' : '1px solid #fecdd3',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                {importedParsedRows.length > 0 && <CheckCircle size={16} />}
+                {importStatusMsg}
+              </div>
+            )}
+
+            {importedParsedRows.length > 0 && (
+              <div style={{ maxHeight: '160px', overflowY: 'auto', marginBottom: '1.25rem', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                <table style={{ width: '100%', fontSize: '0.75rem', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead style={{ backgroundColor: '#f1f5f9', color: '#475569' }}>
+                    <tr>
+                      <th style={{ padding: '6px 10px' }}>Title</th>
+                      <th style={{ padding: '6px 10px' }}>Category</th>
+                      <th style={{ padding: '6px 10px' }}>SKU</th>
+                      <th style={{ padding: '6px 10px' }}>Price</th>
+                      <th style={{ padding: '6px 10px' }}>Stock</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {importedParsedRows.slice(0, 5).map((p, idx) => (
+                      <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '6px 10px', fontWeight: '700' }}>{p.title}</td>
+                        <td style={{ padding: '6px 10px' }}>{p.category}</td>
+                        <td style={{ padding: '6px 10px' }}>{p.sku}</td>
+                        <td style={{ padding: '6px 10px' }}>₹{p.price}</td>
+                        <td style={{ padding: '6px 10px' }}>{p.stock}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {importedParsedRows.length > 5 && (
+                  <div style={{ padding: '6px 10px', fontSize: '0.7rem', color: '#64748b', textAlign: 'center', backgroundColor: '#fafafa' }}>
+                    ... and {importedParsedRows.length - 5} more product(s)
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button 
+                className="btn btn-ghost" 
+                onClick={handleDownloadSampleCsv} 
+                style={{ fontSize: '0.75rem', color: '#2563eb', padding: 0 }}
+              >
+                Download Sample CSV Template
+              </button>
+
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button className="btn btn-outline" onClick={() => setIsImportModalOpen(false)}>Cancel</button>
+                <button 
+                  className="btn btn-primary" 
+                  onClick={handleExecuteImport}
+                  disabled={importedParsedRows.length === 0}
+                  style={{ opacity: importedParsedRows.length === 0 ? 0.5 : 1 }}
+                >
+                  Import {importedParsedRows.length} Product(s)
+                </button>
+              </div>
             </div>
           </div>
         </div>
