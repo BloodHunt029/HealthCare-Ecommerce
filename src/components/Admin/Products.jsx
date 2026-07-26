@@ -15,11 +15,9 @@ export default function Products() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
 
-  // Dynamically compile all active collections from layout collectionsList & existing products
+  // Compile exact active collections from layout collectionsList
   const availableCollections = Array.from(new Set([
-    ...(layout?.collectionsList || []).map(c => c.name),
-    ...products.map(p => p.category).filter(Boolean),
-    'Home Care', 'Mobility Aid', 'Hospital Bed', 'Respiratory Care', 'Diagnostics', 'Surgicals & PPE', 'Rehab and Ortho', 'Hospital Supplies'
+    ...(layout?.collectionsList || []).map(c => c.name).filter(Boolean)
   ]));
 
   // Shopify-style state fields
