@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, doc, setDoc, onSnapshot, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, onSnapshot, getDoc, collection, deleteDoc, writeBatch, getDocs } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 
 // Firebase configuration using environment variables with actual project fallbacks
@@ -19,4 +19,5 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
-export { doc, setDoc, onSnapshot, getDoc, signInWithPopup, signOut, onAuthStateChanged };
+export { doc, setDoc, onSnapshot, getDoc, collection, deleteDoc, writeBatch, getDocs, signInWithPopup, signOut, onAuthStateChanged };
+

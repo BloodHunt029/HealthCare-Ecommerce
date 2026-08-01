@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 
 export default function Orders() {
-  const { orders, products, customers, setCustomers, createOrder, updateOrderStatus, updatePaymentStatus } = useContext(AppContext);
+  const { orders, products, customers, setCustomers, createOrder, updateOrderStatus, updatePaymentStatus, exportToCSV } = useContext(AppContext);
   
   // View Toggle: Table View vs Shopify Create Order Page View
   const [isCreatingOrderPage, setIsCreatingOrderPage] = useState(false);
@@ -1358,7 +1358,7 @@ export default function Orders() {
           >
             <Plus size={18} /> Create Order
           </button>
-          <button className="btn btn-outline" onClick={() => alert('Bulk orders exported to CSV.')} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <button className="btn btn-outline" onClick={() => exportToCSV('orders_export', orders)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <FileSpreadsheet size={16} /> Export CSV
           </button>
         </div>

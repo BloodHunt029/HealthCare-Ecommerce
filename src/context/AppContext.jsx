@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useRef } from 'react';
-import { db, doc, setDoc, onSnapshot } from '../config/firebase';
+import { db, doc, setDoc, onSnapshot, collection, deleteDoc } from '../config/firebase';
 import importedProductsData from '../data/importedProducts.json';
+
 
 export const AppContext = createContext();
 
@@ -350,6 +351,11 @@ const initialLayout = {
   ]
 };
 
+const initialUserAddresses = [
+  { id: 'addr_1', name: 'Sanjay Kumar', phone: '+91 98401 23456', address: 'Flat 4B, Sky Towers, 14 Mount Poonamallee Rd, Porur', city: 'Chennai', pincode: '600089', isDefault: true },
+  { id: 'addr_2', name: 'Sanjay (Office)', phone: '+91 98401 23456', address: 'Tech Park, Floor 3, Guindy', city: 'Chennai', pincode: '600032', isDefault: false }
+];
+
 const getStorage = (key, fallback) => {
   try {
     const saved = localStorage.getItem(key);
@@ -373,6 +379,8 @@ export const AppProvider = ({ children }) => {
   const [faqs, setFaqs] = useState(() => getStorage('aeon_faqs', initialFAQs));
   const [blogs, setBlogs] = useState(() => getStorage('aeon_blogs', initialBlogs));
   const [leads, setLeads] = useState(() => getStorage('aeon_leads', initialLeads));
+  const [userAddresses, setUserAddresses] = useState(() => getStorage('aeon_user_addresses', initialUserAddresses));
+  const [wishlist, setWishlist] = useState(() => getStorage('aeon_wishlist', ['p2', 'p4']));
   const initialApprovedStaff = [
     { email: 'bloodhunt029@gmail.com', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' },
     { email: 'prasanth08-29@gmail.com', role: 'Super Admin', status: 'approved', addedAt: '2026-07-25 18:00' },
@@ -415,11 +423,11 @@ export const AppProvider = ({ children }) => {
     try {
       if (db) {
         setDoc(doc(db, 'healthcare_store', key), { data, updatedAt: new Date().toISOString() }).catch((err) => {
-          console.warn(`Firestore save error for ${key}:`, err);
+          console.error(`Firestore save error for ${key}:`, err);
         });
       }
     } catch (e) {
-      console.warn(`Firestore setDoc error for ${key}:`, e);
+      console.error(`Firestore setDoc error for ${key}:`, e);
     }
   };
 
@@ -431,23 +439,37 @@ export const AppProvider = ({ children }) => {
     }
 
     const unsubscribes = [];
+    const loadedKeys = new Set();
 
     const syncDoc = (key, setter, fallbackData) => {
       const unsub = onSnapshot(doc(db, 'healthcare_store', key), (docSnap) => {
-        if (docSnap.exists() && docSnap.data()?.data) {
+        loadedKeys.add(key);
+        if (docSnap.exists() && docSnap.data()?.data !== undefined) {
           const cloudData = docSnap.data().data;
           const localSaved = getStorage(key, null);
-          if (key === 'aeon_products' && Array.isArray(cloudData) && cloudData.length < 50 && Array.isArray(localSaved) && localSaved.length >= 50) {
-            setter(localSaved);
+
+          // If local browser has more products than cloud (e.g. added offline or bulk imported locally), merge & sync up to Firestore
+          if (key === 'aeon_products' && Array.isArray(cloudData) && Array.isArray(localSaved) && localSaved.length > cloudData.length) {
+            const combinedMap = new Map();
+            // Cloud items first
+            cloudData.forEach(p => p && p.id && combinedMap.set(p.id, p));
+            // Local items supplement
+            localSaved.forEach(p => p && p.id && combinedMap.set(p.id, p));
+            const mergedProducts = Array.from(combinedMap.values());
+            setter(mergedProducts);
+            saveKey(key, mergedProducts);
           } else {
             setter(cloudData);
             try {
               localStorage.setItem(key, JSON.stringify(cloudData));
             } catch (err) {}
           }
-        } else if (!docSnap.exists() && fallbackData && isInitialSyncDone.current) {
-          // Initialize document in Cloud Firestore if it does not exist yet
-          setDoc(doc(db, 'healthcare_store', key), { data: fallbackData, updatedAt: new Date().toISOString() }).catch(() => {});
+        } else if (!docSnap.exists() && fallbackData) {
+          // Document does not exist in Cloud Firestore yet; initialize it with fallbackData once
+          setDoc(doc(db, 'healthcare_store', key), { data: fallbackData, updatedAt: new Date().toISOString() }).catch((err) => {
+            console.error(`Error initializing document ${key} in Firestore:`, err);
+          });
+          setter(fallbackData);
         }
       }, (err) => {
         console.warn(`Firestore snapshot sync error for ${key}:`, err);
@@ -455,7 +477,56 @@ export const AppProvider = ({ children }) => {
       unsubscribes.push(unsub);
     };
 
-    syncDoc('aeon_products', setProducts, initialProducts);
+    // Realtime Cloud Firestore collection listener for individual product documents
+    const unsubProducts = onSnapshot(collection(db, 'healthcare_products'), (querySnap) => {
+      let cloudProducts = [];
+      querySnap.forEach((docSnap) => {
+        cloudProducts.push({ id: docSnap.id, ...docSnap.data() });
+      });
+
+      if (cloudProducts.length > 0) {
+        // Merge any locally saved products from local storage that are missing in cloud
+        const localSaved = getStorage('aeon_products', []);
+        let mergedProducts = [...cloudProducts];
+
+        if (Array.isArray(localSaved) && localSaved.length > 0) {
+          const cloudIds = new Set(cloudProducts.map(p => String(p.id)));
+          localSaved.forEach(localItem => {
+            if (localItem && localItem.id && !cloudIds.has(String(localItem.id))) {
+              mergedProducts.push(localItem);
+              setDoc(doc(db, 'healthcare_products', String(localItem.id)), localItem).catch(err => {
+                console.error(`Migration error for product ${localItem.id}:`, err);
+              });
+            }
+          });
+        }
+
+        setProducts(mergedProducts);
+        try {
+          localStorage.setItem('aeon_products', JSON.stringify(mergedProducts));
+        } catch (e) {}
+      } else {
+        // Collection is empty in Cloud Firestore: Seed initial products into healthcare_products collection
+        const localSaved = getStorage('aeon_products', initialProducts);
+        const seedList = (Array.isArray(localSaved) && localSaved.length > 0) ? localSaved : initialProducts;
+        setProducts(seedList);
+        try {
+          localStorage.setItem('aeon_products', JSON.stringify(seedList));
+        } catch (e) {}
+
+        seedList.forEach(prod => {
+          if (prod && prod.id) {
+            setDoc(doc(db, 'healthcare_products', String(prod.id)), prod).catch(err => {
+              console.error(`Error seeding product ${prod.id}:`, err);
+            });
+          }
+        });
+      }
+    }, (err) => {
+      console.warn('Firestore products collection sync warning:', err);
+    });
+    unsubscribes.push(unsubProducts);
+
     syncDoc('aeon_customers', setCustomers, initialCustomers);
     syncDoc('aeon_orders', setOrders, initialOrders);
     syncDoc('aeon_discounts', setDiscounts, initialDiscounts);
@@ -467,13 +538,9 @@ export const AppProvider = ({ children }) => {
     syncDoc('aeon_approved_staff', setApprovedStaff, initialApprovedStaff);
     syncDoc('aeon_pending_requests', setPendingRequests, []);
 
-    // Allow database writes 300ms after initializing listeners
-    const timer = setTimeout(() => {
-      isInitialSyncDone.current = true;
-    }, 300);
+    isInitialSyncDone.current = true;
 
     return () => {
-      clearTimeout(timer);
       unsubscribes.forEach(unsub => unsub());
     };
   }, []);
@@ -801,38 +868,65 @@ export const AppProvider = ({ children }) => {
     }));
   };
 
-  // Product CRUD & Batch Import Actions
+  // Product CRUD & Batch Import Actions (Individual Documents in healthcare_products Firestore Collection)
   const addProduct = (prodData) => {
+    const newId = prodData.id || `p_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const newProduct = { ...prodData, id: newId };
+
     setProducts(prev => {
-      const newProduct = {
-        id: prodData.id || `p_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        ...prodData
-      };
-      const updated = [newProduct, ...prev];
-      saveKey('aeon_products', updated);
+      const updated = [newProduct, ...prev.filter(p => p.id !== newId)];
+      try { localStorage.setItem('aeon_products', JSON.stringify(updated)); } catch (e) {}
       return updated;
     });
+
+    if (db) {
+      setDoc(doc(db, 'healthcare_products', String(newId)), newProduct).catch(err => {
+        console.error(`Error adding product ${newId} to Firestore:`, err);
+      });
+    }
   };
 
   const updateProduct = (updatedProd) => {
+    if (!updatedProd || !updatedProd.id) return;
+    const prodId = String(updatedProd.id);
+
     setProducts(prev => {
-      const updated = prev.map(p => p.id === updatedProd.id ? { ...p, ...updatedProd } : p);
-      saveKey('aeon_products', updated);
+      const updated = prev.map(p => String(p.id) === prodId ? { ...p, ...updatedProd } : p);
+      try { localStorage.setItem('aeon_products', JSON.stringify(updated)); } catch (e) {}
       return updated;
     });
+
+    if (db) {
+      setDoc(doc(db, 'healthcare_products', prodId), updatedProd, { merge: true }).catch(err => {
+        console.error(`Error updating product ${prodId} in Firestore:`, err);
+      });
+    }
   };
 
   const deleteProduct = (id) => {
+    if (!id) return;
+    const prodId = String(id);
+
     setProducts(prev => {
-      const updated = prev.filter(p => p.id !== id);
-      saveKey('aeon_products', updated);
+      const updated = prev.filter(p => String(p.id) !== prodId);
+      try { localStorage.setItem('aeon_products', JSON.stringify(updated)); } catch (e) {}
       return updated;
     });
+
+    if (db) {
+      deleteDoc(doc(db, 'healthcare_products', prodId)).catch(err => {
+        console.error(`Error deleting product ${prodId} from Firestore:`, err);
+      });
+    }
   };
 
   const importProducts = (newProductsList) => {
+    if (!Array.isArray(newProductsList) || newProductsList.length === 0) return;
+
     setProducts(prev => {
       const updatedList = [...prev];
+      const toWrite = [];
+
       newProductsList.forEach(newProd => {
         const existingIndex = updatedList.findIndex(
           p => (p.sku && newProd.sku && String(p.sku).toLowerCase() === String(newProd.sku).toLowerCase()) ||
@@ -849,11 +943,121 @@ export const AppProvider = ({ children }) => {
         } else {
           updatedList.unshift(prodWithId);
         }
+        toWrite.push(prodWithId);
       });
 
-      saveKey('aeon_products', updatedList);
+      try { localStorage.setItem('aeon_products', JSON.stringify(updatedList)); } catch (e) {}
+
+      if (db) {
+        toWrite.forEach(prod => {
+          setDoc(doc(db, 'healthcare_products', String(prod.id)), prod, { merge: true }).catch(err => {
+            console.error(`Error importing product ${prod.id} to Firestore:`, err);
+          });
+        });
+      }
+
       return updatedList;
     });
+  };
+
+  // Wishlist actions
+  const toggleWishlist = (productId) => {
+    setWishlist(prev => {
+      let updated;
+      if (prev.includes(productId)) {
+        updated = prev.filter(id => id !== productId);
+      } else {
+        updated = [...prev, productId];
+      }
+      try { localStorage.setItem('aeon_wishlist', JSON.stringify(updated)); } catch (e) {}
+      return updated;
+    });
+  };
+
+  // Address Book actions
+  const addUserAddress = (newAddr) => {
+    setUserAddresses(prev => {
+      const id = `addr_${Date.now()}`;
+      const addrWithId = { ...newAddr, id, isDefault: prev.length === 0 || newAddr.isDefault };
+      let updated = [...prev];
+      if (addrWithId.isDefault) {
+        updated = updated.map(a => ({ ...a, isDefault: false }));
+      }
+      updated.push(addrWithId);
+      saveKey('aeon_user_addresses', updated);
+      return updated;
+    });
+  };
+
+  const updateUserAddress = (updatedAddr) => {
+    setUserAddresses(prev => {
+      let updated = prev.map(a => {
+        if (a.id === updatedAddr.id) {
+          return updatedAddr;
+        }
+        if (updatedAddr.isDefault) {
+          return { ...a, isDefault: false };
+        }
+        return a;
+      });
+      saveKey('aeon_user_addresses', updated);
+      return updated;
+    });
+  };
+
+  const deleteUserAddress = (id) => {
+    setUserAddresses(prev => {
+      const updated = prev.filter(a => a.id !== id);
+      if (updated.length > 0 && !updated.some(a => a.isDefault)) {
+        updated[0].isDefault = true;
+      }
+      saveKey('aeon_user_addresses', updated);
+      return updated;
+    });
+  };
+
+  // Lead / Service callback submission
+  const submitLead = (payload) => {
+    const newLead = {
+      id: `l_${Date.now()}`,
+      name: payload.name,
+      phone: payload.phone,
+      pincode: payload.pincode || '600089',
+      need: payload.need || 'General Inquiry',
+      date: new Date().toISOString().split('T')[0],
+      status: 'new'
+    };
+    setLeads(prev => {
+      const updated = [newLead, ...prev];
+      saveKey('aeon_leads', updated);
+      return updated;
+    });
+    return newLead;
+  };
+
+  // CSV Export utility
+  const exportToCSV = (filename, dataArray) => {
+    if (!Array.isArray(dataArray) || dataArray.length === 0) return;
+    const sample = dataArray[0];
+    const headers = Object.keys(sample).filter(k => typeof sample[k] !== 'object');
+    const csvRows = [];
+    csvRows.push(headers.join(','));
+    for (const row of dataArray) {
+      const values = headers.map(header => {
+        const val = row[header];
+        const escaped = ('' + (val ?? '')).replace(/"/g, '""');
+        return `"${escaped}"`;
+      });
+      csvRows.push(values.join(','));
+    }
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -868,7 +1072,9 @@ export const AppProvider = ({ children }) => {
       layout, setLayout, updateLayout, resetLayout,
       cart, addToCart, removeFromCart, updateCartQty, clearCart,
       analytics, activeUtm, trackPageView, notificationLogs, triggerOrderNotification,
-      leads, setLeads, resetLeads,
+      leads, setLeads, submitLead, resetLeads,
+      userAddresses, addUserAddress, updateUserAddress, deleteUserAddress,
+      wishlist, toggleWishlist, exportToCSV,
       resetAllStoreData,
       userRole, setUserRole,
       approvedStaff, pendingRequests, requestStaffAccess, approveStaffRequest, rejectStaffRequest, removeApprovedStaff

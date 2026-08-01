@@ -1,20 +1,24 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../../context/AppContext';
-import { Star, ShieldAlert, Truck, ChevronRight, HelpCircle, Phone, ArrowLeft, Search, ShoppingBag } from 'lucide-react';
+import { 
+  Star, ShieldAlert, Truck, ChevronRight, HelpCircle, Phone, ArrowLeft, 
+  Search, ShoppingBag, Heart, Share2, Copy, Check, Video, MapPin, CheckCircle2 
+} from 'lucide-react';
 
 export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
-  const { products, addToCart } = useContext(AppContext);
+  const { products, addToCart, wishlist, toggleWishlist } = useContext(AppContext);
   const [product, setProduct] = useState(null);
   
   // States
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState('');
-  const [activeTabTab, setActiveTabTab] = useState('specs'); // specs | reviews | qa
-  const [reviewName, setReviewName] = useState('');
-  const [reviewRating, setReviewRating] = useState(5);
-  const [reviewText, setReviewText] = useState('');
-  const [localReviews, setLocalReviews] = useState([]);
+  const [activeTabTab, setActiveTabTab] = useState('specs'); // specs | video | qa
   const [successMsg, setSuccessMsg] = useState('');
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  // Pincode Estimator State
+  const [checkPincode, setCheckPincode] = useState('600089');
+  const [pincodeResult, setPincodeResult] = useState({ checked: true, isChennai: true, text: '⚡ Express Doorstep Delivery (1-2 Days) Available in Chennai' });
 
   // Interactive Lens Zoom and Gallery states
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -257,7 +261,44 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
             </div>
           )}
 
-          {/* Delivery Checker & Stock availability */}
+          {/* Pincode Serviceability Estimator */}
+          <div className="card" style={{ padding: '1rem', marginBottom: '1.5rem', backgroundColor: '#f8fafc', border: '1px dashed #cbd5e1' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <MapPin size={16} style={{ color: 'hsl(var(--primary))' }} /> Check Delivery & Pincode Serviceability:
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input 
+                type="text" 
+                value={checkPincode}
+                onChange={(e) => setCheckPincode(e.target.value)}
+                placeholder="Enter Pincode (e.g. 600089)"
+                style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', border: '1px solid hsl(var(--border))', fontSize: '0.85rem', width: '160px' }}
+              />
+              <button 
+                className="btn btn-secondary" 
+                style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}
+                onClick={() => {
+                  const p = checkPincode.trim();
+                  if (p.startsWith('600') || p.startsWith('601')) {
+                    setPincodeResult({ checked: true, isChennai: true, text: '⚡ Express Same-Day / 24-hr Setup Available in Chennai Hub!' });
+                  } else {
+                    setPincodeResult({ checked: true, isChennai: false, text: '🚚 Standard Insured Pan-India Shipping (3-5 Business Days)' });
+                  }
+                }}
+              >
+                Check
+              </button>
+            </div>
+            {pincodeResult.checked && (
+              <div style={{ marginTop: '0.6rem', fontSize: '0.8rem', color: pincodeResult.isChennai ? 'hsl(var(--primary))' : '#475569', fontWeight: '600' }}>
+                {pincodeResult.text}
+              </div>
+            )}
+          </div>
+
+          {/* Delivery & Stock availability info */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
             <div>
               Status: {product.stock > 0 ? (
@@ -269,7 +310,7 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
               )}
             </div>
             <div style={{ color: 'hsl(var(--text-muted))', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <Truck size={14} /> 1-2 Days Shipping Chennai
+              <Truck size={14} /> GST Included
             </div>
           </div>
 
@@ -280,7 +321,7 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', border: '1px solid hsl(var(--border))', borderRadius: '8px', overflow: 'hidden' }}>
               <button 
                 onClick={() => setQuantity(q => Math.max(1, q - 1))}
@@ -307,6 +348,48 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
             >
               <ShoppingBag size={18} /> {product.stock === 0 && product.allowBackorder ? 'Order on Backorder' : 'Add to Cart'}
             </button>
+
+            {/* Wishlist Button */}
+            <button
+              onClick={() => toggleWishlist(product.id)}
+              className="btn btn-outline"
+              style={{ padding: '0.75rem', borderColor: wishlist.includes(product.id) ? '#ef4444' : 'hsl(var(--border))', color: wishlist.includes(product.id) ? '#ef4444' : 'inherit' }}
+              title={wishlist.includes(product.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+            >
+              <Heart size={20} fill={wishlist.includes(product.id) ? '#ef4444' : 'none'} />
+            </button>
+          </div>
+
+          {/* Social Share Bar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', borderTop: '1px solid hsl(var(--border))', paddingTop: '1rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'hsl(var(--text-muted))', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <Share2 size={14} /> Share Product:
+            </span>
+            <button 
+              className="btn btn-ghost" 
+              style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', color: '#25D366' }}
+              onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Check out ${product.title} on AeonCare: ${window.location.href}`)}`, '_blank')}
+            >
+              WhatsApp
+            </button>
+            <button 
+              className="btn btn-ghost" 
+              style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', color: '#1877F2' }}
+              onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')}
+            >
+              Facebook
+            </button>
+            <button 
+              className="btn btn-ghost" 
+              style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                setCopiedLink(true);
+                setTimeout(() => setCopiedLink(false), 3000);
+              }}
+            >
+              {copiedLink ? <Check size={14} style={{ color: 'hsl(var(--success))' }} /> : <Copy size={14} />} {copiedLink ? 'Copied!' : 'Copy Link'}
+            </button>
           </div>
 
           {/* Help Block */}
@@ -324,10 +407,11 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
         </div>
       </div>
 
-      {/* Tabs segment: Specifications, QA */}
+      {/* Tabs segment: Specifications, Video, QA */}
       <div style={{ borderBottom: '1px solid hsl(var(--border))', display: 'flex', gap: '2rem', marginBottom: '1.5rem' }}>
         {[
           { id: 'specs', label: 'Specifications & Features' },
+          { id: 'video', label: 'Video Demo Walkthrough' },
           { id: 'qa', label: 'Q&As' }
         ].map(tab => (
           <button
@@ -376,6 +460,22 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
           </div>
         )}
 
+        {activeTabTab === 'video' && (
+          <div className="animate-fade-in" style={{ maxWidth: '750px' }}>
+            <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px', border: '1px solid hsl(var(--border))' }}>
+              <iframe
+                title="Product Video Demo"
+                src={product.videoUrl || 'https://www.youtube.com/embed/dQw4w9WgXcQ'}
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
+                allowFullScreen
+              />
+            </div>
+            <p style={{ fontSize: '0.85rem', color: 'hsl(var(--text-muted))', marginTop: '0.75rem' }}>
+              * Watch complete video demonstration, assembly guidelines, and operation controls.
+            </p>
+          </div>
+        )}
+
         {activeTabTab === 'qa' && (
           <div className="animate-fade-in">
             {product.qa && product.qa.length > 0 ? (
@@ -394,6 +494,29 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
             )}
           </div>
         )}
+      </div>
+
+      {/* Frequently Bought Together / Bundle Recommendations */}
+      <div style={{ borderTop: '2px solid hsl(var(--border))', paddingTop: '2.5rem', marginTop: '3rem' }}>
+        <h3 style={{ fontSize: '1.3rem', fontWeight: '800', marginBottom: '1.25rem', color: '#1e293b' }}>Frequently Bought Together</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
+          {products.filter(p => p.id !== product.id).slice(0, 3).map(rel => (
+            <div key={rel.id} className="card card-hover" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div onClick={() => setSelectedProductId(rel.id)} style={{ cursor: 'pointer' }}>
+                <img src={rel.image} alt={rel.title} style={{ width: '100%', height: '140px', objectFit: 'contain', marginBottom: '0.75rem' }} />
+                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b', marginBottom: '0.5rem', lineHeight: '1.3' }}>{rel.title}</div>
+                <div style={{ fontSize: '0.95rem', fontWeight: '800', color: 'hsl(var(--primary))' }}>₹{rel.price.toLocaleString('en-IN')}</div>
+              </div>
+              <button 
+                className="btn btn-outline" 
+                style={{ marginTop: '0.75rem', width: '100%', padding: '0.4rem', fontSize: '0.8rem' }}
+                onClick={() => addToCart({ id: rel.id, title: rel.title, price: rel.price, image: rel.image, qty: 1 })}
+              >
+                + Add Bundle
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
     </div>

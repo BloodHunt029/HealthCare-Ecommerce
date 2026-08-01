@@ -1,9 +1,9 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
-import { UserPlus, Search, PhoneCall, ShoppingCart, User, PlusCircle, Check } from 'lucide-react';
+import { UserPlus, Search, PhoneCall, ShoppingCart, User, PlusCircle, Check, Download } from 'lucide-react';
 
 export default function Customers() {
-  const { customers, setCustomers, products, createOrder } = useContext(AppContext);
+  const { customers, setCustomers, products, createOrder, exportToCSV } = useContext(AppContext);
   
   // States
   const [searchQuery, setSearchQuery] = useState('');
@@ -109,14 +109,19 @@ export default function Customers() {
     <div className="animate-fade-in">
       
       {/* Title */}
-      <div style={{ display: 'flex', justifyContext: 'space-between', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: '800' }}>Customers CRM</h1>
           <p style={{ color: 'hsl(var(--text-muted))', fontSize: '0.875rem' }}>View client total spent, segments, and record manual phone-in sales.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsCreatingManual(true)}>
-          <UserPlus size={16} /> Register Phone Order
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }} onClick={() => exportToCSV('customers_list', customers)}>
+            <Download size={16} /> Export CSV
+          </button>
+          <button className="btn btn-primary" onClick={() => setIsCreatingManual(true)}>
+            <UserPlus size={16} /> Register Phone Order
+          </button>
+        </div>
       </div>
 
       {successMsg && (

@@ -9,6 +9,7 @@ import Services from './components/Storefront/Services';
 import BlogFAQ from './components/Storefront/BlogFAQ';
 import UserPortal from './components/Storefront/UserPortal';
 import SEOManager from './components/Storefront/SEOManager';
+import RequestCallbackWidget from './components/Storefront/RequestCallbackWidget';
 
 // Admin Imports
 import Dashboard from './components/Admin/Dashboard';
@@ -165,6 +166,9 @@ function AppContent() {
 
             {activeTab === 'checkout' && <Checkout setActiveTab={setActiveTab} />}
           </main>
+
+          {/* Request Callback Floating Widget */}
+          <RequestCallbackWidget />
 
           {/* WhatsApp floating widget */}
           <div 

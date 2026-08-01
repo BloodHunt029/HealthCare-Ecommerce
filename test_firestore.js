@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCDBRZKkcrlvHp5Hkf9zautKWVc_pZuG-U",
@@ -15,7 +15,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 async function checkDocs() {
-  const keys = ['aeon_settings', 'aeon_layout', 'aeon_products'];
+  const keys = ['aeon_settings', 'aeon_layout'];
   for (const key of keys) {
     try {
       const docRef = doc(db, 'healthcare_store', key);
@@ -23,7 +23,6 @@ async function checkDocs() {
       if (snap.exists()) {
         console.log(`\n================ DOCUMENT: ${key} ================`);
         console.log("UpdatedAt:", snap.data().updatedAt);
-        console.log("Data:", JSON.stringify(snap.data().data, null, 2));
       } else {
         console.log(`\n================ DOCUMENT: ${key} DOES NOT EXIST IN FIRESTORE ================`);
       }
@@ -31,7 +30,20 @@ async function checkDocs() {
       console.error(`Error fetching ${key}:`, err.message || err);
     }
   }
+
+  try {
+    console.log(`\n================ COLLECTION: healthcare_products ================`);
+    const querySnap = await getDocs(collection(db, 'healthcare_products'));
+    console.log(`Found ${querySnap.size} individual product documents in healthcare_products collection:`);
+    querySnap.forEach(d => {
+      console.log(` - Document ID: ${d.id} | Title: "${d.data().title}" | Price: ₹${d.data().price}`);
+    });
+  } catch (err) {
+    console.error('Error fetching healthcare_products collection:', err.message || err);
+  }
+
   process.exit(0);
 }
 
 checkDocs();
+

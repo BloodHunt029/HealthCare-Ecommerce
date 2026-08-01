@@ -46,19 +46,32 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
     }
   }, [initialSearchVal]);
 
-  const categories = ['All', ...Array.from(new Set([
-    ...(layout?.collectionsList || []).map(c => c.name),
-    ...products.map(p => p.category).filter(Boolean)
-  ]))];
+  const [selectedSubCategory, setSelectedSubCategory] = useState('All');
+
+  const categories = ['All', 'Home Care', 'Mobility Aid', 'Rehab & Ortho', 'Medical Devices', 'Surgicals & PPE', 'Hospital Supplies', 'Mother & Baby Care'];
+  
+  const subCategoryMap = {
+    'Home Care': ['All', 'Hospital Beds', 'Bed Accessories', 'Diapers & Pads', 'Bathroom Assist'],
+    'Mobility Aid': ['All', 'Wheelchairs', 'Commode Wheelchairs', 'Walkers & Crutches', 'Transfer Aids'],
+    'Rehab & Ortho': ['All', 'Head & Neck', 'Back & Abdomen', 'Leg & Foot', 'Fitness'],
+    'Medical Devices': ['All', 'BP Monitor', 'Glucometer', 'Thermometer', 'Stethoscope', 'Respiratory Care'],
+    'Surgicals & PPE': ['All', 'Masks & Gloves', 'Disinfectants', 'First Aid'],
+    'Hospital Supplies': ['All', 'Coats & Scrubs', 'Lab Supplies', 'Stretchers'],
+    'Mother & Baby Care': ['All']
+  };
+
   const brands = ['All', 'CareQuip', 'Vissco', 'Accu-Chek', 'Seni', 'Dyna', 'AEONCARE'];
 
   // Category Description Maps matching AeonCare DTC theme
   const categoryDescriptions = {
     'All': 'Discover our comprehensive catalog of premium medical and home-care products. Explore mobility solutions, diagnostics monitors, hospital cots and daily patient hygiene support.',
-    'Home Care': 'Discover a wide range of hospital beds for home and medical use at Aeoncare.in. Explore adjustable, electric, and manual beds designed for maximum comfort, safety, and care. Fast delivery and trusted support.',
-    'Mobility Aid': 'Find lightweight folding transit wheelchairs, commode wheelchairs, and walking frames engineered for elderly mobility assistance and post-hospital discharge care.',
-    'Medical Devices': 'Track patient blood pressure, body temperatures, and heart metrics with certified Intellisense upper-arm cuffs, infrared thermometers, and pulse diagnostic devices.',
-    'Surgicals & PPE': 'Acquire certified high-filtration face masks, disposable latex/nitrile gloves, isolation gowns, and clinical disinfectants for home care sanitation.'
+    'Home Care': 'Discover hospital beds, bed accessories, incontinence diapers, and bathroom assist safety handles for patient comfort.',
+    'Mobility Aid': 'Find lightweight folding wheelchairs, commode chairs, walkers, and transfer aids engineered for mobility assistance.',
+    'Rehab & Ortho': 'Explore neck braces, lumbar supports, shoulder immobilizers, and rehabilitation aids.',
+    'Medical Devices': 'Track blood pressure, body temperature, blood glucose, and respiratory oxygen metrics with certified monitors.',
+    'Surgicals & PPE': 'Acquire certified high-filtration face masks, nitrile gloves, isolation gowns, and disinfectants.',
+    'Hospital Supplies': 'Professional lab scrubs, clinical linen, and patient transfer stretchers.',
+    'Mother & Baby Care': 'Gentle maternal hygiene, postpartum support, and infant care equipment.'
   };
 
   // Filter logic
