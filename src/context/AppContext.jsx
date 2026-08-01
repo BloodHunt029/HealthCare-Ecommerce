@@ -477,6 +477,32 @@ export const AppProvider = ({ children }) => {
       unsubscribes.push(unsub);
     };
 
+    // Realtime Cloud Firestore listener for full product catalog
+    syncDoc('aeon_products', (cloudProducts) => {
+      if (Array.isArray(cloudProducts) && cloudProducts.length > 0) {
+        const localSaved = getStorage('aeon_products', []);
+        const combinedMap = new Map();
+        
+        // 1. Initial seed products (imported catalog)
+        initialProducts.forEach(p => p && p.id && combinedMap.set(String(p.id), p));
+        
+        // 2. Cloud products from Firestore (overrides with latest admin updates)
+        cloudProducts.forEach(p => p && p.id && combinedMap.set(String(p.id), p));
+        
+        // 3. Local saved products (if admin created items offline locally)
+        if (Array.isArray(localSaved)) {
+          localSaved.forEach(p => p && p.id && combinedMap.set(String(p.id), p));
+        }
+
+        const merged = Array.from(combinedMap.values());
+        setProducts(merged);
+        try { localStorage.setItem('aeon_products', JSON.stringify(merged)); } catch (e) {}
+      } else {
+        setProducts(initialProducts);
+        saveKey('aeon_products', initialProducts);
+      }
+    }, initialProducts);
+
     // Realtime Cloud Firestore collection listener for individual product documents
     const unsubProducts = onSnapshot(collection(db, 'healthcare_products'), (querySnap) => {
       let cloudProducts = [];
@@ -485,41 +511,14 @@ export const AppProvider = ({ children }) => {
       });
 
       if (cloudProducts.length > 0) {
-        // Merge any locally saved products from local storage that are missing in cloud
-        const localSaved = getStorage('aeon_products', []);
-        let mergedProducts = [...cloudProducts];
-
-        if (Array.isArray(localSaved) && localSaved.length > 0) {
-          const cloudIds = new Set(cloudProducts.map(p => String(p.id)));
-          localSaved.forEach(localItem => {
-            if (localItem && localItem.id && !cloudIds.has(String(localItem.id))) {
-              mergedProducts.push(localItem);
-              setDoc(doc(db, 'healthcare_products', String(localItem.id)), localItem).catch(err => {
-                console.error(`Migration error for product ${localItem.id}:`, err);
-              });
-            }
-          });
-        }
-
-        setProducts(mergedProducts);
-        try {
-          localStorage.setItem('aeon_products', JSON.stringify(mergedProducts));
-        } catch (e) {}
-      } else {
-        // Collection is empty in Cloud Firestore: Seed initial products into healthcare_products collection
-        const localSaved = getStorage('aeon_products', initialProducts);
-        const seedList = (Array.isArray(localSaved) && localSaved.length > 0) ? localSaved : initialProducts;
-        setProducts(seedList);
-        try {
-          localStorage.setItem('aeon_products', JSON.stringify(seedList));
-        } catch (e) {}
-
-        seedList.forEach(prod => {
-          if (prod && prod.id) {
-            setDoc(doc(db, 'healthcare_products', String(prod.id)), prod).catch(err => {
-              console.error(`Error seeding product ${prod.id}:`, err);
-            });
-          }
+        setProducts(prev => {
+          const combinedMap = new Map();
+          initialProducts.forEach(p => p && p.id && combinedMap.set(String(p.id), p));
+          prev.forEach(p => p && p.id && combinedMap.set(String(p.id), p));
+          cloudProducts.forEach(p => p && p.id && combinedMap.set(String(p.id), p));
+          const mergedProducts = Array.from(combinedMap.values());
+          try { localStorage.setItem('aeon_products', JSON.stringify(mergedProducts)); } catch (e) {}
+          return mergedProducts;
         });
       }
     }, (err) => {
@@ -875,7 +874,7 @@ export const AppProvider = ({ children }) => {
 
     setProducts(prev => {
       const updated = [newProduct, ...prev.filter(p => p.id !== newId)];
-      try { localStorage.setItem('aeon_products', JSON.stringify(updated)); } catch (e) {}
+      saveKey('aeon_products', updated);
       return updated;
     });
 
@@ -892,7 +891,7 @@ export const AppProvider = ({ children }) => {
 
     setProducts(prev => {
       const updated = prev.map(p => String(p.id) === prodId ? { ...p, ...updatedProd } : p);
-      try { localStorage.setItem('aeon_products', JSON.stringify(updated)); } catch (e) {}
+      saveKey('aeon_products', updated);
       return updated;
     });
 
@@ -909,7 +908,7 @@ export const AppProvider = ({ children }) => {
 
     setProducts(prev => {
       const updated = prev.filter(p => String(p.id) !== prodId);
-      try { localStorage.setItem('aeon_products', JSON.stringify(updated)); } catch (e) {}
+      saveKey('aeon_products', updated);
       return updated;
     });
 
@@ -946,7 +945,7 @@ export const AppProvider = ({ children }) => {
         toWrite.push(prodWithId);
       });
 
-      try { localStorage.setItem('aeon_products', JSON.stringify(updatedList)); } catch (e) {}
+      saveKey('aeon_products', updatedList);
 
       if (db) {
         toWrite.forEach(prod => {

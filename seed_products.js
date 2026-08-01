@@ -1,5 +1,11 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const firebaseConfig = {
   apiKey: "AIzaSyCDBRZKkcrlvHp5Hkf9zautKWVc_pZuG-U",
@@ -14,7 +20,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const initialProducts = [
+// Read importedProducts.json
+let importedProductsData = [];
+try {
+  const jsonPath = path.join(__dirname, 'src', 'data', 'importedProducts.json');
+  if (fs.existsSync(jsonPath)) {
+    const raw = fs.readFileSync(jsonPath, 'utf8');
+    importedProductsData = JSON.parse(raw);
+  }
+} catch (err) {
+  console.warn("Notice: could not read importedProducts.json:", err.message);
+}
+
+const sampleProducts = [
   {
     id: 'p1',
     title: 'Premium Electric Hospital Bed (5 Function)',
@@ -152,13 +170,33 @@ const initialProducts = [
   }
 ];
 
+const combinedMap = new Map();
+(Array.isArray(importedProductsData) ? importedProductsData : []).forEach(p => p && p.id && combinedMap.set(String(p.id), p));
+sampleProducts.forEach(p => p && p.id && combinedMap.set(String(p.id), p));
+
+const allProducts = Array.from(combinedMap.values());
+
 async function seed() {
-  console.log("Seeding products to healthcare_products Firestore collection...");
-  for (const p of initialProducts) {
-    await setDoc(doc(db, 'healthcare_products', p.id), p);
-    console.log(`Successfully seeded product document: healthcare_products/${p.id}`);
+  console.log(`Seeding ${allProducts.length} total products to Cloud Firestore...`);
+  
+  // 1. Write full array to healthcare_store/aeon_products
+  await setDoc(doc(db, 'healthcare_store', 'aeon_products'), {
+    data: allProducts,
+    updatedAt: new Date().toISOString()
+  });
+  console.log(`✓ Updated healthcare_store/aeon_products with ${allProducts.length} products.`);
+
+  // 2. Write individual product docs in healthcare_products collection
+  let count = 0;
+  for (const p of allProducts) {
+    await setDoc(doc(db, 'healthcare_products', String(p.id)), p, { merge: true });
+    count++;
+    if (count % 25 === 0 || count === allProducts.length) {
+      console.log(`✓ Seeded ${count}/${allProducts.length} product documents to healthcare_products collection.`);
+    }
   }
-  console.log("Seeding finished successfully!");
+  
+  console.log("\n🎉 Full Cloud Firestore Seeding Finished Successfully!");
   process.exit(0);
 }
 
