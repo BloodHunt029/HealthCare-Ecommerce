@@ -217,12 +217,10 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
                   if (tab.id === 'home' || tab.id === 'services' || tab.id === 'blog' || tab.id === 'userPortal') {
                     setActiveTab(tab.id);
                   } else {
-                    setActiveTab('catalog');
                     const catTarget = tab.collection || 'All';
-                    setTimeout(() => {
-                      const event = new CustomEvent('selectCategory', { detail: catTarget });
-                      window.dispatchEvent(event);
-                    }, 50);
+                    if (typeof window !== 'undefined') window.__pendingCategory = catTarget;
+                    setActiveTab('catalog');
+                    window.dispatchEvent(new CustomEvent('selectCategory', { detail: catTarget }));
                   }
                 };
 

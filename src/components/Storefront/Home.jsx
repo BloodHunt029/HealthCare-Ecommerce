@@ -188,11 +188,10 @@ export default function Home({ setActiveTab, setSelectedProductId, layoutOverrid
                     width: isMobileView ? '105px' : '140px'
                   }}
                   onClick={() => {
+                    if (typeof window !== 'undefined') window.__pendingCategory = col.name;
+                    setSelectedProductId(null);
                     setActiveTab('catalog');
-                    setTimeout(() => {
-                      const event = new CustomEvent('selectCategory', { detail: col.name });
-                      window.dispatchEvent(event);
-                    }, 50);
+                    window.dispatchEvent(new CustomEvent('selectCategory', { detail: col.name }));
                   }}
                 >
                   <div 
@@ -371,11 +370,10 @@ export default function Home({ setActiveTab, setSelectedProductId, layoutOverrid
                   <button 
                     className="btn btn-outline" 
                     onClick={() => {
+                      if (typeof window !== 'undefined') window.__pendingCategory = collBlock.category;
+                      setSelectedProductId(null);
                       setActiveTab('catalog');
-                      setTimeout(() => {
-                        const event = new CustomEvent('selectCategory', { detail: collBlock.category });
-                        window.dispatchEvent(event);
-                      }, 50);
+                      window.dispatchEvent(new CustomEvent('selectCategory', { detail: collBlock.category }));
                     }}
                     style={{ whiteSpace: 'nowrap' }}
                   >
@@ -666,7 +664,15 @@ export default function Home({ setActiveTab, setSelectedProductId, layoutOverrid
                     </div>
                   ))}
                 </div>
-                <button className="btn btn-outline" onClick={() => setActiveTab('catalog')}>
+                <button 
+                  className="btn btn-outline" 
+                  onClick={() => {
+                    if (typeof window !== 'undefined') window.__pendingCategory = targetCategory;
+                    setSelectedProductId(null);
+                    setActiveTab('catalog');
+                    window.dispatchEvent(new CustomEvent('selectCategory', { detail: targetCategory }));
+                  }}
+                >
                   View Full Category
                 </button>
               </div>

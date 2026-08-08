@@ -4,7 +4,9 @@ import { Search, Star, ShoppingCart, X, LayoutGrid, List, SlidersHorizontal } fr
 
 export default function Catalog({ selectedProductId, setSelectedProductId, initialSearchVal }) {
   const { products, addToCart, layout } = useContext(AppContext);
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    return (typeof window !== 'undefined' && window.__pendingCategory) ? window.__pendingCategory : 'All';
+  });
   const [priceFilter, setPriceFilter] = useState('All');
   const [selectedBrand, setSelectedBrand] = useState('All');
   const [sortBy, setSortBy] = useState('popular');
@@ -15,6 +17,9 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
   // Handle incoming searches or category selections from other pages
   useEffect(() => {
     const handleSelectCategory = (e) => {
+      if (typeof window !== 'undefined') {
+        window.__pendingCategory = e.detail;
+      }
       setSelectedCategory(e.detail);
       setSearchQuery('');
       setPriceFilter('All');
@@ -122,6 +127,7 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
   const [quickViewProduct, setQuickViewProduct] = useState(null);
 
   const clearAllFilters = () => {
+    if (typeof window !== 'undefined') window.__pendingCategory = 'All';
     setSelectedCategory('All');
     setPriceFilter('All');
     setSelectedBrand('All');
