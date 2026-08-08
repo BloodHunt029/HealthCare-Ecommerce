@@ -59,6 +59,7 @@ export default function OnlineStore() {
   const [colWithImageCategory, setColWithImageCategory] = useState(layout.colWithImageCategory || 'Mobility Aid');
   const [richTextHeading, setRichTextHeading] = useState(layout.richTextHeading || '');
   const [richTextBody, setRichTextBody] = useState(layout.richTextBody || '');
+  const [productsPerPage, setProductsPerPage] = useState(layout.productsPerPage || 20);
   
   // Section Sizes & Spacing State
   const [sectionSizes, setSectionSizes] = useState(layout.sectionSizes || {});
@@ -102,6 +103,7 @@ export default function OnlineStore() {
         setColWithImageCategory(layout.colWithImageCategory || 'Mobility Aid');
         setRichTextHeading(layout.richTextHeading || '');
         setRichTextBody(layout.richTextBody || '');
+        setProductsPerPage(layout.productsPerPage || 20);
         setSectionSizes(layout.sectionSizes || {});
       }
     }
@@ -406,6 +408,7 @@ export default function OnlineStore() {
       colWithImageCategory,
       richTextHeading,
       richTextBody,
+      productsPerPage: Number(productsPerPage) || 20,
       navigationTabs
     });
     alert('Theme settings saved and synced successfully to the live storefront!');
@@ -667,6 +670,15 @@ export default function OnlineStore() {
                       <ChevronRight size={14} style={{ color: '#94a3b8' }} />
                     </div>
                   </div>
+
+                  <button 
+                    type="button"
+                    onClick={() => setSelectedSection('catalog_pagination')}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '0.65rem', border: '1px solid #e2e8f0', borderRadius: '6px', backgroundColor: selectedSection === 'catalog_pagination' ? '#eff6ff' : '#ffffff', cursor: 'pointer', textAlign: 'left', marginTop: '0.35rem' }}
+                  >
+                    <span style={{ fontSize: '0.8rem', fontWeight: '600', color: selectedSection === 'catalog_pagination' ? '#2563eb' : '#334155' }}>Catalog Pagination ({productsPerPage} / page)</span>
+                    <ChevronRight size={14} style={{ color: '#94a3b8' }} />
+                  </button>
                 </div>
               </div>
 
@@ -831,7 +843,58 @@ export default function OnlineStore() {
 
               <div style={{ padding: '1.25rem', flex: 1, overflowY: 'auto' }}>
                 
-                {/* Colors preset */}
+                {/* Palette & Theme Presets */}
+                {selectedSection === 'catalog_pagination' && (
+                  <div>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: '800', marginBottom: '0.5rem', color: '#1e293b' }}>Catalog Pagination & Products Per Page</h4>
+                    <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '1.25rem', lineHeight: '1.4' }}>
+                      Choose how many products display per page on your storefront catalog before pagination controls appear.
+                    </p>
+                    
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: '700' }}>Products Per Page (Rows Preset)</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1rem' }}>
+                        {[
+                          { count: 20, label: '20 Items (5 Rows)' },
+                          { count: 24, label: '24 Items (6 Rows)' },
+                          { count: 40, label: '40 Items (10 Rows)' },
+                          { count: 60, label: '60 Items (15 Rows)' }
+                        ].map(opt => (
+                          <button
+                            key={opt.count}
+                            type="button"
+                            onClick={() => setProductsPerPage(opt.count)}
+                            style={{
+                              padding: '0.6rem',
+                              border: '1px solid',
+                              borderColor: Number(productsPerPage) === opt.count ? '#2563eb' : '#cbd5e1',
+                              backgroundColor: Number(productsPerPage) === opt.count ? '#eff6ff' : '#ffffff',
+                              color: Number(productsPerPage) === opt.count ? '#1d4ed8' : '#334155',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              fontWeight: '700',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Custom Products Per Page</label>
+                      <input 
+                        type="number" 
+                        min={4} 
+                        max={120}
+                        className="form-input"
+                        value={productsPerPage} 
+                        onChange={(e) => setProductsPerPage(Math.max(1, Number(e.target.value)))} 
+                      />
+                    </div>
+                  </div>
+                )}
                 {selectedSection === 'branding' && (
                   <div>
                     <h4 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '1rem', color: '#1e293b' }}>Style Hues Palette</h4>

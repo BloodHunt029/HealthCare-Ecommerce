@@ -326,6 +326,7 @@ const initialStoreSettings = {
 };
 
 const initialLayout = {
+  productsPerPage: 20,
   themeColors: 'teal',
   logoText: 'AeonCare',
   announcementBar: '🚚 Free Express Delivery in Chennai on Orders above ₹2,000!',

@@ -11,8 +11,20 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
   const [selectedBrand, setSelectedBrand] = useState('All');
   const [sortBy, setSortBy] = useState('popular');
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewModeType, setViewModeType] = useState('grid'); // grid | list
-  const [displayPerPage, setDisplayPerPage] = useState('24');
+  const [displayPerPage, setDisplayPerPage] = useState(() => String(layout?.productsPerPage || 20));
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Sync displayPerPage if admin changes layout setting
+  useEffect(() => {
+    if (layout?.productsPerPage) {
+      setDisplayPerPage(String(layout.productsPerPage));
+    }
+  }, [layout?.productsPerPage]);
+
+  // Reset page to 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, selectedBrand, priceFilter, searchQuery, displayPerPage]);
 
   // Handle incoming searches or category selections from other pages
   useEffect(() => {
@@ -136,6 +148,12 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
 
   const hasActiveFilters = selectedCategory !== 'All' || selectedBrand !== 'All' || priceFilter !== 'All' || searchQuery.trim().length > 0;
 
+  const perPage = Math.max(1, Number(displayPerPage) || 20);
+  const totalPages = Math.ceil(sortedProducts.length / perPage) || 1;
+  const startIndex = (currentPage - 1) * perPage;
+  const endIndex = Math.min(startIndex + perPage, sortedProducts.length);
+  const paginatedProducts = sortedProducts.slice(startIndex, startIndex + perPage);
+
   return (
     <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2.5rem 1.5rem', flex: 1 }} className="animate-fade-in">
       
@@ -196,7 +214,7 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
         {/* Left Side: Product Counter & Quick Search */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>
-            Showing 1 - {sortedProducts.length} of {sortedProducts.length} products
+            Showing {sortedProducts.length > 0 ? startIndex + 1 : 0} - {endIndex} of {sortedProducts.length} products
           </span>
           {searchQuery && (
             <span className="badge badge-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -241,9 +259,10 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
               onChange={(e) => setDisplayPerPage(e.target.value)}
               style={{ border: 'none', background: 'transparent', fontSize: '0.8rem', fontWeight: '700', outline: 'none', cursor: 'pointer' }}
             >
-              <option value="24">24 per page</option>
-              <option value="48">48 per page</option>
-              <option value="96">96 per page</option>
+              <option value="20">20 per page (5 rows)</option>
+              <option value="24">24 per page (6 rows)</option>
+              <option value="40">40 per page (10 rows)</option>
+              <option value="60">60 per page (15 rows)</option>
             </select>
           </div>
 
@@ -296,7 +315,7 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
             borderLeft: '1px solid #e2e8f0',
             backgroundColor: '#ffffff'
           }}>
-            {sortedProducts.map(p => {
+            {paginatedProducts.map(p => {
               const discountValue = p.mrp - p.price;
               const hasDiscount = p.mrp > p.price;
               const isBedItem = p.title.toLowerCase().includes('bed') || p.title.toLowerCase().includes('cot') || p.title.toLowerCase().includes('mattress');
@@ -429,6 +448,72 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Pagination Control Bar */}
+        {sortedProducts.length > perPage && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: '600' }}>
+              Page {currentPage} of {totalPages} ({sortedProducts.length} total items)
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+              <button
+                disabled={currentPage <= 1}
+                onClick={() => {
+                  setCurrentPage(p => Math.max(1, p - 1));
+                  window.scrollTo({ top: 200, behavior: 'smooth' });
+                }}
+                className="btn btn-outline"
+                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', opacity: currentPage <= 1 ? 0.5 : 1, cursor: currentPage <= 1 ? 'not-allowed' : 'pointer' }}
+              >
+                ‹ Previous
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2)
+                .map((page, idx, arr) => {
+                  const prev = arr[idx - 1];
+                  const showEllipsis = prev && page - prev > 1;
+                  return (
+                    <React.Fragment key={page}>
+                      {showEllipsis && <span style={{ padding: '0 4px', color: '#94a3b8' }}>...</span>}
+                      <button
+                        onClick={() => {
+                          setCurrentPage(page);
+                          window.scrollTo({ top: 200, behavior: 'smooth' });
+                        }}
+                        style={{
+                          padding: '0.4rem 0.75rem',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          fontWeight: '700',
+                          border: '1px solid',
+                          borderColor: currentPage === page ? 'hsl(var(--primary))' : '#cbd5e1',
+                          backgroundColor: currentPage === page ? 'hsl(var(--primary))' : '#ffffff',
+                          color: currentPage === page ? '#ffffff' : '#334155',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {page}
+                      </button>
+                    </React.Fragment>
+                  );
+                })}
+
+              <button
+                disabled={currentPage >= totalPages}
+                onClick={() => {
+                  setCurrentPage(p => Math.min(totalPages, p + 1));
+                  window.scrollTo({ top: 200, behavior: 'smooth' });
+                }}
+                className="btn btn-outline"
+                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', opacity: currentPage >= totalPages ? 0.5 : 1, cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer' }}
+              >
+                Next ›
+              </button>
+            </div>
           </div>
         )}
       </div>
