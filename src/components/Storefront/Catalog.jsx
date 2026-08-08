@@ -11,6 +11,7 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
   const [selectedBrand, setSelectedBrand] = useState('All');
   const [sortBy, setSortBy] = useState('popular');
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewModeType, setViewModeType] = useState('grid'); // grid | list
   const [displayPerPage, setDisplayPerPage] = useState(() => String(layout?.productsPerPage || 20));
   const [currentPage, setCurrentPage] = useState(1);
 
