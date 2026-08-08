@@ -684,19 +684,52 @@ export const AppProvider = ({ children }) => {
     saveKey('aeon_cart', []);
   };
 
-  // Cart actions
+  // Cart actions with unique cartItemId support
+  const getCartItemId = (item) => {
+    if (!item) return '';
+    if (item.cartItemId) return item.cartItemId;
+    const type = item.type || 'buy';
+    const variant = item.variant ? String(item.variant).replace(/\s+/g, '_') : 'std';
+    return `${item.id}_${type}_${variant}`;
+  };
+
   const addToCart = (product, qty = 1, options = {}) => {
     setCart(prev => {
-      const existing = prev.find(i => i.id === product.id && i.type === (options.type || 'buy'));
-      if (existing) {
-        return prev.map(i => (i.id === product.id && i.type === (options.type || 'buy')) ? { ...i, qty: i.qty + qty } : i);
+      const type = options.type || product.type || 'buy';
+      const variant = product.variant || options.variant || null;
+      const targetCartItemId = `${product.id}_${type}_${variant ? String(variant).replace(/\s+/g, '_') : 'std'}`;
+
+      const existingIndex = prev.findIndex(i => (i.cartItemId || getCartItemId(i)) === targetCartItemId);
+      if (existingIndex > -1) {
+        return prev.map((item, idx) => idx === existingIndex ? { ...item, qty: item.qty + qty } : item);
       }
-      return [...prev, { ...product, qty, type: options.type || 'buy', rentDuration: options.rentDuration || null }];
+
+      const newCartItem = {
+        ...product,
+        cartItemId: targetCartItemId,
+        qty: qty || product.qty || 1,
+        type,
+        variant,
+        rentDuration: options.rentDuration || product.rentDuration || null
+      };
+      return [...prev, newCartItem];
     });
   };
 
-  const removeFromCart = (id) => setCart(prev => prev.filter(i => i.id !== id));
-  const updateCartQty = (id, qty) => setCart(prev => prev.map(i => i.id === id ? { ...i, qty } : i));
+  const removeFromCart = (cartItemIdOrId) => {
+    setCart(prev => prev.filter(i => (i.cartItemId || getCartItemId(i)) !== cartItemIdOrId && i.id !== cartItemIdOrId));
+  };
+
+  const updateCartQty = (cartItemIdOrId, qty) => {
+    setCart(prev => prev.map(i => {
+      const currentKey = i.cartItemId || getCartItemId(i);
+      if (currentKey === cartItemIdOrId || i.id === cartItemIdOrId) {
+        return { ...i, qty: Math.max(1, qty) };
+      }
+      return i;
+    }));
+  };
+
   const clearCart = () => setCart([]);
 
   // Page View Tracking

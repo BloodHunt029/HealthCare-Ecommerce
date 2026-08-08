@@ -43,28 +43,34 @@ export function CartDrawer({ isOpen, toggleCartOpen, setActiveTab }) {
               <div style={{ fontSize: '0.85rem', marginTop: '4px' }}>Add items from our catalog to proceed.</div>
             </div>
           ) : (
-            cart.map(item => (
-              <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.85rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <img src={item.image} alt={item.title} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px' }} />
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b', lineHeight: '1.3' }}>{item.title}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>₹{item.price.toLocaleString('en-IN')}</div>
+            cart.map(item => {
+              const itemKey = item.cartItemId || `${item.id}_${item.type || 'buy'}_${item.variant ? String(item.variant).replace(/\s+/g, '_') : 'std'}`;
+              return (
+                <div key={itemKey} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.85rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <img src={item.image} alt={item.title} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px' }} />
+                    <div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b', lineHeight: '1.3' }}>{item.title}</div>
+                      {item.variant && (
+                        <div style={{ fontSize: '0.72rem', color: '#0d9488', fontWeight: '600' }}>Variant: {item.variant}</div>
+                      )}
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>₹{item.price.toLocaleString('en-IN')}</div>
+                    </div>
                   </div>
-                </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '4px' }}>
-                    <button type="button" onClick={() => updateCartQty(item.id, Math.max(1, item.qty - 1))} style={{ padding: '2px 6px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '700' }}>-</button>
-                    <span style={{ padding: '0 6px', fontSize: '0.8rem', fontWeight: '700' }}>{item.qty}</span>
-                    <button type="button" onClick={() => updateCartQty(item.id, item.qty + 1)} style={{ padding: '2px 6px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '700' }}>+</button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '4px' }}>
+                      <button type="button" onClick={() => updateCartQty(itemKey, Math.max(1, item.qty - 1))} style={{ padding: '2px 6px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '700' }}>-</button>
+                      <span style={{ padding: '0 6px', fontSize: '0.8rem', fontWeight: '700' }}>{item.qty}</span>
+                      <button type="button" onClick={() => updateCartQty(itemKey, item.qty + 1)} style={{ padding: '2px 6px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '700' }}>+</button>
+                    </div>
+                    <button type="button" onClick={() => removeFromCart(itemKey)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444' }}>
+                      <Trash2 size={16} />
+                    </button>
                   </div>
-                  <button type="button" onClick={() => removeFromCart(item.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444' }}>
-                    <Trash2 size={16} />
-                  </button>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
@@ -479,33 +485,39 @@ export default function CartCheckout() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {cart.map(item => (
-                  <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <img src={item.image} alt={item.title} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px' }} />
-                      <div>
-                        <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{item.title}</div>
-                        <div style={{ fontSize: '0.8rem', color: 'hsl(var(--text-muted))' }}>₹{item.price.toLocaleString('en-IN')} each</div>
+                {cart.map(item => {
+                  const itemKey = item.cartItemId || `${item.id}_${item.type || 'buy'}_${item.variant ? String(item.variant).replace(/\s+/g, '_') : 'std'}`;
+                  return (
+                    <div key={itemKey} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <img src={item.image} alt={item.title} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px' }} />
+                        <div>
+                          <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{item.title}</div>
+                          {item.variant && (
+                            <div style={{ fontSize: '0.75rem', color: '#0d9488', fontWeight: '600' }}>Variant: {item.variant}</div>
+                          )}
+                          <div style={{ fontSize: '0.8rem', color: 'hsl(var(--text-muted))' }}>₹{item.price.toLocaleString('en-IN')} each</div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', border: '1px solid hsl(var(--border))', borderRadius: '6px' }}>
+                          <button style={{ padding: '4px 10px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '700' }} onClick={() => updateCartQty(itemKey, Math.max(1, item.qty - 1))}>-</button>
+                          <span style={{ padding: '0 8px', fontSize: '0.875rem', fontWeight: '700' }}>{item.qty}</span>
+                          <button style={{ padding: '4px 10px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '700' }} onClick={() => updateCartQty(itemKey, item.qty + 1)}>+</button>
+                        </div>
+
+                        <div style={{ fontWeight: '800', width: '90px', textAlign: 'right' }}>
+                          ₹{(item.price * item.qty).toLocaleString('en-IN')}
+                        </div>
+
+                        <button style={{ border: 'none', background: 'none', color: 'hsl(var(--destructive))', cursor: 'pointer' }} onClick={() => removeFromCart(itemKey)}>
+                          <Trash2 size={18} />
+                        </button>
                       </div>
                     </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', border: '1px solid hsl(var(--border))', borderRadius: '6px' }}>
-                        <button style={{ padding: '4px 10px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '700' }} onClick={() => updateCartQty(item.id, Math.max(1, item.qty - 1))}>-</button>
-                        <span style={{ padding: '0 8px', fontSize: '0.875rem', fontWeight: '700' }}>{item.qty}</span>
-                        <button style={{ padding: '4px 10px', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '700' }} onClick={() => updateCartQty(item.id, item.qty + 1)}>+</button>
-                      </div>
-
-                      <div style={{ fontWeight: '800', width: '90px', textAlign: 'right' }}>
-                        ₹{(item.price * item.qty).toLocaleString('en-IN')}
-                      </div>
-
-                      <button style={{ border: 'none', background: 'none', color: 'hsl(var(--destructive))', cursor: 'pointer' }} onClick={() => removeFromCart(item.id)}>
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

@@ -15,7 +15,6 @@ export default function OnlineStore() {
     faqs, addFAQ, deleteFAQ, storeSettings 
   } = useContext(AppContext);
   
-  const [showFullStorePreview, setShowFullStorePreview] = useState(false);
   const [selectedSection, setSelectedSection] = useState(null); // header_branding | hero | trust | collections | slideshow | featured_collection | video | faq | blog | footer | branding | image_banner | collection_with_image | rich_text
   const [viewportMode, setViewportMode] = useState('desktop'); // desktop | mobile
   const [sectionsOrderList, setSectionsOrderList] = useState(layout.sectionsOrder || ['hero', 'trust', 'collections', 'featured', 'video', 'blog']);
@@ -106,7 +105,7 @@ export default function OnlineStore() {
         setSectionSizes(layout.sectionSizes || {});
       }
     }
-  }, [layout]);
+  }, [layout, storeSettings]);
 
   // FAQ local form state
   const [faqQ, setFaqQ] = useState('');
