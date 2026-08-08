@@ -25,6 +25,21 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
 
+  // Sticky bar state
+  const [showStickyBar, setShowStickyBar] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 350) {
+        setShowStickyBar(true);
+      } else {
+        setShowStickyBar(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Fetch product on load
   useEffect(() => {
     const found = products.find(p => p.id === productId);
@@ -518,6 +533,31 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
           ))}
         </div>
       </div>
+
+      {/* Sticky Bottom Add-to-Cart Bar on Scroll */}
+      {showStickyBar && (
+        <div className="animate-fade-in" style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 998,
+          backgroundColor: '#ffffff', borderTop: '1px solid #cbd5e1',
+          boxShadow: '0 -4px 16px rgba(0,0,0,0.12)', padding: '0.75rem 1.5rem',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <img src={product.image} alt={product.title} style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px', border: '1px solid #e2e8f0' }} />
+            <div>
+              <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b', lineHeight: '1.2' }}>{product.title}</div>
+              <div style={{ fontSize: '0.9rem', fontWeight: '800', color: '#ef4444' }}>₹{product.price.toLocaleString('en-IN')}.00</div>
+            </div>
+          </div>
+          <button 
+            className="btn btn-primary"
+            style={{ padding: '0.6rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '800' }}
+            onClick={handleAddToCart}
+          >
+            <ShoppingBag size={18} /> Add to Cart
+          </button>
+        </div>
+      )}
 
     </div>
   );

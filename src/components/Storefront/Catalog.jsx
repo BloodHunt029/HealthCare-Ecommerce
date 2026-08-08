@@ -119,12 +119,16 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
     return a.title.localeCompare(b.title);
   });
 
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+
   const clearAllFilters = () => {
     setSelectedCategory('All');
     setPriceFilter('All');
     setSelectedBrand('All');
     setSearchQuery('');
   };
+
+  const hasActiveFilters = selectedCategory !== 'All' || selectedBrand !== 'All' || priceFilter !== 'All' || searchQuery.trim().length > 0;
 
   return (
     <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2.5rem 1.5rem', flex: 1 }} className="animate-fade-in">
@@ -138,6 +142,36 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
           {categoryDescriptions[selectedCategory] || categoryDescriptions['All']}
         </p>
       </div>
+
+      {/* Dismissible Active Filter Pill Badges */}
+      {hasActiveFilters && (
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+          <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700' }}>Active Filters:</span>
+          {selectedCategory !== 'All' && (
+            <span style={{ backgroundColor: '#e0f2fe', color: '#0369a1', fontSize: '0.75rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '99px', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              Collection: {selectedCategory} <X size={12} style={{ cursor: 'pointer' }} onClick={() => setSelectedCategory('All')} />
+            </span>
+          )}
+          {selectedBrand !== 'All' && (
+            <span style={{ backgroundColor: '#fef3c7', color: '#92400e', fontSize: '0.75rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '99px', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              Brand: {selectedBrand} <X size={12} style={{ cursor: 'pointer' }} onClick={() => setSelectedBrand('All')} />
+            </span>
+          )}
+          {priceFilter !== 'All' && (
+            <span style={{ backgroundColor: '#dcfce7', color: '#15803d', fontSize: '0.75rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '99px', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              Price: {priceFilter} <X size={12} style={{ cursor: 'pointer' }} onClick={() => setPriceFilter('All')} />
+            </span>
+          )}
+          {searchQuery && (
+            <span style={{ backgroundColor: '#f1f5f9', color: '#334155', fontSize: '0.75rem', fontWeight: '700', padding: '0.25rem 0.6rem', borderRadius: '99px', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              Query: "{searchQuery}" <X size={12} style={{ cursor: 'pointer' }} onClick={() => setSearchQuery('')} />
+            </span>
+          )}
+          <button onClick={clearAllFilters} style={{ fontSize: '0.72rem', color: '#ef4444', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '700', textDecoration: 'underline' }}>
+            Clear All
+          </button>
+        </div>
+      )}
 
       {/* Horizontal Toolbar: Filters & Sort Controls Bar */}
       <div style={{ 
@@ -351,25 +385,37 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
                       alignItems: 'baseline', 
                       gap: '0.5rem', 
                       flexWrap: 'wrap',
-                      marginTop: 'auto' 
+                      marginTop: 'auto',
+                      justifyContent: 'space-between'
                     }}>
-                      <span style={{ 
-                        color: '#ef4444', 
-                        fontSize: '1.05rem', 
-                        fontWeight: '800' 
-                      }}>
-                        Rs. {p.price.toLocaleString('en-IN')}.00
-                      </span>
-                      {hasDiscount && (
+                      <div>
                         <span style={{ 
-                          color: '#94a3b8', 
-                          textDecoration: 'line-through', 
-                          fontSize: '0.8rem',
-                          fontWeight: '500'
+                          color: '#ef4444', 
+                          fontSize: '1.05rem', 
+                          fontWeight: '800' 
                         }}>
-                          Rs. {p.mrp.toLocaleString('en-IN')}.00
+                          Rs. {p.price.toLocaleString('en-IN')}.00
                         </span>
-                      )}
+                        {hasDiscount && (
+                          <span style={{ 
+                            color: '#94a3b8', 
+                            textDecoration: 'line-through', 
+                            fontSize: '0.8rem',
+                            fontWeight: '500',
+                            marginLeft: '6px'
+                          }}>
+                            Rs. {p.mrp.toLocaleString('en-IN')}.00
+                          </span>
+                        )}
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setQuickViewProduct(p); }}
+                        className="btn btn-outline"
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.7rem', fontWeight: '700' }}
+                      >
+                        Quick View
+                      </button>
                     </div>
 
                   </div>
@@ -380,6 +426,73 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
           </div>
         )}
       </div>
+
+      {/* Quick View Modal Popup */}
+      {quickViewProduct && (
+        <div 
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1.5rem' }}
+          onClick={() => setQuickViewProduct(null)}
+        >
+          <div 
+            style={{ backgroundColor: '#ffffff', borderRadius: '16px', maxWidth: '720px', width: '100%', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', position: 'relative' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setQuickViewProduct(null)} 
+              style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontSize: '1.25rem', fontWeight: 'bold', zIndex: 10 }}
+            >
+              <X size={22} />
+            </button>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', padding: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', borderRadius: '12px', padding: '1rem' }}>
+                <img src={quickViewProduct.image} alt={quickViewProduct.title} style={{ maxWidth: '100%', maxHeight: '280px', objectFit: 'contain' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#0d9488', textTransform: 'uppercase' }}>{quickViewProduct.brand || 'AEONCARE'} • {quickViewProduct.category}</span>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#1e293b', lineHeight: '1.3' }}>{quickViewProduct.title}</h3>
+                <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#ef4444' }}>
+                  ₹{quickViewProduct.price.toLocaleString('en-IN')}.00
+                  {quickViewProduct.mrp > quickViewProduct.price && (
+                    <span style={{ fontSize: '0.85rem', color: '#94a3b8', textDecoration: 'line-through', marginLeft: '0.5rem', fontWeight: '500' }}>₹{quickViewProduct.mrp.toLocaleString('en-IN')}</span>
+                  )}
+                </div>
+                <p style={{ fontSize: '0.825rem', color: '#475569', lineHeight: '1.5', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {quickViewProduct.description}
+                </p>
+                <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto', paddingTop: '1rem' }}>
+                  <button 
+                    className="btn btn-primary" 
+                    style={{ flex: 1, padding: '0.65rem 1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+                    onClick={() => {
+                      addToCart({
+                        id: quickViewProduct.id,
+                        title: quickViewProduct.title,
+                        price: quickViewProduct.price,
+                        type: 'buy',
+                        qty: 1,
+                        image: quickViewProduct.image
+                      });
+                      setQuickViewProduct(null);
+                    }}
+                  >
+                    <ShoppingCart size={16} /> Add to Cart
+                  </button>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ padding: '0.65rem 1rem', fontSize: '0.85rem' }}
+                    onClick={() => {
+                      setSelectedProductId(quickViewProduct.id);
+                      setQuickViewProduct(null);
+                    }}
+                  >
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

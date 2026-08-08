@@ -249,6 +249,56 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
         )}
 
       </div>
+
+      {/* Sticky Mobile Bottom Navigation Bar (<768px viewport) */}
+      <div className="mobile-bottom-nav" style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        backgroundColor: '#ffffff', borderTop: '1px solid #e2e8f0',
+        display: 'flex', justifyContent: 'space-around', alignItems: 'center',
+        padding: '0.5rem 0.25rem', zIndex: 999, boxShadow: '0 -4px 12px rgba(0,0,0,0.06)'
+      }}>
+        <button 
+          onClick={() => setActiveTab('home')}
+          style={{ background: 'none', border: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: activeTab === 'home' ? 'hsl(var(--primary))' : '#64748b', fontSize: '0.7rem', fontWeight: '600' }}
+        >
+          <ShieldCheck size={20} />
+          <span>Home</span>
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('catalog')}
+          style={{ background: 'none', border: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: activeTab === 'catalog' ? 'hsl(var(--primary))' : '#64748b', fontSize: '0.7rem', fontWeight: '600' }}
+        >
+          <Search size={20} />
+          <span>Catalog</span>
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('userPortal')}
+          style={{ background: 'none', border: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: activeTab === 'userPortal' ? 'hsl(var(--primary))' : '#64748b', fontSize: '0.7rem', fontWeight: '600' }}
+        >
+          <User size={20} />
+          <span>Account</span>
+        </button>
+
+        <button 
+          onClick={toggleCartOpen}
+          style={{ background: 'none', border: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: '#64748b', fontSize: '0.7rem', fontWeight: '600', position: 'relative' }}
+        >
+          <ShoppingCart size={20} />
+          <span>Cart</span>
+          {cartItemsCount > 0 && (
+            <span style={{
+              position: 'absolute', top: '-4px', right: '8px',
+              backgroundColor: 'hsl(var(--accent))', color: 'white',
+              borderRadius: '50%', width: '16px', height: '16px',
+              fontSize: '0.65rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700'
+            }}>
+              {cartItemsCount}
+            </span>
+          )}
+        </button>
+      </div>
     </header>
   );
 }
