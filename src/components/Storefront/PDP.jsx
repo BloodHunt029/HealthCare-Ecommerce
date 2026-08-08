@@ -15,6 +15,10 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
   const [activeTabTab, setActiveTabTab] = useState('specs'); // specs | video | qa
   const [successMsg, setSuccessMsg] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
+  const [localReviews, setLocalReviews] = useState([]);
+  const [reviewName, setReviewName] = useState('');
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState('');
 
   // Pincode Estimator State
   const [checkPincode, setCheckPincode] = useState('600089');
