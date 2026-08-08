@@ -371,8 +371,34 @@ const getStorage = (key, fallback) => {
   }
 };
 
+const getProductKey = (p) => {
+  if (!p) return '';
+  if (p.handle && String(p.handle).trim().length > 0) return String(p.handle).toLowerCase().trim();
+  if (p.title && String(p.title).trim().length > 0) return String(p.title).toLowerCase().trim();
+  return String(p.id || '');
+};
+
+const deduplicateProducts = (productsList) => {
+  if (!Array.isArray(productsList)) return [];
+  const map = new Map();
+  productsList.forEach(p => {
+    if (!p) return;
+    const key = getProductKey(p);
+    if (!key) return;
+    if (!map.has(key)) {
+      map.set(key, p);
+    } else {
+      const existing = map.get(key);
+      const isCsv = String(p.id).startsWith('p_csv_');
+      const merged = isCsv ? { ...p, ...existing } : { ...existing, ...p };
+      map.set(key, merged);
+    }
+  });
+  return Array.from(map.values());
+};
+
 export const AppProvider = ({ children }) => {
-  const [products, setProducts] = useState(() => getStorage('aeon_products', initialProducts));
+  const [products, setProducts] = useState(() => deduplicateProducts(getStorage('aeon_products', initialProducts)));
   const [customers, setCustomers] = useState(() => getStorage('aeon_customers', initialCustomers));
   const [orders, setOrders] = useState(() => getStorage('aeon_orders', initialOrders));
   const [discounts, setDiscounts] = useState(() => getStorage('aeon_discounts', initialDiscounts));
@@ -481,25 +507,17 @@ export const AppProvider = ({ children }) => {
     syncDoc('aeon_products', (cloudProducts) => {
       if (Array.isArray(cloudProducts) && cloudProducts.length > 0) {
         const localSaved = getStorage('aeon_products', []);
-        const combinedMap = new Map();
-        
-        // 1. Initial seed products (imported catalog)
-        initialProducts.forEach(p => p && p.id && combinedMap.set(String(p.id), p));
-        
-        // 2. Cloud products from Firestore (overrides with latest admin updates)
-        cloudProducts.forEach(p => p && p.id && combinedMap.set(String(p.id), p));
-        
-        // 3. Local saved products (if admin created items offline locally)
-        if (Array.isArray(localSaved)) {
-          localSaved.forEach(p => p && p.id && combinedMap.set(String(p.id), p));
-        }
-
-        const merged = Array.from(combinedMap.values());
+        const merged = deduplicateProducts([
+          ...initialProducts,
+          ...cloudProducts,
+          ...(Array.isArray(localSaved) ? localSaved : [])
+        ]);
         setProducts(merged);
         try { localStorage.setItem('aeon_products', JSON.stringify(merged)); } catch (e) {}
       } else {
-        setProducts(initialProducts);
-        saveKey('aeon_products', initialProducts);
+        const dedupedInitial = deduplicateProducts(initialProducts);
+        setProducts(dedupedInitial);
+        saveKey('aeon_products', dedupedInitial);
       }
     }, initialProducts);
 
@@ -512,11 +530,11 @@ export const AppProvider = ({ children }) => {
 
       if (cloudProducts.length > 0) {
         setProducts(prev => {
-          const combinedMap = new Map();
-          initialProducts.forEach(p => p && p.id && combinedMap.set(String(p.id), p));
-          prev.forEach(p => p && p.id && combinedMap.set(String(p.id), p));
-          cloudProducts.forEach(p => p && p.id && combinedMap.set(String(p.id), p));
-          const mergedProducts = Array.from(combinedMap.values());
+          const mergedProducts = deduplicateProducts([
+            ...initialProducts,
+            ...prev,
+            ...cloudProducts
+          ]);
           try { localStorage.setItem('aeon_products', JSON.stringify(mergedProducts)); } catch (e) {}
           return mergedProducts;
         });
