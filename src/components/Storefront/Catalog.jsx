@@ -77,7 +77,12 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
   // Filter logic
   const filteredProducts = products.filter(p => {
     // Category filter
-    if (selectedCategory !== 'All' && (!p.category || p.category.toLowerCase().trim() !== selectedCategory.toLowerCase().trim())) return false;
+    if (selectedCategory !== 'All') {
+      const nameNorm = selectedCategory.toLowerCase().trim();
+      const catMatch = p.category && p.category.toLowerCase().trim() === nameNorm;
+      const colMatch = Array.isArray(p.collections) && p.collections.some(c => String(c).toLowerCase().trim() === nameNorm);
+      if (!catMatch && !colMatch) return false;
+    }
     
     // Brand filter
     if (selectedBrand !== 'All' && p.brand.toUpperCase() !== selectedBrand.toUpperCase()) return false;

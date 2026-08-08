@@ -320,7 +320,7 @@ export default function Home({ setActiveTab, setSelectedProductId, layoutOverrid
             title: 'Home Care & Patient Bed Essentials',
             subtitle: 'Motorized hospital cots, pressure-relief medical mattresses, and senior home-care supplies.',
             category: 'Home Care',
-            productsList: products.filter(p => p.category === 'Home Care').slice(0, 3)
+            productsList: products.filter(p => p.category === 'Home Care' || (Array.isArray(p.collections) && p.collections.includes('Home Care'))).slice(0, 3)
           },
           {
             id: 'mobility_aid',
@@ -328,7 +328,7 @@ export default function Home({ setActiveTab, setSelectedProductId, layoutOverrid
             title: 'Mobility Aids & Transit Solutions',
             subtitle: 'Lightweight folding wheelchairs, commode chairs, rollators and walking assistance frames.',
             category: 'Mobility Aid',
-            productsList: products.filter(p => p.category === 'Mobility Aid').slice(0, 3)
+            productsList: products.filter(p => p.category === 'Mobility Aid' || (Array.isArray(p.collections) && p.collections.includes('Mobility Aid'))).slice(0, 3)
           },
           {
             id: 'medical_devices',
@@ -336,7 +336,7 @@ export default function Home({ setActiveTab, setSelectedProductId, layoutOverrid
             title: 'Medical Devices & Health Diagnostics',
             subtitle: 'Intellisense BP monitors, fingertip pulse oximeters, and medical oxygen concentrators.',
             category: 'Medical Devices',
-            productsList: products.filter(p => p.category === 'Medical Devices').slice(0, 3)
+            productsList: products.filter(p => p.category === 'Medical Devices' || (Array.isArray(p.collections) && p.collections.includes('Medical Devices'))).slice(0, 3)
           }
         ];
         const featuredStyles = getSectionStyles('featured', 64, 1280);
@@ -629,7 +629,7 @@ export default function Home({ setActiveTab, setSelectedProductId, layoutOverrid
 
       case 'collection_with_image': {
         const targetCategory = effectiveLayout.colWithImageCategory || 'Mobility Aid';
-        const filteredProds = products.filter(p => p.category === targetCategory).slice(0, 2);
+        const filteredProds = products.filter(p => p.category === targetCategory || (Array.isArray(p.collections) && p.collections.includes(targetCategory))).slice(0, 2);
         const colImgStyles = getSectionStyles('collection_with_image', 64, 1280);
         return (
           <section key="collection_with_image" style={{ padding: colImgStyles.padding, minHeight: colImgStyles.minHeight, maxWidth: colImgStyles.maxWidth, margin: '0 auto' }}>

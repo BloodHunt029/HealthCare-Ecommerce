@@ -550,7 +550,7 @@ function AppContent() {
 }
 
 function CollectionsManager() {
-  const { layout, updateLayout, products, setProducts, updateProduct } = useContext(AppContext);
+  const { layout, updateLayout, products, setProducts, updateProduct, updateProductsBatch } = useContext(AppContext);
   const collections = layout.collectionsList || [];
   
   const [editingIndex, setEditingIndex] = useState(null);
@@ -559,6 +559,14 @@ function CollectionsManager() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalSearch, setModalSearch] = useState('');
   const [tempSelectedIds, setTempSelectedIds] = useState([]);
+
+  const isProductInCollection = (p, colName) => {
+    if (!p || !colName) return false;
+    const nameNorm = colName.toLowerCase().trim();
+    const categoryMatch = p.category && p.category.toLowerCase().trim() === nameNorm;
+    const collectionsArrayMatch = Array.isArray(p.collections) && p.collections.some(c => String(c).toLowerCase().trim() === nameNorm);
+    return categoryMatch || collectionsArrayMatch;
+  };
 
   // JPG File Uploader inside Collection editor
   const handleJpgCollectionUpload = (e) => {
@@ -621,7 +629,7 @@ function CollectionsManager() {
   const handleOpenProductSelector = () => {
     const targetName = editColName.trim() || collections[editingIndex]?.name || '';
     const currentProductIds = products
-      .filter(p => p.category && p.category.toLowerCase().trim() === targetName.toLowerCase().trim())
+      .filter(p => isProductInCollection(p, targetName))
       .map(p => p.id);
     setTempSelectedIds(currentProductIds);
     setModalSearch('');
@@ -644,17 +652,40 @@ function CollectionsManager() {
     // Single pass batch update to update products list cleanly
     const updatedProducts = products.map(p => {
       const isSelected = tempSelectedIds.includes(p.id);
-      const currentlyInCol = p.category && p.category.toLowerCase().trim() === targetName.toLowerCase().trim();
+      const inCol = isProductInCollection(p, targetName);
 
-      if (isSelected && !currentlyInCol) {
-        return { ...p, category: targetName };
-      } else if (!isSelected && currentlyInCol) {
-        return { ...p, category: 'Home Care' };
+      if (isSelected) {
+        const existingColls = Array.isArray(p.collections) ? p.collections : [];
+        const newColls = existingColls.some(c => String(c).toLowerCase().trim() === targetName.toLowerCase().trim())
+          ? existingColls
+          : [...existingColls, targetName];
+
+        return { 
+          ...p, 
+          category: targetName,
+          collections: newColls 
+        };
+      } else if (!isSelected && inCol) {
+        const existingColls = Array.isArray(p.collections) ? p.collections : [];
+        const newColls = existingColls.filter(c => String(c).toLowerCase().trim() !== targetName.toLowerCase().trim());
+        const newCat = (p.category && p.category.toLowerCase().trim() === targetName.toLowerCase().trim()) 
+          ? (newColls[0] || 'Home Care') 
+          : p.category;
+
+        return { 
+          ...p, 
+          category: newCat, 
+          collections: newColls 
+        };
       }
       return p;
     });
 
-    setProducts(updatedProducts);
+    if (updateProductsBatch) {
+      updateProductsBatch(updatedProducts);
+    } else {
+      setProducts(updatedProducts);
+    }
     setIsModalOpen(false);
     alert(`Successfully linked ${tempSelectedIds.length} product(s) to collection "${targetName}"!`);
   };
@@ -686,7 +717,7 @@ function CollectionsManager() {
 
           <div className="grid-auto">
             {collections.map((col, idx) => {
-              const matchedProducts = products.filter(p => p.category.toLowerCase() === col.name.toLowerCase());
+              const matchedProducts = products.filter(p => isProductInCollection(p, col.name));
               return (
                 <div key={idx} className="card card-hover" style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', backgroundColor: 'white' }}>
                   <div style={{ 
@@ -800,14 +831,14 @@ function CollectionsManager() {
                 {/* List currently selected products */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {products
-                    .filter(p => p.category && p.category.toLowerCase().trim() === (editColName.trim() || collections[editingIndex]?.name || '').toLowerCase().trim())
+                    .filter(p => isProductInCollection(p, editColName.trim() || collections[editingIndex]?.name || ''))
                     .map(p => (
                       <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' }}>
                         <img src={p.image} alt={p.title} style={{ width: '36px', height: '36px', objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: '4px' }} />
                         <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#334155' }}>{p.title}</span>
                       </div>
                     ))}
-                  {products.filter(p => p.category && p.category.toLowerCase().trim() === (editColName.trim() || collections[editingIndex]?.name || '').toLowerCase().trim()).length === 0 && (
+                  {products.filter(p => isProductInCollection(p, editColName.trim() || collections[editingIndex]?.name || '')).length === 0 && (
                     <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic' }}>No products linked to this collection yet.</span>
                   )}
                 </div>

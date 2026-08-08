@@ -902,6 +902,23 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const updateProductsBatch = (updatedProductsList) => {
+    if (!Array.isArray(updatedProductsList)) return;
+
+    setProducts(updatedProductsList);
+    saveKey('aeon_products', updatedProductsList);
+
+    if (db) {
+      updatedProductsList.forEach(prod => {
+        if (prod && prod.id) {
+          setDoc(doc(db, 'healthcare_products', String(prod.id)), prod, { merge: true }).catch(err => {
+            console.error(`Error updating product ${prod.id} in Firestore batch:`, err);
+          });
+        }
+      });
+    }
+  };
+
   const deleteProduct = (id) => {
     if (!id) return;
     const prodId = String(id);
@@ -1061,7 +1078,7 @@ export const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider value={{
-      products, setProducts, addProduct, updateProduct, deleteProduct, importProducts, resetProducts,
+      products, setProducts, addProduct, updateProduct, updateProductsBatch, deleteProduct, importProducts, resetProducts,
       customers, setCustomers, resetCustomers,
       orders, setOrders, createOrder, updateOrderStatus, updatePaymentStatus, resetOrders,
       discounts, setDiscounts, resetDiscounts,
