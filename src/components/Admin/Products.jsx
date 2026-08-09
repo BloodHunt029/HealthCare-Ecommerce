@@ -672,7 +672,7 @@ export default function Products() {
                           <button className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', color: 'hsl(var(--primary))' }} onClick={() => handleStartEdit(p)} title="Edit details">
                             <Edit2 size={14} /> Edit
                           </button>
-                          <button className="btn btn-ghost" style={{ padding: '0.25rem', color: 'hsl(var(--destructive))' }} onClick={() => { if(window.confirm('Delete product?')) deleteProduct(p.id); }} title="Remove listing">
+                          <button className="btn btn-ghost" style={{ padding: '0.25rem', color: 'hsl(var(--destructive))' }} onClick={() => showConfirm ? showConfirm('Delete Product Listing', `Are you sure you want to delete "${p.title}"? This action cannot be undone.`, () => deleteProduct(p.id)) : deleteProduct(p.id)} title="Remove listing">
                             <Trash2 size={14} />
                           </button>
                         </div>

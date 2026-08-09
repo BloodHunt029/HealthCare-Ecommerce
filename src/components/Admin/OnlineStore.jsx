@@ -438,10 +438,15 @@ export default function OnlineStore() {
 
   const deleteSectionItem = (idx, e) => {
     e.stopPropagation();
-    if (window.confirm('Remove this section from your storefront?')) {
+    const doDelete = () => {
       const list = sectionsOrderList.filter((_, i) => i !== idx);
       setSectionsOrderList(list);
       setSelectedSection(null);
+    };
+    if (showConfirm) {
+      showConfirm('Remove Store Section', 'Are you sure you want to remove this section from your storefront?', doDelete);
+    } else {
+      doDelete();
     }
   };
 

@@ -766,26 +766,28 @@ function CollectionsManager() {
   };
 
   const handleCreateCollection = () => {
-    const newName = `New Collection ${collections.length + 1}`;
-    const newCol = { 
-      name: newName, 
-      slug: newName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''), 
-      image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200' 
+    const newCol = {
+      name: `New Collection ${collections.length + 1}`,
+      image: 'https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?w=600'
     };
     const updated = [...collections, newCol];
     updateLayout({ collectionsList: updated });
-    const newIdx = updated.length - 1;
-    setEditingIndex(newIdx);
+    setEditingIndex(updated.length - 1);
     setEditColName(newCol.name);
     setEditColImage(newCol.image);
   };
 
   const handleDeleteCollection = (idxToDelete) => {
     const colToDeleteName = collections[idxToDelete]?.name;
-    if (window.confirm(`Are you sure you want to delete collection "${colToDeleteName}"?`)) {
+    const doDelete = () => {
       const updated = collections.filter((_, i) => i !== idxToDelete);
       updateLayout({ collectionsList: updated });
       setEditingIndex(null);
+    };
+    if (showConfirm) {
+      showConfirm('Delete Collection', `Are you sure you want to delete collection "${colToDeleteName}"?`, doDelete);
+    } else if (window.confirm(`Are you sure you want to delete collection "${colToDeleteName}"?`)) {
+      doDelete();
     }
   };
 
@@ -793,27 +795,26 @@ function CollectionsManager() {
     const oldName = collections[editingIndex]?.name;
     const targetName = editColName.trim() || oldName || 'Collection';
     const updatedColls = [...collections];
-    updatedColls[editingIndex] = { 
+    updatedColls[editingIndex] = {
       ...updatedColls[editingIndex],
-      name: targetName, 
+      name: targetName,
       slug: targetName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-      image: editColImage 
+      image: editColImage.trim() || updatedColls[editingIndex].image
     };
+    
     updateLayout({ collectionsList: updatedColls });
 
-    // If collection was renamed (e.g. from "New Collection 4" to "Diagnostics"), update all linked products!
-    if (oldName && oldName !== targetName) {
+    if (oldName && oldName.toLowerCase().trim() !== targetName.toLowerCase().trim()) {
       const updatedProducts = products.map(p => {
-        let pColls = Array.isArray(p.collections) 
-          ? p.collections 
-          : (typeof p.collections === 'string' ? p.collections.split(',') : []);
-        pColls = pColls.map(c => String(c).trim()).filter(Boolean);
-
-        const hasOld = pColls.some(c => c.toLowerCase() === oldName.toLowerCase());
-        if (hasOld) {
-          const newColls = pColls.map(c => c.toLowerCase() === oldName.toLowerCase() ? targetName : c);
-          const newCat = (p.category && p.category.toLowerCase() === oldName.toLowerCase()) ? targetName : p.category;
-          return { ...p, category: newCat, collections: newColls };
+        if (isProductInCollection(p, oldName)) {
+          const existingColls = Array.isArray(p.collections) ? p.collections : [];
+          const filtered = existingColls.filter(c => String(c).toLowerCase().trim() !== oldName.toLowerCase().trim());
+          const newColls = [...filtered, targetName];
+          return {
+            ...p,
+            category: p.category && p.category.toLowerCase().trim() === oldName.toLowerCase().trim() ? targetName : p.category,
+            collections: newColls
+          };
         }
         return p;
       });
@@ -825,6 +826,7 @@ function CollectionsManager() {
       }
     }
 
+    setEditingIndex(null);
     alert('Collection details saved successfully!');
   };
 

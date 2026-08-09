@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useRef } from 'react';
 import { db, doc, setDoc, onSnapshot, collection, deleteDoc } from '../config/firebase';
 import importedProductsData from '../data/importedProducts.json';
-
+import { CheckCircle2, AlertTriangle, X, Info, HelpCircle } from 'lucide-react';
 
 export const AppContext = createContext();
 
@@ -1195,6 +1195,43 @@ export const AppProvider = ({ children }) => {
     document.body.removeChild(link);
   };
 
+  // Modern Toast & Custom Confirmation Modal System
+  const [toasts, setToasts] = useState([]);
+  const [confirmModal, setConfirmModal] = useState(null);
+
+  const showToast = (message, type = 'success', duration = 3500) => {
+    const id = Date.now() + Math.random();
+    setToasts(prev => [...prev, { id, message: String(message), type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, duration);
+  };
+
+  const showConfirm = (title, message, onConfirm, confirmText = 'Confirm', cancelText = 'Cancel') => {
+    setConfirmModal({
+      title,
+      message,
+      onConfirm: () => {
+        setConfirmModal(null);
+        onConfirm?.();
+      },
+      onCancel: () => setConfirmModal(null),
+      confirmText,
+      cancelText
+    });
+  };
+
+  // Override browser native window.alert globally for modern UI/UX
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.alert = (msg) => {
+        const msgStr = String(msg || '');
+        const isError = msgStr.toLowerCase().includes('error') || msgStr.toLowerCase().includes('fail') || msgStr.toLowerCase().includes('required') || msgStr.toLowerCase().includes('only jpg');
+        showToast(msgStr, isError ? 'error' : 'success');
+      };
+    }
+  }, []);
+
   return (
     <AppContext.Provider value={{
       products, setProducts, addProduct, updateProduct, updateProductsBatch, deleteProduct, importProducts, resetProducts,
@@ -1212,9 +1249,174 @@ export const AppProvider = ({ children }) => {
       wishlist, toggleWishlist, exportToCSV,
       resetAllStoreData,
       userRole, setUserRole,
-      approvedStaff, pendingRequests, requestStaffAccess, approveStaffRequest, rejectStaffRequest, removeApprovedStaff
+      approvedStaff, pendingRequests, requestStaffAccess, approveStaffRequest, rejectStaffRequest, removeApprovedStaff,
+      showToast, showConfirm
     }}>
       {children}
+      <ToastContainer toasts={toasts} setToasts={setToasts} />
+      <ConfirmModal confirmModal={confirmModal} setConfirmModal={setConfirmModal} />
     </AppContext.Provider>
   );
 };
+
+/* ================= SLEEK TOAST NOTIFICATION CONTAINER ================= */
+function ToastContainer({ toasts, setToasts }) {
+  if (!toasts || toasts.length === 0) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: '1.25rem',
+      right: '1.25rem',
+      zIndex: 999999,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.75rem',
+      pointerEvents: 'none',
+      maxWidth: '420px',
+      width: 'calc(100% - 2.5rem)'
+    }}>
+      {toasts.map(toast => {
+        const isError = toast.type === 'error';
+        const isInfo = toast.type === 'info';
+        const borderColor = isError ? '#ef4444' : (isInfo ? '#3b82f6' : '#10b981');
+
+        return (
+          <div
+            key={toast.id}
+            className="animate-slide-in-right"
+            style={{
+              pointerEvents: 'auto',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.85rem',
+              backgroundColor: '#ffffff',
+              color: '#1e293b',
+              padding: '0.85rem 1.15rem',
+              borderRadius: '10px',
+              borderLeft: `4px solid ${borderColor}`,
+              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{ flexShrink: 0, marginTop: '2px' }}>
+              {isError ? (
+                <AlertTriangle size={20} style={{ color: '#ef4444' }} />
+              ) : isInfo ? (
+                <Info size={20} style={{ color: '#3b82f6' }} />
+              ) : (
+                <CheckCircle2 size={20} style={{ color: '#10b981' }} />
+              )}
+            </div>
+
+            <div style={{ flex: 1 }}>
+              <h5 style={{ fontSize: '0.825rem', fontWeight: '800', margin: '0 0 2px 0', color: '#0f172a' }}>
+                {isError ? 'Action Required' : isInfo ? 'Notice' : 'Success'}
+              </h5>
+              <p style={{ fontSize: '0.8rem', margin: 0, color: '#475569', lineHeight: '1.4', fontWeight: '500' }}>
+                {toast.message}
+              </p>
+            </div>
+
+            <button
+              onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#94a3b8',
+                padding: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '4px'
+              }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ================= MODERN CONFIRMATION DIALOG MODAL ================= */
+function ConfirmModal({ confirmModal, setConfirmModal }) {
+  if (!confirmModal) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(15, 23, 42, 0.65)',
+      backdropFilter: 'blur(4px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 999999,
+      padding: '1rem'
+    }}
+    onClick={() => confirmModal.onCancel?.()}
+    >
+      <div
+        style={{
+          width: '420px',
+          maxWidth: '100%',
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
+          padding: '1.75rem',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          position: 'relative'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div style={{
+          width: '52px',
+          height: '52px',
+          borderRadius: '50%',
+          backgroundColor: '#fef2f2',
+          color: '#ef4444',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '1rem'
+        }}>
+          <AlertTriangle size={26} />
+        </div>
+
+        <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#0f172a', marginBottom: '0.5rem' }}>
+          {confirmModal.title || 'Confirm Action'}
+        </h3>
+
+        <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: '1.5', marginBottom: '1.5rem' }}>
+          {confirmModal.message}
+        </p>
+
+        <div style={{ display: 'flex', gap: '0.75rem', width: '100%' }}>
+          <button
+            type="button"
+            className="btn btn-outline"
+            style={{ flex: 1, padding: '0.6rem 1rem', fontSize: '0.85rem' }}
+            onClick={() => confirmModal.onCancel?.()}
+          >
+            {confirmModal.cancelText || 'Cancel'}
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            style={{ flex: 1, padding: '0.6rem 1rem', fontSize: '0.85rem', backgroundColor: '#ef4444', borderColor: '#dc2626' }}
+            onClick={() => confirmModal.onConfirm?.()}
+          >
+            {confirmModal.confirmText || 'Confirm'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
