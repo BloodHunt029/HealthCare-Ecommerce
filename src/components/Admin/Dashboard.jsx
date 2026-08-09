@@ -165,19 +165,6 @@ export default function Dashboard({ setActiveAdminTab }) {
           <h1 style={{ fontSize: '1.75rem', fontWeight: '800' }}>Admin Command Dashboard</h1>
           <p style={{ color: 'hsl(var(--text-muted))', fontSize: '0.875rem' }}>Real-time overview of sales, sessions, orders, conversion rate, and inventory.</p>
         </div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button 
-            className="btn btn-outline"
-            onClick={() => setShowWidgetCustomizer(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.825rem', fontWeight: '700', padding: '0.5rem 1rem', borderRadius: '8px', backgroundColor: '#ffffff', borderColor: '#cbd5e1' }}
-          >
-            <Sliders size={16} style={{ color: '#2563eb' }} /> Customize Dashboard Data
-          </button>
-          <div className="badge badge-success" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
-            ● Live Store Sync Enabled
-          </div>
-        </div>
       </div>
 
       {/* DATE RANGE FILTER BAR & CUSTOM CALENDAR PICKER */}
