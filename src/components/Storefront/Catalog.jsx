@@ -121,22 +121,38 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
       const pCollections = Array.isArray(p.collections) ? p.collections.map(c => String(c).toLowerCase().trim()) : [];
       const pTags = Array.isArray(p.tags) ? p.tags.map(t => String(t).toLowerCase().trim()) : [];
 
-      let matched = false;
+      // 1. Direct explicit assignment match (check p.collections or p.category)
+      const isExplicitInCol = pCat === rawTarget || pCat === cleanTarget || pCollections.includes(rawTarget) || pCollections.includes(cleanTarget);
 
-      if (cleanTarget.includes('hospital bed') || cleanTarget.includes('bed') || cleanTarget === 'cot') {
-        matched = pTitle.includes('bed') || pTitle.includes('cot') || pTags.some(t => t.includes('bed') || t.includes('cot')) || pCollections.some(c => c.includes('bed') || c.includes('cot')) || pCat.includes('hospital bed');
-      } else if (cleanTarget.includes('wheelchair') || cleanTarget.includes('wheel chair')) {
-        matched = pTitle.includes('wheelchair') || pTitle.includes('wheel chair') || pTags.some(t => t.includes('wheelchair')) || pCollections.some(c => c.includes('wheelchair')) || pCat.includes('wheelchair');
-      } else if (cleanTarget.includes('walker') || cleanTarget.includes('walkstick') || cleanTarget.includes('stick') || cleanTarget.includes('crutch')) {
-        matched = pTitle.includes('walker') || pTitle.includes('stick') || pTitle.includes('crutch') || pTags.some(t => t.includes('walker') || t.includes('stick') || t.includes('crutch')) || pCollections.some(c => c.includes('walker') || c.includes('stick')) || pCat.includes('walker');
+      // Check if ANY products in the catalog have been explicitly linked to this collection by the admin
+      const hasExplicitCollectionItems = products.some(prod => {
+        const cat = (prod.category || '').toLowerCase().trim();
+        const colls = Array.isArray(prod.collections) ? prod.collections.map(c => String(c).toLowerCase().trim()) : [];
+        return cat === rawTarget || cat === cleanTarget || colls.includes(rawTarget) || colls.includes(cleanTarget);
+      });
+
+      if (hasExplicitCollectionItems) {
+        // Strict Mode: Admin manually selected products for this collection. Show ONLY assigned products!
+        if (!isExplicitInCol) return false;
       } else {
-        const catMatch = pCat === rawTarget || pCat === cleanTarget || (cleanTarget.length > 3 && pCat.includes(cleanTarget));
-        const colMatch = pCollections.some(c => c === rawTarget || c === cleanTarget || (cleanTarget.length > 3 && c.includes(cleanTarget)));
-        const tagMatch = pTags.some(t => t === rawTarget || t === cleanTarget || (cleanTarget.length > 3 && (t.includes(cleanTarget) || cleanTarget.includes(t))));
-        matched = catMatch || colMatch || tagMatch;
-      }
+        // Fallback Mode: No manual collection assignments. Fall back to smart keyword matching.
+        let matched = false;
 
-      if (!matched) return false;
+        if (cleanTarget.includes('hospital bed') || cleanTarget.includes('bed') || cleanTarget === 'cot') {
+          matched = pTitle.includes('bed') || pTitle.includes('cot') || pTags.some(t => t.includes('bed') || t.includes('cot')) || pCollections.some(c => c.includes('bed') || c.includes('cot')) || pCat.includes('hospital bed');
+        } else if (cleanTarget.includes('wheelchair') || cleanTarget.includes('wheel chair')) {
+          matched = pTitle.includes('wheelchair') || pTitle.includes('wheel chair') || pTags.some(t => t.includes('wheelchair')) || pCollections.some(c => c.includes('wheelchair')) || pCat.includes('wheelchair');
+        } else if (cleanTarget.includes('walker') || cleanTarget.includes('walkstick') || cleanTarget.includes('stick') || cleanTarget.includes('crutch')) {
+          matched = pTitle.includes('walker') || pTitle.includes('stick') || pTitle.includes('crutch') || pTags.some(t => t.includes('walker') || t.includes('stick') || t.includes('crutch')) || pCollections.some(c => c.includes('walker') || c.includes('stick')) || pCat.includes('walker');
+        } else {
+          const catMatch = pCat === rawTarget || pCat === cleanTarget || (cleanTarget.length > 3 && pCat.includes(cleanTarget));
+          const colMatch = pCollections.some(c => c === rawTarget || c === cleanTarget || (cleanTarget.length > 3 && c.includes(cleanTarget)));
+          const tagMatch = pTags.some(t => t === rawTarget || t === cleanTarget || (cleanTarget.length > 3 && (t.includes(cleanTarget) || cleanTarget.includes(t))));
+          matched = catMatch || colMatch || tagMatch;
+        }
+
+        if (!matched) return false;
+      }
     }
     
     // Brand filter
