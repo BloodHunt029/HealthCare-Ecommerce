@@ -28,11 +28,16 @@ import AdminLogin from './components/Admin/AdminLogin';
 import { 
   ShieldCheck, LayoutDashboard, ShoppingBag, FolderHeart, 
   Users, TicketPercent, Globe, Award, HelpCircle, ShieldAlert,
-  MessageSquare, BookOpen, ArrowLeft, Settings, LogOut, Plus
+  MessageSquare, BookOpen, ArrowLeft, Settings, LogOut, Plus,
+  Eye, Monitor, Smartphone, ExternalLink
 } from 'lucide-react';
 
 function AppContent() {
   const { layout, storeSettings, userRole, orders, trackPageView } = useContext(AppContext);
+  
+  // Live Storefront Preview Modal State
+  const [showLivePreviewModal, setShowLivePreviewModal] = useState(false);
+  const [previewDeviceMode, setPreviewDeviceMode] = useState('desktop'); // desktop | mobile
   
   // Navigation states (detect /admin route from URL)
   const [viewMode, setViewModeState] = useState(() => {
@@ -100,6 +105,13 @@ function AppContent() {
       }
     }
   }, [activeTab, selectedProductId, viewMode, layout.navigationTabs]);
+
+  // Listen for openLivePreviewModal event from anywhere in Admin
+  React.useEffect(() => {
+    const handleOpenPreview = () => setShowLivePreviewModal(true);
+    window.addEventListener('openLivePreviewModal', handleOpenPreview);
+    return () => window.removeEventListener('openLivePreviewModal', handleOpenPreview);
+  }, []);
 
   // Apply theme classes from layout
   const themeClass = `app-container theme-${layout.themeColors || 'teal'} product-list-${layout.productListColor || 'white'}`;
@@ -258,13 +270,32 @@ function AppContent() {
                 <span style={{ display: 'inline-block', backgroundColor: 'hsl(var(--primary))', color: 'white', borderRadius: '4px', padding: '2px 4px', fontWeight: 'bold', fontSize: '0.7rem' }}>ADMIN</span>
                 <span>AeonCare Control Panel</span>
               </div>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                 <span style={{ color: '#cbd5e1', fontSize: '0.78rem' }}>
                   Signed in: <strong style={{ color: '#60a5fa' }}>{adminAuthSession.email}</strong> ({userRole})
                 </span>
                 <button 
+                  className="btn btn-outline" 
+                  style={{ 
+                    padding: '0.2rem 0.65rem', 
+                    fontSize: '0.75rem', 
+                    borderRadius: '4px', 
+                    backgroundColor: '#2563eb', 
+                    color: '#ffffff', 
+                    borderColor: '#1d4ed8', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.35rem',
+                    fontWeight: '700'
+                  }}
+                  onClick={() => setShowLivePreviewModal(true)}
+                  title="Open real-time interactive preview of the storefront"
+                >
+                  <Eye size={14} /> Live Store Preview
+                </button>
+                <button 
                   className="btn btn-secondary" 
-                  style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                  style={{ padding: '0.2rem 0.65rem', fontSize: '0.75rem', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
                   onClick={handleAdminSignOut}
                   title="Sign out of Admin Session"
                 >
@@ -544,6 +575,136 @@ function AppContent() {
         </>
       )
     )}
+
+      {/* ================= LIVE STOREFRONT PREVIEW MODAL ================= */}
+      {showLivePreviewModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.85)',
+          zIndex: 99999,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}>
+          {/* Preview Header Controls Bar */}
+          <div style={{
+            backgroundColor: '#1e293b',
+            borderBottom: '1px solid #334155',
+            padding: '0.65rem 1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            color: 'white'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '800', fontSize: '0.95rem' }}>
+                <Eye size={18} style={{ color: '#60a5fa' }} />
+                <span>Live Storefront Preview</span>
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>| Real-time layout, pricing & palette changes preview</span>
+            </div>
+
+            {/* Device Viewport Toggles */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#0f172a', padding: '3px', borderRadius: '6px', border: '1px solid #334155' }}>
+              <button
+                type="button"
+                onClick={() => setPreviewDeviceMode('desktop')}
+                style={{
+                  padding: '4px 12px',
+                  fontSize: '0.75rem',
+                  fontWeight: '700',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  backgroundColor: previewDeviceMode === 'desktop' ? '#2563eb' : 'transparent',
+                  color: previewDeviceMode === 'desktop' ? 'white' : '#94a3b8',
+                  display: 'flex', alignItems: 'center', gap: '0.35rem'
+                }}
+              >
+                <Monitor size={14} /> Desktop (Full)
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewDeviceMode('mobile')}
+                style={{
+                  padding: '4px 12px',
+                  fontSize: '0.75rem',
+                  fontWeight: '700',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  backgroundColor: previewDeviceMode === 'mobile' ? '#2563eb' : 'transparent',
+                  color: previewDeviceMode === 'mobile' ? 'white' : '#94a3b8',
+                  display: 'flex', alignItems: 'center', gap: '0.35rem'
+                }}
+              >
+                <Smartphone size={14} /> Mobile (390px)
+              </button>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ padding: '0.35rem 0.85rem', fontSize: '0.75rem', color: 'white', borderColor: '#475569', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                onClick={() => window.open(window.location.origin, '_blank')}
+              >
+                <ExternalLink size={14} /> Open in New Tab
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                style={{ padding: '0.35rem 1rem', fontSize: '0.75rem' }}
+                onClick={() => setShowLivePreviewModal(false)}
+              >
+                ✕ Close Preview
+              </button>
+            </div>
+          </div>
+
+          {/* Scrollable Live Preview Screen */}
+          <div style={{
+            flex: 1,
+            backgroundColor: '#0f172a',
+            overflowY: 'auto',
+            display: 'flex',
+            justifyContent: 'center',
+            padding: previewDeviceMode === 'mobile' ? '2rem 1rem' : '0'
+          }}>
+            <div style={{
+              width: previewDeviceMode === 'mobile' ? '390px' : '100%',
+              minHeight: previewDeviceMode === 'mobile' ? '800px' : '100%',
+              maxHeight: previewDeviceMode === 'mobile' ? '800px' : 'none',
+              backgroundColor: '#ffffff',
+              boxShadow: previewDeviceMode === 'mobile' ? '0 25px 50px -12px rgba(0, 0, 0, 0.7)' : 'none',
+              borderRadius: previewDeviceMode === 'mobile' ? '24px' : '0',
+              border: previewDeviceMode === 'mobile' ? '8px solid #334155' : 'none',
+              overflow: previewDeviceMode === 'mobile' ? 'auto' : 'visible',
+              position: 'relative'
+            }}>
+              <div className={`theme-${layout?.themeColors || 'teal'} product-list-${layout?.productListColor || 'white'}`}>
+                <Navbar activeTab={activeTab} setActiveTab={setActiveTab} toggleCartOpen={toggleCartOpen} />
+                <main style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                  {activeTab === 'home' && <Home setActiveTab={setActiveTab} setSelectedProductId={setSelectedProductId} />}
+                  {activeTab === 'catalog' && (
+                    selectedProductId ? (
+                      <PDP productId={selectedProductId} setSelectedProductId={setSelectedProductId} setActiveTab={setActiveTab} />
+                    ) : (
+                      <Catalog selectedProductId={selectedProductId} setSelectedProductId={setSelectedProductId} />
+                    )
+                  )}
+                  {activeTab === 'services' && <Services />}
+                  {activeTab === 'blog' && <BlogFAQ mode="blog" />}
+                  {activeTab === 'faq' && <BlogFAQ mode="faq" />}
+                  {activeTab === 'userPortal' && <UserPortal setSelectedProductId={setSelectedProductId} setActiveTab={setActiveTab} toggleCartOpen={toggleCartOpen} />}
+                </main>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
@@ -868,6 +1029,20 @@ function CollectionsManager() {
               </h1>
             </div>
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              <button 
+                type="button"
+                className="btn btn-outline" 
+                style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem', backgroundColor: '#3b82f6', color: 'white', borderColor: '#2563eb', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    const targetName = editColName.trim() || collections[editingIndex]?.name || '';
+                    if (targetName) window.__pendingCategory = targetName;
+                  }
+                  window.dispatchEvent(new CustomEvent('openLivePreviewModal'));
+                }}
+              >
+                <Eye size={14} /> Live Store Preview
+              </button>
               <button 
                 className="btn btn-outline" 
                 onClick={() => handleDeleteCollection(editingIndex)}

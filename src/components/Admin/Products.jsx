@@ -701,7 +701,17 @@ export default function Products() {
                 {isAddingNew ? 'Add product' : `Edit product`}
               </h1>
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <button 
+                type="button"
+                className="btn btn-outline" 
+                style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem', backgroundColor: '#3b82f6', color: 'white', borderColor: '#2563eb', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('openLivePreviewModal'));
+                }}
+              >
+                <Eye size={14} /> Live Store Preview
+              </button>
               <button className="btn btn-outline" onClick={() => { setSelectedProductId(''); setIsAddingNew(false); }}>Discard</button>
               <button className="btn btn-primary" onClick={handleSaveProduct}>Save</button>
             </div>
