@@ -72,11 +72,18 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
 
     // Match products (typo tolerance modeled as character overlap / substring check)
     const matches = products.filter(p => {
-      const titleMatch = p.title.toLowerCase().includes(searchTarget);
-      const descMatch = p.description.toLowerCase().includes(searchTarget);
-      const tagMatch = p.tags.some(t => t.toLowerCase().includes(searchTarget));
-      const brandMatch = p.brand.toLowerCase().includes(searchTarget);
-      const categoryMatch = p.category.toLowerCase().includes(searchTarget);
+      if (!p) return false;
+      const pTitle = (p.title || '').toLowerCase();
+      const pDesc = (p.description || '').toLowerCase();
+      const pBrand = (p.brand || '').toLowerCase();
+      const pCat = (p.category || '').toLowerCase();
+      const pTags = Array.isArray(p.tags) ? p.tags : (typeof p.tags === 'string' ? p.tags.split(',') : []);
+
+      const titleMatch = pTitle.includes(searchTarget);
+      const descMatch = pDesc.includes(searchTarget);
+      const tagMatch = pTags.some(t => String(t || '').toLowerCase().includes(searchTarget));
+      const brandMatch = pBrand.includes(searchTarget);
+      const categoryMatch = pCat.includes(searchTarget);
 
       return titleMatch || descMatch || tagMatch || brandMatch || categoryMatch;
     });

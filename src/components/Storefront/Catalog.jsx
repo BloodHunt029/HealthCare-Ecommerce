@@ -121,6 +121,17 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
 
   // Filter logic
   const filteredProducts = products.filter(p => {
+    if (!p) return false;
+
+    const pCat = (p.category || '').toLowerCase().trim();
+    const pTitle = (p.title || '').toLowerCase().trim();
+    const pDesc = (p.description || '').toLowerCase().trim();
+    const pBrand = (p.brand || '').toLowerCase().trim();
+    const pCollections = getNormalizedCollections(p);
+    const pTags = Array.isArray(p.tags) 
+      ? p.tags.map(t => String(t || '').toLowerCase().trim()) 
+      : (typeof p.tags === 'string' ? p.tags.split(',').map(t => t.toLowerCase().trim()) : []);
+
     // Category filter
     if (selectedCategory !== 'All') {
       const rawTarget = String(selectedCategory).toLowerCase().trim();
@@ -128,16 +139,12 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
         .replace(/\b(collection|collections|page|items|store|highlight|highlights)\b/gi, '')
         .trim();
 
-      const pCat = (p.category || '').toLowerCase().trim();
-      const pTitle = (p.title || '').toLowerCase().trim();
-      const pCollections = getNormalizedCollections(p);
-      const pTags = Array.isArray(p.tags) ? p.tags.map(t => String(t).toLowerCase().trim()) : [];
-
       // 1. Direct explicit assignment match (check p.collections or p.category)
       const isExplicitInCol = pCat === rawTarget || pCat === cleanTarget || pCollections.some(c => c === rawTarget || c === cleanTarget || (cleanTarget.length > 2 && c.includes(cleanTarget)) || (c.length > 2 && cleanTarget.includes(c)));
 
       // Check if ANY products in the catalog have been explicitly linked to this collection by the admin
       const hasExplicitCollectionItems = products.some(prod => {
+        if (!prod) return false;
         const cat = (prod.category || '').toLowerCase().trim();
         const colls = getNormalizedCollections(prod);
         return cat === rawTarget || cat === cleanTarget || colls.some(c => c === rawTarget || c === cleanTarget || (cleanTarget.length > 2 && c.includes(cleanTarget)) || (c.length > 2 && cleanTarget.includes(c)));
@@ -168,23 +175,25 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
     }
     
     // Brand filter
-    if (selectedBrand !== 'All' && p.brand.toUpperCase() !== selectedBrand.toUpperCase()) return false;
+    if (selectedBrand !== 'All' && pBrand.toUpperCase() !== String(selectedBrand).toUpperCase()) return false;
     
     // Price filter
     if (priceFilter !== 'All') {
-      if (priceFilter === 'under2k' && p.price >= 2000) return false;
-      if (priceFilter === '2k-10k' && (p.price < 2000 || p.price > 10000)) return false;
-      if (priceFilter === 'over10k' && p.price <= 10000) return false;
+      const priceNum = Number(p.price) || 0;
+      if (priceFilter === 'under2k' && priceNum >= 2000) return false;
+      if (priceFilter === '2k-10k' && (priceNum < 2000 || priceNum > 10000)) return false;
+      if (priceFilter === 'over10k' && priceNum <= 10000) return false;
     }
 
     // Search query
     if (searchQuery.trim().length > 0) {
-      const target = searchQuery.toLowerCase();
-      const titleMatch = p.title.toLowerCase().includes(target);
-      const descMatch = p.description.toLowerCase().includes(target);
-      const brandMatch = p.brand.toLowerCase().includes(target);
-      const tagMatch = p.tags.some(t => t.toLowerCase().includes(target));
-      if (!titleMatch && !descMatch && !brandMatch && !tagMatch) return false;
+      const target = searchQuery.toLowerCase().trim();
+      const titleMatch = pTitle.includes(target);
+      const descMatch = pDesc.includes(target);
+      const brandMatch = pBrand.includes(target);
+      const catMatch = pCat.includes(target);
+      const tagMatch = pTags.some(t => t.includes(target));
+      if (!titleMatch && !descMatch && !brandMatch && !catMatch && !tagMatch) return false;
     }
 
     return true;
