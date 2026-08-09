@@ -207,33 +207,60 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
           <div style={{ borderTop: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--card))' }}>
             <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1.5rem', display: 'flex', gap: '2rem', overflowX: 'auto' }}>
               {(layout.navigationTabs || [
-                { id: 'home', label: 'Home' },
-                { id: 'catalog', label: 'Shop Catalog' },
-                { id: 'services', label: 'Care Services' },
-                { id: 'blog', label: 'Blog & FAQs' },
-                { id: 'userPortal', label: 'My Account' }
-              ]).map(tab => {
-                const handleNavClick = () => {
-                  if (tab.id === 'home' || tab.id === 'services' || tab.id === 'blog' || tab.id === 'userPortal') {
-                    setActiveTab(tab.id);
+                { id: 'home', label: 'Home', collection: 'home' },
+                { id: 'catalog', label: 'Shop Catalog', collection: 'All' },
+                { id: 'hospital_bed', label: 'Hospital Bed Collection', collection: 'Hospital Bed' },
+                { id: 'walkers_stick', label: 'Walkers & Walkstick Collection', collection: 'Walkers & Walkstick' },
+                { id: 'services', label: 'Care Services', collection: 'services' },
+                { id: 'blog', label: 'Blog & FAQs', collection: 'blog' },
+                { id: 'userPortal', label: 'My Account', collection: 'userPortal' }
+              ]).map((tab, idx) => {
+                let target = tab.collection;
+                const labelLower = (tab.label || '').toLowerCase();
+                
+                // Smart fallback if target is unassigned or still legacy tab.id
+                if (!target || target === tab.id) {
+                  if (labelLower.includes('hospital bed') || labelLower.includes('bed collection') || labelLower.includes('hospital cot')) {
+                    target = 'Hospital Bed';
+                  } else if (labelLower.includes('walker') || labelLower.includes('walkstick') || labelLower.includes('walking stick')) {
+                    target = 'Walkers & Walkstick';
+                  } else if (labelLower.includes('services') || labelLower.includes('care services')) {
+                    target = 'services';
+                  } else if (labelLower.includes('home')) {
+                    target = 'home';
+                  } else if (labelLower.includes('blog') || labelLower.includes('faq')) {
+                    target = 'blog';
+                  } else if (labelLower.includes('account') || labelLower.includes('userportal')) {
+                    target = 'userPortal';
                   } else {
-                    const catTarget = tab.collection || 'All';
+                    target = tab.id || 'All';
+                  }
+                }
+
+                const handleNavClick = () => {
+                  if (target === 'home' || target === 'services' || target === 'blog' || target === 'userPortal') {
+                    setActiveTab(target);
+                  } else {
+                    const catTarget = target || 'All';
                     if (typeof window !== 'undefined') window.__pendingCategory = catTarget;
                     setActiveTab('catalog');
                     window.dispatchEvent(new CustomEvent('selectCategory', { detail: catTarget }));
                   }
                 };
 
+                const isStorePage = target === 'home' || target === 'services' || target === 'blog' || target === 'userPortal';
+                const isActive = isStorePage ? activeTab === target : activeTab === 'catalog';
+
                 return (
                   <button
-                    key={tab.id}
+                    key={tab.id || idx}
                     onClick={handleNavClick}
                     style={{
                       padding: '1rem 0.25rem',
                       fontSize: '0.875rem',
                       fontWeight: '600',
-                      color: activeTab === tab.id ? 'hsl(var(--primary))' : 'hsl(var(--text-muted))',
-                      borderBottom: activeTab === tab.id ? '3px solid hsl(var(--primary))' : '3px solid transparent',
+                      color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--text-muted))',
+                      borderBottom: isActive ? '3px solid hsl(var(--primary))' : '3px solid transparent',
                       transition: 'all var(--transition-fast)',
                       whiteSpace: 'nowrap'
                     }}

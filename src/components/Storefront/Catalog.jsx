@@ -96,10 +96,37 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
   const filteredProducts = products.filter(p => {
     // Category filter
     if (selectedCategory !== 'All') {
-      const nameNorm = selectedCategory.toLowerCase().trim();
-      const catMatch = p.category && p.category.toLowerCase().trim() === nameNorm;
-      const colMatch = Array.isArray(p.collections) && p.collections.some(c => String(c).toLowerCase().trim() === nameNorm);
-      if (!catMatch && !colMatch) return false;
+      const rawTarget = String(selectedCategory).toLowerCase().trim();
+      const cleanTarget = rawTarget
+        .replace(/\b(collection|collections|page|items|store|highlight|highlights)\b/gi, '')
+        .trim();
+
+      const pCat = (p.category || '').toLowerCase().trim();
+      const pTitle = (p.title || '').toLowerCase().trim();
+      const pDesc = (p.description || '').toLowerCase().trim();
+      const pCollections = Array.isArray(p.collections) ? p.collections.map(c => String(c).toLowerCase().trim()) : [];
+      const pTags = Array.isArray(p.tags) ? p.tags.map(t => String(t).toLowerCase().trim()) : [];
+
+      // Direct exact or substring match
+      const catMatch = pCat === rawTarget || pCat === cleanTarget || (cleanTarget && (pCat.includes(cleanTarget) || cleanTarget.includes(pCat)));
+      const colMatch = pCollections.some(c => c === rawTarget || c === cleanTarget || (cleanTarget && c.includes(cleanTarget)));
+      const tagMatch = pTags.some(t => t === rawTarget || t === cleanTarget || (cleanTarget && (t.includes(cleanTarget) || cleanTarget.includes(t))));
+
+      // Specialized keyword search for key medical collections
+      let termMatch = false;
+
+      if (cleanTarget.includes('hospital bed') || cleanTarget.includes('bed') || cleanTarget.includes('cot')) {
+        termMatch = pTitle.includes('bed') || pTitle.includes('cot') || pCat.includes('home care') || pTags.some(t => t.includes('bed') || t.includes('cot'));
+      } else if (cleanTarget.includes('walker') || cleanTarget.includes('walkstick') || cleanTarget.includes('stick') || cleanTarget.includes('crutch')) {
+        termMatch = pTitle.includes('walker') || pTitle.includes('stick') || pTitle.includes('crutch') || pCat.includes('mobility') || pTags.some(t => t.includes('walker') || t.includes('stick') || t.includes('crutch') || t.includes('mobility'));
+      } else if (cleanTarget.includes('wheelchair') || cleanTarget.includes('wheel chair')) {
+        termMatch = pTitle.includes('wheelchair') || pTitle.includes('wheel chair') || pTags.some(t => t.includes('wheelchair'));
+      } else if (cleanTarget.length > 2) {
+        const terms = cleanTarget.split(/[\s&,/]+/).filter(t => t.length > 2);
+        termMatch = terms.some(t => pTitle.includes(t) || pCat.includes(t) || pTags.some(tag => tag.includes(t)));
+      }
+
+      if (!catMatch && !colMatch && !tagMatch && !termMatch) return false;
     }
     
     // Brand filter

@@ -1011,6 +1011,13 @@ export default function OnlineStore() {
                                   <option value="Medical Devices">Medical Devices</option>
                                   <option value="Surgicals & PPE">Surgicals & PPE</option>
                                 </optgroup>
+                                <optgroup label="Popular Equipment Collections">
+                                  <option value="Hospital Bed">Hospital Bed Collection</option>
+                                  <option value="Walkers & Walkstick">Walkers & Walkstick Collection</option>
+                                  <option value="Wheelchairs">Wheelchairs Collection</option>
+                                  <option value="Respiratory Care">Respiratory Care Collection</option>
+                                  <option value="Diagnostics">Diagnostics Collection</option>
+                                </optgroup>
                                 <optgroup label="Featured Category Highlights">
                                   {collectionsList.map(c => (
                                     <option key={c.name} value={c.name}>{c.name}</option>

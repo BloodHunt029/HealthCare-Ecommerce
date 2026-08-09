@@ -142,6 +142,72 @@ const initialProducts = [
       description: 'Buy automatic digital blood pressure monitor with voice function. Dual user 180 memory capacity. Fast delivery across India.',
       slug: 'digital-bp-monitor-voice'
     }
+  },
+  {
+    id: 'p5',
+    title: 'Ultra Light Weight Folding Patient Walker with Wheels',
+    description: 'High-strength anodized aluminum lightweight folding walker with 5-inch front wheels and non-slip rubber tips. Height adjustable with one-button push folding mechanism. Perfect support for elderly mobility and post-surgery walking rehabilitation.',
+    category: 'Mobility Aid',
+    price: 2450,
+    mrp: 3500,
+    image: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+    isRentable: true,
+    rentRates: { daily: 50, weekly: 300, monthly: 900 },
+    securityDeposit: 1000,
+    specifications: [
+      { name: 'Frame Material', value: 'Anodized Lightweight Aluminum' },
+      { name: 'Height Adjustment', value: '78 cm - 96 cm (8 levels)' },
+      { name: 'Weight Capacity', value: '110 kg' },
+      { name: 'Weight', value: '2.4 kg' }
+    ],
+    stock: 20,
+    lowStockThreshold: 5,
+    brand: 'AeonFit',
+    tags: ['walker', 'walkers', 'walkstick', 'walking stick', 'mobility', 'crutches', 'folding walker'],
+    reviews: [
+      { name: 'Subramanian R.', rating: 5, comment: 'Very sturdy and lightweight walker. Easy for my father to fold and keep in the car.', date: '2026-07-12' }
+    ],
+    qa: [
+      { question: 'Is the height adjustable?', answer: 'Yes, height can be adjusted easily across 8 preset levels.' }
+    ],
+    seo: {
+      title: 'Buy/Rent Light Weight Folding Patient Walker - AeonCare',
+      description: 'Shop aluminum folding patient walkers with wheels online. Height adjustable, one-button fold.',
+      slug: 'folding-patient-walker-wheels'
+    }
+  },
+  {
+    id: 'p6',
+    title: 'Ergonomic Quad Cane Walking Stick with Anti-Slip Base',
+    description: '4-leg quad walking stick designed for superior stability and balance. Features soft foam grip handle, lightweight aluminum shaft, and self-standing 4-prong rubber base for maximum support on flat and uneven surfaces.',
+    category: 'Mobility Aid',
+    price: 1350,
+    mrp: 1950,
+    image: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+    isRentable: false,
+    rentRates: { daily: 0, weekly: 0, monthly: 0 },
+    securityDeposit: 0,
+    specifications: [
+      { name: 'Base Type', value: 'Quad 4-Leg Rubber Tip Base' },
+      { name: 'Height Adjustment', value: '72 cm - 95 cm' },
+      { name: 'Weight Capacity', value: '100 kg' },
+      { name: 'Grip', value: 'Ergonomic Cushioned Foam' }
+    ],
+    stock: 35,
+    lowStockThreshold: 8,
+    brand: 'CareQuip',
+    tags: ['walkstick', 'walkers', 'walking stick', 'quad cane', 'stick', 'mobility'],
+    reviews: [
+      { name: 'Parvathi M.', rating: 5, comment: 'Provides great support for my mother. Doesn’t slip even on smooth tile floors.', date: '2026-07-14' }
+    ],
+    qa: [
+      { question: 'Can it stand upright on its own?', answer: 'Yes, the wide 4-prong base allows it to stand independently.' }
+    ],
+    seo: {
+      title: 'Buy Quad Cane Walking Stick Online - AeonCare',
+      description: 'Four prong quad walking stick for elderly stability. Height adjustable non-slip base.',
+      slug: 'quad-cane-walking-stick'
+    }
   }
 ];
 
@@ -332,12 +398,13 @@ const initialLayout = {
   announcementBar: '🚚 Free Express Delivery in Chennai on Orders above ₹2,000!',
   hiddenSections: [],
   navigationTabs: [
-    { id: 'home', label: 'Home' },
-    { id: 'catalog', label: 'Shop Catalog' },
-    { id: 'services', label: 'Care Services' },
-    { id: 'blog', label: 'Caregiver Blog' },
-    { id: 'faq', label: 'Help & FAQs' },
-    { id: 'userPortal', label: 'My Account' }
+    { id: 'home', label: 'Home', collection: 'home' },
+    { id: 'catalog', label: 'Shop Catalog', collection: 'All' },
+    { id: 'hospital_bed', label: 'Hospital Bed Collection', collection: 'Hospital Bed' },
+    { id: 'walkers_stick', label: 'Walkers & Walkstick Collection', collection: 'Walkers & Walkstick' },
+    { id: 'services', label: 'Care Services', collection: 'services' },
+    { id: 'blog', label: 'Caregiver Blog', collection: 'blog' },
+    { id: 'userPortal', label: 'My Account', collection: 'userPortal' }
   ],
   sectionsOrder: ['hero', 'trust', 'collections', 'banner', 'featured', 'video', 'faq', 'blog', 'cta'],
   heroTitle: 'Caring for your family, right at home.',
