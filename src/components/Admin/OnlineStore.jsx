@@ -1032,7 +1032,10 @@ export default function OnlineStore() {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                       {[
-                        { key: 'showRevenue', label: 'Revenue Total Stat Card' },
+                        { key: 'showRevenue', label: '1. Total Sales Stat Card' },
+                        { key: 'showSessions', label: '2. Store Sessions Stat Card' },
+                        { key: 'showTotalOrders', label: '3. No. of Orders Stat Card' },
+                        { key: 'showConversionRate', label: '4. Conversion Value % Stat Card' },
                         { key: 'showFulfillment', label: 'Awaiting Fulfillment Stat Card' },
                         { key: 'showTotalProducts', label: 'Total Products Stat Card' },
                         { key: 'showLowStock', label: 'Low Stock Alerts Stat Card' },
@@ -1042,7 +1045,8 @@ export default function OnlineStore() {
                         { key: 'showRecentTransactions', label: 'Recent Transactions Table' }
                       ].map(w => {
                         const activeWidgets = {
-                          showRevenue: true, showFulfillment: true, showTotalProducts: true, showLowStock: true,
+                          showRevenue: true, showSessions: true, showTotalOrders: true, showConversionRate: true,
+                          showFulfillment: true, showTotalProducts: true, showLowStock: true,
                           showSalesChart: true, showTaskCenter: true, showInventoryCheck: true, showRecentTransactions: true,
                           ...(layout?.adminDashboardWidgets || {})
                         };
