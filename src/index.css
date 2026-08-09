@@ -65,6 +65,8 @@
   --secondary-h: 198;
   --secondary-s: 75%;
   --secondary-l: 96%;
+  --primary: 174 65% 38%;
+  --secondary: 198 75% 96%;
 }
 
 .theme-emerald {
@@ -74,6 +76,8 @@
   --secondary-h: 150;
   --secondary-s: 60%;
   --secondary-l: 95%;
+  --primary: 150 70% 35%;
+  --secondary: 150 60% 95%;
 }
 
 .theme-blue {
@@ -83,6 +87,8 @@
   --secondary-h: 217;
   --secondary-s: 80%;
   --secondary-l: 96%;
+  --primary: 217 85% 50%;
+  --secondary: 217 80% 96%;
 }
 
 .theme-purple {
@@ -92,6 +98,8 @@
   --secondary-h: 262;
   --secondary-s: 60%;
   --secondary-l: 96%;
+  --primary: 262 75% 52%;
+  --secondary: 262 60% 96%;
 }
 
 .theme-crimson {
@@ -101,6 +109,8 @@
   --secondary-h: 348;
   --secondary-s: 80%;
   --secondary-l: 96%;
+  --primary: 348 83% 47%;
+  --secondary: 348 80% 96%;
 }
 
 .theme-amber {
@@ -110,6 +120,8 @@
   --secondary-h: 38;
   --secondary-s: 80%;
   --secondary-l: 95%;
+  --primary: 38 92% 45%;
+  --secondary: 38 80% 95%;
 }
 
 .theme-dark {
@@ -122,6 +134,8 @@
   --text-muted-light: 224 71% 10%;
   --glass: rgba(15, 23, 42, 0.8);
   --glass-border: rgba(255, 255, 255, 0.05);
+  --primary: 217 85% 60%;
+  --secondary: 224 71% 15%;
 }
 
 /* Product List Card Color Themes */

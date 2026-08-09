@@ -32,6 +32,7 @@ export default function Products() {
 
   const [price, setPrice] = useState(0);
   const [mrp, setMrp] = useState(0);
+  const [offerTag, setOfferTag] = useState('');
   
   // Multiple images state array
   const [images, setImages] = useState([]);
@@ -86,6 +87,7 @@ export default function Products() {
 
     setPrice(prod.price);
     setMrp(prod.mrp || prod.price);
+    setOfferTag(prod.offerTag || '');
     
     // Load multiple images or fallback to single image array
     const loadedImgs = Array.isArray(prod.images) && prod.images.length > 0 
@@ -127,6 +129,7 @@ export default function Products() {
 
     setPrice(0);
     setMrp(0);
+    setOfferTag('');
     setImages(['https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?w=600']);
     setStock(10);
     setLowStockThreshold(3);
@@ -199,6 +202,7 @@ export default function Products() {
       productType: productType || 'None',
       price: Number(price),
       mrp: Number(mrp) || Number(price),
+      offerTag: offerTag ? offerTag.trim() : '',
       
       // Save primary image and complete images array
       image: images[0] || 'https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?w=600',
@@ -849,13 +853,13 @@ export default function Products() {
                 )}
               </div>
 
-              {/* Pricing details card */}
+              {/* Pricing & Offer details card */}
               <div className="card" style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <h3 style={{ fontSize: '0.9rem', fontWeight: '800', marginBottom: '1rem', color: '#1e293b' }}>Pricing</h3>
+                <h3 style={{ fontSize: '0.9rem', fontWeight: '800', marginBottom: '1rem', color: '#1e293b' }}>Pricing & Promotional Offer</h3>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">Price</label>
+                    <label className="form-label" style={{ fontWeight: '700' }}>Selling Price (₹)</label>
                     <div style={{ position: 'relative' }}>
                       <span style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', fontSize: '0.85rem', color: '#64748b' }}>₹</span>
                       <input 
@@ -867,8 +871,9 @@ export default function Products() {
                       />
                     </div>
                   </div>
+
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">Compare-at price (MRP)</label>
+                    <label className="form-label" style={{ fontWeight: '700' }}>Compare-at MRP (₹)</label>
                     <div style={{ position: 'relative' }}>
                       <span style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', fontSize: '0.85rem', color: '#64748b' }}>₹</span>
                       <input 
@@ -880,6 +885,44 @@ export default function Products() {
                       />
                     </div>
                   </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontWeight: '700' }}>Discount Offer (%)</label>
+                    <div style={{ position: 'relative' }}>
+                      <input 
+                        type="number" 
+                        className="form-input" 
+                        placeholder="e.g. 20"
+                        value={Number(mrp) > 0 && Number(price) > 0 ? Math.max(0, Math.round(((Number(mrp) - Number(price)) / Number(mrp)) * 100)) : ''} 
+                        onChange={(e) => {
+                          const pct = Number(e.target.value) || 0;
+                          const baseMrp = Number(mrp) || Number(price) || 0;
+                          if (baseMrp > 0) {
+                            const newPrice = Math.round(baseMrp - (baseMrp * pct / 100));
+                            setPrice(newPrice);
+                          }
+                        }} 
+                        style={{ paddingRight: '1.75rem' }} 
+                      />
+                      <span style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', fontSize: '0.85rem', color: '#64748b', fontWeight: 'bold' }}>%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontWeight: '700' }}>Custom Offer Badge / Promotional Tag</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="e.g. SPECIAL FESTIVE OFFER - FLAT 25% OFF | FREE DOORSTEP SETUP"
+                    value={offerTag} 
+                    onChange={(e) => setOfferTag(e.target.value)} 
+                  />
+                  {Number(mrp) > Number(price) && (
+                    <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#16a34a', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <span>🔥 Customer Saves ₹{(Number(mrp) - Number(price)).toLocaleString('en-IN')} ({Math.round(((Number(mrp) - Number(price)) / Number(mrp)) * 100)}% OFF)</span>
+                    </div>
+                  )}
                 </div>
               </div>
 

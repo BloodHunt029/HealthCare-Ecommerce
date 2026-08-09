@@ -404,8 +404,8 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
                   }}
                   className="card-hover-grid-item"
                 >
-                  {/* Red Save Badge */}
-                  {hasDiscount && (
+                  {/* Red Save Badge or Custom Offer Tag */}
+                  {(p.offerTag || hasDiscount) && (
                     <div style={{
                       position: 'absolute',
                       top: '1rem',
@@ -419,7 +419,7 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
                       textTransform: 'uppercase',
                       zIndex: 3
                     }}>
-                      Save Rs. {discountValue.toLocaleString('en-IN')}.00
+                      {p.offerTag ? p.offerTag : `Save Rs. ${discountValue.toLocaleString('en-IN')}.00`}
                     </div>
                   )}
 

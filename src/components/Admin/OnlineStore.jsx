@@ -912,15 +912,18 @@ export default function OnlineStore() {
                         <button
                           key={opt.id}
                           type="button"
-                          onClick={() => setThemeColors(opt.id)}
+                          onClick={() => {
+                            setThemeColors(opt.id);
+                            updateLayout({ themeColors: opt.id });
+                          }}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem',
                             padding: '0.5rem 0.65rem',
                             border: '1px solid',
-                            borderColor: themeColors === opt.id ? '#2563eb' : '#e2e8f0',
-                            backgroundColor: themeColors === opt.id ? '#eff6ff' : '#ffffff',
+                            borderColor: (layout?.themeColors || themeColors) === opt.id ? '#2563eb' : '#e2e8f0',
+                            backgroundColor: (layout?.themeColors || themeColors) === opt.id ? '#eff6ff' : '#ffffff',
                             borderRadius: '6px',
                             cursor: 'pointer',
                             fontSize: '0.75rem',
@@ -946,15 +949,18 @@ export default function OnlineStore() {
                         <button
                           key={opt.id}
                           type="button"
-                          onClick={() => setProductListColor(opt.id)}
+                          onClick={() => {
+                            setProductListColor(opt.id);
+                            updateLayout({ productListColor: opt.id });
+                          }}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem',
                             padding: '0.5rem 0.65rem',
                             border: '1px solid',
-                            borderColor: productListColor === opt.id ? '#2563eb' : '#e2e8f0',
-                            backgroundColor: productListColor === opt.id ? '#eff6ff' : '#ffffff',
+                            borderColor: (layout?.productListColor || productListColor) === opt.id ? '#2563eb' : '#e2e8f0',
+                            backgroundColor: (layout?.productListColor || productListColor) === opt.id ? '#eff6ff' : '#ffffff',
                             borderRadius: '6px',
                             cursor: 'pointer',
                             fontSize: '0.75rem',
