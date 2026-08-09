@@ -263,7 +263,7 @@ function AppContent() {
             <div className="system-banner" style={{ backgroundColor: '#1e293b', borderBottom: '1px solid #475569' }}>
               <div className="mode-indicator">
                 <span style={{ display: 'inline-block', backgroundColor: 'hsl(var(--primary))', color: 'white', borderRadius: '4px', padding: '2px 4px', fontWeight: 'bold', fontSize: '0.7rem' }}>ADMIN AUTH</span>
-                <span>AeonCare Control Panel Staff Login</span>
+                <span>{layout?.logoText || storeSettings?.storeName || 'Health Care'} Control Panel Staff Login</span>
               </div>
               <button 
                 className="btn btn-primary" 
@@ -281,7 +281,7 @@ function AppContent() {
             <div className="system-banner" style={{ backgroundColor: '#1e293b', borderBottom: '1px solid #475569' }}>
               <div className="mode-indicator">
                 <span style={{ display: 'inline-block', backgroundColor: 'hsl(var(--primary))', color: 'white', borderRadius: '4px', padding: '2px 4px', fontWeight: 'bold', fontSize: '0.7rem' }}>ADMIN</span>
-                <span>AeonCare Control Panel</span>
+                <span>{layout?.logoText || storeSettings?.storeName || 'Health Care'} Control Panel</span>
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                 <span style={{ color: '#cbd5e1', fontSize: '0.78rem' }}>
@@ -329,7 +329,7 @@ function AppContent() {
             <aside className="admin-sidebar animate-fade-in">
               <div style={{ padding: '0 0.5rem 1rem', borderBottom: '1px solid hsl(var(--border))', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <ShieldCheck size={20} style={{ color: 'hsl(var(--primary))' }} />
-                <span style={{ fontWeight: '800', fontSize: '1rem' }}>AeonAdmin Suite</span>
+                <span style={{ fontWeight: '800', fontSize: '1rem' }}>{layout?.logoText || storeSettings?.storeName || 'Health Care'} Admin Suite</span>
               </div>
 
               {/* Home */}
