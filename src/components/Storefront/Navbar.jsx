@@ -118,27 +118,27 @@ export default function Navbar({ activeTab, setActiveTab, setSelectedProductId, 
   return (
     <header className="animate-fade-in" style={{ position: 'relative', zIndex: 1000 }}>
       {!layout?.hiddenSections?.includes('announcementBar') && (
-        <div style={{ backgroundColor: 'hsl(var(--primary))', color: 'white', fontSize: '0.8rem', padding: '0.4rem 1rem', textAlign: 'center', fontWeight: '500' }}>
+        <div className="announcement-bar" style={{ backgroundColor: 'hsl(var(--primary))', color: 'white', fontSize: '0.8rem', padding: '0.4rem 1rem', textAlign: 'center', fontWeight: '500' }}>
           {layout.announcementBar}
         </div>
       )}
 
       {/* Main Navigation Row */}
       <div style={{ borderBottom: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--card))' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
+        <div className="navbar-container" style={{ maxWidth: '1280px', margin: '0 auto', padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
           
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => setActiveTab('home')}>
             <span style={{ display: 'inline-block', backgroundColor: 'hsl(var(--primary))', color: 'white', borderRadius: '8px', padding: '6px' }}>
               <ShieldCheck size={24} />
             </span>
-            <span style={{ fontSize: '1.5rem', fontWeight: '800', color: 'hsl(var(--primary))', letterSpacing: '-0.03em' }}>
-              {layout?.logoText || storeSettings?.storeName || 'AeonCare'}
+            <span style={{ fontSize: '1.4rem', fontWeight: '800', color: 'hsl(var(--primary))', letterSpacing: '-0.03em' }}>
+              {layout?.logoText || storeSettings?.storeName || 'Health Care'}
             </span>
           </div>
 
           {/* Autocomplete Search Bar */}
-          <form onSubmit={handleSearchSubmit} style={{ flex: 1, maxWidth: '500px', position: 'relative', zIndex: 1001 }} ref={suggestionRef}>
+          <form onSubmit={handleSearchSubmit} className="navbar-search-form" style={{ flex: 1, maxWidth: '500px', position: 'relative', zIndex: 1001 }} ref={suggestionRef}>
             <div style={{ position: 'relative' }}>
               <input
                 type="text"
