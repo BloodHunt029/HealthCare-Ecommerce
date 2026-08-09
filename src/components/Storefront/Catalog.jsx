@@ -108,22 +108,22 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
       const pTags = Array.isArray(p.tags) ? p.tags.map(t => String(t).toLowerCase().trim()) : [];
 
       // Direct exact or substring match
-      const catMatch = pCat === rawTarget || pCat === cleanTarget || (cleanTarget && (pCat.includes(cleanTarget) || cleanTarget.includes(pCat)));
-      const colMatch = pCollections.some(c => c === rawTarget || c === cleanTarget || (cleanTarget && c.includes(cleanTarget)));
-      const tagMatch = pTags.some(t => t === rawTarget || t === cleanTarget || (cleanTarget && (t.includes(cleanTarget) || cleanTarget.includes(t))));
+      const catMatch = pCat === rawTarget || pCat === cleanTarget || (cleanTarget.length > 3 && (pCat === cleanTarget || pCat.startsWith(cleanTarget)));
+      const colMatch = pCollections.some(c => c === rawTarget || c === cleanTarget || (cleanTarget.length > 3 && c.includes(cleanTarget)));
+      const tagMatch = pTags.some(t => t === rawTarget || t === cleanTarget || (cleanTarget.length > 3 && (t.includes(cleanTarget) || cleanTarget.includes(t))));
 
-      // Specialized keyword search for key medical collections
+      // Specialized product keyword search for targeted equipment collections
       let termMatch = false;
 
       if (cleanTarget.includes('hospital bed') || cleanTarget.includes('bed') || cleanTarget.includes('cot')) {
-        termMatch = pTitle.includes('bed') || pTitle.includes('cot') || pCat.includes('home care') || pTags.some(t => t.includes('bed') || t.includes('cot'));
+        termMatch = pTitle.includes('bed') || pTitle.includes('cot') || pTags.some(t => t.includes('bed') || t.includes('cot')) || pCollections.some(c => c.includes('bed') || c.includes('cot'));
       } else if (cleanTarget.includes('walker') || cleanTarget.includes('walkstick') || cleanTarget.includes('stick') || cleanTarget.includes('crutch')) {
-        termMatch = pTitle.includes('walker') || pTitle.includes('stick') || pTitle.includes('crutch') || pCat.includes('mobility') || pTags.some(t => t.includes('walker') || t.includes('stick') || t.includes('crutch') || t.includes('mobility'));
+        termMatch = pTitle.includes('walker') || pTitle.includes('stick') || pTitle.includes('crutch') || pTags.some(t => t.includes('walker') || t.includes('stick') || t.includes('crutch')) || pCollections.some(c => c.includes('walker') || c.includes('stick'));
       } else if (cleanTarget.includes('wheelchair') || cleanTarget.includes('wheel chair')) {
-        termMatch = pTitle.includes('wheelchair') || pTitle.includes('wheel chair') || pTags.some(t => t.includes('wheelchair'));
-      } else if (cleanTarget.length > 2) {
-        const terms = cleanTarget.split(/[\s&,/]+/).filter(t => t.length > 2);
-        termMatch = terms.some(t => pTitle.includes(t) || pCat.includes(t) || pTags.some(tag => tag.includes(t)));
+        termMatch = pTitle.includes('wheelchair') || pTitle.includes('wheel chair') || pTags.some(t => t.includes('wheelchair')) || pCollections.some(c => c.includes('wheelchair'));
+      } else if (cleanTarget.length > 3 && !['all', 'home care', 'mobility aid', 'medical devices'].includes(cleanTarget)) {
+        const terms = cleanTarget.split(/[\s&,/]+/).filter(t => t.length > 3);
+        termMatch = terms.length > 0 && terms.some(t => pTitle.includes(t) || pTags.some(tag => tag.includes(t)) || pCollections.some(c => c.includes(t)));
       }
 
       if (!catMatch && !colMatch && !tagMatch && !termMatch) return false;

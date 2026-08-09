@@ -10,6 +10,18 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
   const [suggestions, setSuggestions] = useState([]);
   const suggestionRef = useRef(null);
 
+  const [currentCategory, setCurrentCategory] = useState(() => (typeof window !== 'undefined' && window.__pendingCategory) ? window.__pendingCategory : 'All');
+
+  useEffect(() => {
+    const handleCategoryChange = (e) => {
+      if (e && e.detail) {
+        setCurrentCategory(e.detail);
+      }
+    };
+    window.addEventListener('selectCategory', handleCategoryChange);
+    return () => window.removeEventListener('selectCategory', handleCategoryChange);
+  }, []);
+
   // Close suggestions on click outside
   useEffect(() => {
     function handleClickOutside(event) {
@@ -224,6 +236,8 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
                     target = 'Hospital Bed';
                   } else if (labelLower.includes('walker') || labelLower.includes('walkstick') || labelLower.includes('walking stick')) {
                     target = 'Walkers & Walkstick';
+                  } else if (labelLower.includes('wheelchair')) {
+                    target = 'Wheelchairs';
                   } else if (labelLower.includes('services') || labelLower.includes('care services')) {
                     target = 'services';
                   } else if (labelLower.includes('home')) {
@@ -232,6 +246,8 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
                     target = 'blog';
                   } else if (labelLower.includes('account') || labelLower.includes('userportal')) {
                     target = 'userPortal';
+                  } else if (labelLower.includes('all') || labelLower.includes('shop') || labelLower.includes('catalog')) {
+                    target = 'All';
                   } else {
                     target = tab.id || 'All';
                   }
@@ -243,13 +259,28 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
                   } else {
                     const catTarget = target || 'All';
                     if (typeof window !== 'undefined') window.__pendingCategory = catTarget;
+                    setCurrentCategory(catTarget);
                     setActiveTab('catalog');
                     window.dispatchEvent(new CustomEvent('selectCategory', { detail: catTarget }));
                   }
                 };
 
                 const isStorePage = target === 'home' || target === 'services' || target === 'blog' || target === 'userPortal';
-                const isActive = isStorePage ? activeTab === target : activeTab === 'catalog';
+
+                let isActive = false;
+                if (isStorePage) {
+                  isActive = activeTab === target;
+                } else if (activeTab === 'catalog') {
+                  const normCurr = (currentCategory || 'All').toLowerCase().trim();
+                  const normTgt = (target || 'All').toLowerCase().trim();
+                  const normLabel = labelLower.trim();
+
+                  if (normTgt === 'all' || normTgt === 'catalog' || tab.id === 'catalog' || normLabel.includes('all products') || normLabel.includes('shop catalog')) {
+                    isActive = normCurr === 'all' || normCurr === 'catalog';
+                  } else {
+                    isActive = normCurr === normTgt || (normCurr.length > 2 && normTgt.includes(normCurr)) || (normTgt.length > 2 && normCurr.includes(normTgt));
+                  }
+                }
 
                 return (
                   <button
