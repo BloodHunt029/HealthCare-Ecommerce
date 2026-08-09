@@ -563,9 +563,24 @@ function CollectionsManager() {
   const isProductInCollection = (p, colName) => {
     if (!p || !colName) return false;
     const nameNorm = colName.toLowerCase().trim();
-    const categoryMatch = p.category && p.category.toLowerCase().trim() === nameNorm;
-    const collectionsArrayMatch = Array.isArray(p.collections) && p.collections.some(c => String(c).toLowerCase().trim() === nameNorm);
-    return categoryMatch || collectionsArrayMatch;
+    const cleanNorm = nameNorm.replace(/\b(collection|collections|page|items|store|highlight|highlights)\b/gi, '').trim();
+
+    const pCat = (p.category || '').toLowerCase().trim();
+    if (pCat === nameNorm || (cleanNorm.length > 2 && pCat === cleanNorm)) return true;
+
+    let pColls = [];
+    if (Array.isArray(p.collections)) {
+      pColls = p.collections.map(c => String(c).toLowerCase().trim());
+    } else if (typeof p.collections === 'string' && p.collections.trim()) {
+      pColls = p.collections.split(',').map(c => c.toLowerCase().trim());
+    }
+
+    return pColls.some(c => 
+      c === nameNorm || 
+      c === cleanNorm || 
+      (cleanNorm.length > 2 && c.includes(cleanNorm)) ||
+      (c.length > 2 && cleanNorm.includes(c))
+    );
   };
 
   // JPG File Uploader inside Collection editor
@@ -614,7 +629,8 @@ function CollectionsManager() {
   };
 
   const handleSaveCollectionDetails = () => {
-    const targetName = editColName.trim() || collections[editingIndex]?.name || 'Collection';
+    const oldName = collections[editingIndex]?.name;
+    const targetName = editColName.trim() || oldName || 'Collection';
     const updatedColls = [...collections];
     updatedColls[editingIndex] = { 
       ...updatedColls[editingIndex],
@@ -623,6 +639,31 @@ function CollectionsManager() {
       image: editColImage 
     };
     updateLayout({ collectionsList: updatedColls });
+
+    // If collection was renamed (e.g. from "New Collection 4" to "Diagnostics"), update all linked products!
+    if (oldName && oldName !== targetName) {
+      const updatedProducts = products.map(p => {
+        let pColls = Array.isArray(p.collections) 
+          ? p.collections 
+          : (typeof p.collections === 'string' ? p.collections.split(',') : []);
+        pColls = pColls.map(c => String(c).trim()).filter(Boolean);
+
+        const hasOld = pColls.some(c => c.toLowerCase() === oldName.toLowerCase());
+        if (hasOld) {
+          const newColls = pColls.map(c => c.toLowerCase() === oldName.toLowerCase() ? targetName : c);
+          const newCat = (p.category && p.category.toLowerCase() === oldName.toLowerCase()) ? targetName : p.category;
+          return { ...p, category: newCat, collections: newColls };
+        }
+        return p;
+      });
+
+      if (updateProductsBatch) {
+        updateProductsBatch(updatedProducts);
+      } else {
+        setProducts(updatedProducts);
+      }
+    }
+
     alert('Collection details saved successfully!');
   };
 
@@ -637,7 +678,8 @@ function CollectionsManager() {
   };
 
   const handleApplyProductsToCollection = () => {
-    const targetName = editColName.trim() || collections[editingIndex]?.name || 'Collection';
+    const oldName = collections[editingIndex]?.name;
+    const targetName = editColName.trim() || oldName || 'Collection';
     
     // Save collection details first
     const updatedColls = [...collections];
@@ -652,13 +694,20 @@ function CollectionsManager() {
     // Single pass batch update to update products list cleanly
     const updatedProducts = products.map(p => {
       const isSelected = tempSelectedIds.includes(p.id);
-      const inCol = isProductInCollection(p, targetName);
+      const inOldCol = oldName ? isProductInCollection(p, oldName) : false;
+      const inNewCol = isProductInCollection(p, targetName);
+      const inCol = inOldCol || inNewCol;
+
+      let existingColls = Array.isArray(p.collections) 
+        ? p.collections 
+        : (typeof p.collections === 'string' ? p.collections.split(',') : []);
+      existingColls = existingColls.map(c => String(c).trim()).filter(Boolean);
 
       if (isSelected) {
-        const existingColls = Array.isArray(p.collections) ? p.collections : [];
-        const newColls = existingColls.some(c => String(c).toLowerCase().trim() === targetName.toLowerCase().trim())
-          ? existingColls
-          : [...existingColls, targetName];
+        // Remove old name if renamed, ensure targetName is present
+        const filteredColls = existingColls.filter(c => c.toLowerCase() !== oldName?.toLowerCase());
+        const hasTarget = filteredColls.some(c => c.toLowerCase() === targetName.toLowerCase());
+        const newColls = hasTarget ? filteredColls : [...filteredColls, targetName];
 
         return { 
           ...p, 
@@ -666,9 +715,12 @@ function CollectionsManager() {
           collections: newColls 
         };
       } else if (!isSelected && inCol) {
-        const existingColls = Array.isArray(p.collections) ? p.collections : [];
-        const newColls = existingColls.filter(c => String(c).toLowerCase().trim() !== targetName.toLowerCase().trim());
-        const newCat = (p.category && p.category.toLowerCase().trim() === targetName.toLowerCase().trim()) 
+        // Unselected product: remove both oldName and targetName from collections
+        const newColls = existingColls.filter(c => 
+          c.toLowerCase() !== targetName.toLowerCase() && 
+          (!oldName || c.toLowerCase() !== oldName.toLowerCase())
+        );
+        const newCat = (p.category && (p.category.toLowerCase() === targetName.toLowerCase() || (oldName && p.category.toLowerCase() === oldName.toLowerCase()))) 
           ? (newColls[0] || 'Home Care') 
           : p.category;
 

@@ -107,6 +107,18 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
     'Mother & Baby Care': 'Gentle maternal hygiene, postpartum support, and infant care equipment.'
   };
 
+  // Helper function to extract normalized collection names regardless of array or string format
+  const getNormalizedCollections = (item) => {
+    if (!item) return [];
+    if (Array.isArray(item.collections)) {
+      return item.collections.map(c => String(c).toLowerCase().trim()).filter(Boolean);
+    }
+    if (typeof item.collections === 'string' && item.collections.trim().length > 0) {
+      return item.collections.split(',').map(c => c.toLowerCase().trim()).filter(Boolean);
+    }
+    return [];
+  };
+
   // Filter logic
   const filteredProducts = products.filter(p => {
     // Category filter
@@ -118,17 +130,17 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
 
       const pCat = (p.category || '').toLowerCase().trim();
       const pTitle = (p.title || '').toLowerCase().trim();
-      const pCollections = Array.isArray(p.collections) ? p.collections.map(c => String(c).toLowerCase().trim()) : [];
+      const pCollections = getNormalizedCollections(p);
       const pTags = Array.isArray(p.tags) ? p.tags.map(t => String(t).toLowerCase().trim()) : [];
 
       // 1. Direct explicit assignment match (check p.collections or p.category)
-      const isExplicitInCol = pCat === rawTarget || pCat === cleanTarget || pCollections.includes(rawTarget) || pCollections.includes(cleanTarget);
+      const isExplicitInCol = pCat === rawTarget || pCat === cleanTarget || pCollections.some(c => c === rawTarget || c === cleanTarget || (cleanTarget.length > 2 && c.includes(cleanTarget)) || (c.length > 2 && cleanTarget.includes(c)));
 
       // Check if ANY products in the catalog have been explicitly linked to this collection by the admin
       const hasExplicitCollectionItems = products.some(prod => {
         const cat = (prod.category || '').toLowerCase().trim();
-        const colls = Array.isArray(prod.collections) ? prod.collections.map(c => String(c).toLowerCase().trim()) : [];
-        return cat === rawTarget || cat === cleanTarget || colls.includes(rawTarget) || colls.includes(cleanTarget);
+        const colls = getNormalizedCollections(prod);
+        return cat === rawTarget || cat === cleanTarget || colls.some(c => c === rawTarget || c === cleanTarget || (cleanTarget.length > 2 && c.includes(cleanTarget)) || (c.length > 2 && cleanTarget.includes(c)));
       });
 
       if (hasExplicitCollectionItems) {
