@@ -159,60 +159,18 @@ export default function Dashboard({ setActiveAdminTab }) {
   return (
     <div className="animate-fade-in">
       
-      {/* Welcome header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+      {/* Welcome header with Top-Right Corner Date Selection */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '800' }}>Admin Command Dashboard</h1>
-          <p style={{ color: 'hsl(var(--text-muted))', fontSize: '0.875rem' }}>Real-time overview of sales, sessions, orders, conversion rate, and inventory.</p>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#0f172a', margin: 0 }}>Admin Command Dashboard</h1>
+          <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '3px 0 0' }}>Real-time overview of sales, sessions, orders, conversion rate, and inventory.</p>
         </div>
-      </div>
 
-      {/* DATE RANGE FILTER BAR & CUSTOM CALENDAR PICKER */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #cbd5e1',
-        borderRadius: '12px',
-        padding: '0.85rem 1.25rem',
-        marginBottom: '1.5rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.03)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '700', fontSize: '0.85rem', color: '#1e293b' }}>
-            <Calendar size={18} style={{ color: '#2563eb' }} />
-            <span>Timeframe Filter:</span>
-          </div>
-
-          <select
-            value={datePreset}
-            onChange={(e) => setDatePreset(e.target.value)}
-            style={{
-              padding: '0.4rem 0.85rem',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              backgroundColor: '#f8fafc',
-              fontSize: '0.825rem',
-              fontWeight: '700',
-              color: '#0f172a',
-              cursor: 'pointer'
-            }}
-          >
-            <option value="today">📅 Today (Day wise)</option>
-            <option value="yesterday">📅 Yesterday</option>
-            <option value="7days">📆 Last 7 Days (Week wise)</option>
-            <option value="30days">📆 Last 30 Days (Month wise)</option>
-            <option value="this_month">🗓️ This Month</option>
-            <option value="last_month">🗓️ Last Month</option>
-            <option value="all_time">♾️ All Time</option>
-            <option value="custom">⚙️ Custom Date Range (Calendar)</option>
-          </select>
-
+        {/* Top-Right Corner Date Selector & Custom Calendar Picker */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+          
           {datePreset === 'custom' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#f1f5f9', padding: '4px 8px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', backgroundColor: '#ffffff', padding: '4px 8px', borderRadius: '8px', border: '1px solid #cbd5e1', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
               <input
                 type="date"
                 value={customStart}
@@ -228,10 +186,36 @@ export default function Dashboard({ setActiveAdminTab }) {
               />
             </div>
           )}
-        </div>
 
-        <div style={{ fontSize: '0.78rem', color: '#475569', backgroundColor: '#f0f9ff', padding: '4px 10px', borderRadius: '6px', border: '1px solid #bae6fd', fontWeight: '600' }}>
-          Active Filter: <strong style={{ color: '#0369a1' }}>{activeSpan.label}</strong> ({filteredOrdersCount} orders found)
+          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+            <select
+              value={datePreset}
+              onChange={(e) => setDatePreset(e.target.value)}
+              style={{
+                padding: '0.45rem 1rem 0.45rem 2.2rem',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                fontSize: '0.825rem',
+                fontWeight: '700',
+                color: '#0f172a',
+                cursor: 'pointer',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                outline: 'none'
+              }}
+            >
+              <option value="today">📅 Today (Day wise)</option>
+              <option value="yesterday">📅 Yesterday</option>
+              <option value="7days">📆 Last 7 Days (Week wise)</option>
+              <option value="30days">📆 Last 30 Days (Month wise)</option>
+              <option value="this_month">🗓️ This Month</option>
+              <option value="last_month">🗓️ Last Month</option>
+              <option value="all_time">♾️ All Time</option>
+              <option value="custom">⚙️ Custom Date Range (Calendar)</option>
+            </select>
+            <Calendar size={16} style={{ position: 'absolute', left: '0.75rem', color: '#2563eb', pointerEvents: 'none' }} />
+          </div>
+
         </div>
       </div>
 
