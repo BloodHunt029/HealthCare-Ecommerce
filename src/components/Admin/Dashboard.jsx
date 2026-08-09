@@ -51,6 +51,9 @@ export default function Dashboard({ setActiveAdminTab }) {
   const safeProducts = products || [];
   const safeLeads = leads || [];
 
+  // Active Metric Selector Tab for Shopify Analytics Card
+  const [activeMetricTab, setActiveMetricTab] = useState('sessions'); // 'sessions', 'sales', 'orders', 'conversion'
+
   // Date Range Filter States
   const todayStr = new Date().toISOString().substring(0, 10);
   const [datePreset, setDatePreset] = useState('7days'); // 'today', 'yesterday', '7days', '30days', 'this_month', 'last_month', 'all_time', 'custom'
@@ -65,7 +68,7 @@ export default function Dashboard({ setActiveAdminTab }) {
   const getEffectiveDates = () => {
     const now = new Date();
     if (datePreset === 'today') {
-      return { start: todayStr, end: todayStr, label: 'Today (Day Wise)' };
+      return { start: todayStr, end: todayStr, label: 'Today' };
     }
     if (datePreset === 'yesterday') {
       const y = new Date(now);
@@ -94,7 +97,7 @@ export default function Dashboard({ setActiveAdminTab }) {
       return { start: first.toISOString().substring(0, 10), end: last.toISOString().substring(0, 10), label: 'Last Month' };
     }
     if (datePreset === 'custom') {
-      return { start: customStart, end: customEnd, label: `Custom Range (${customStart} to ${customEnd})` };
+      return { start: customStart, end: customEnd, label: `Custom (${customStart} to ${customEnd})` };
     }
     return { start: '1970-01-01', end: '2099-12-31', label: 'All Time' };
   };
@@ -122,278 +125,342 @@ export default function Dashboard({ setActiveAdminTab }) {
   const pendingFulfillCount = filteredOrders.filter(o => o.status === 'pending').length;
   const lowStockProducts = safeProducts.filter(p => p.stock <= (p.lowStockThreshold || 5));
 
-  // Dynamic sales charts generation based on day / week / month filter
-  let salesHistory = [];
-  if (datePreset === 'today' || datePreset === 'yesterday') {
-    salesHistory = [
-      { day: '00:00 - 04:00', sales: Math.round(filteredSales * 0.1) },
-      { day: '04:00 - 08:00', sales: Math.round(filteredSales * 0.15) },
-      { day: '08:00 - 12:00', sales: Math.round(filteredSales * 0.3) },
-      { day: '12:00 - 16:00', sales: Math.round(filteredSales * 0.25) },
-      { day: '16:00 - 20:00', sales: Math.round(filteredSales * 0.15) },
-      { day: '20:00 - 24:00', sales: Math.round(filteredSales * 0.05) }
-    ];
+  // Time labels for line curve chart
+  let chartTimeLabels = ['12:00 AM', '3:00 AM', '6:00 AM', '9:00 AM', '12:00 PM', '3:00 PM', '6:00 PM', '9:00 PM'];
+  if (datePreset === '7days') {
+    chartTimeLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   } else if (datePreset === '30days' || datePreset === 'this_month' || datePreset === 'last_month') {
-    salesHistory = [
-      { day: 'Week 1', sales: Math.round(filteredSales * 0.22) },
-      { day: 'Week 2', sales: Math.round(filteredSales * 0.28) },
-      { day: 'Week 3', sales: Math.round(filteredSales * 0.32) },
-      { day: 'Week 4', sales: Math.round(filteredSales * 0.18) }
-    ];
-  } else {
-    salesHistory = [
-      { day: 'Mon', sales: Math.round(filteredSales * 0.12) || 12000 },
-      { day: 'Tue', sales: Math.round(filteredSales * 0.18) || 19000 },
-      { day: 'Wed', sales: Math.round(filteredSales * 0.14) || 15000 },
-      { day: 'Thu', sales: Math.round(filteredSales * 0.21) || 22000 },
-      { day: 'Fri', sales: Math.round(filteredSales * 0.24) || 34000 },
-      { day: 'Sat', sales: Math.round(filteredSales * 0.08) || 28000 },
-      { day: 'Sun', sales: Math.round(filteredSales * 0.03) || 8000 }
-    ];
+    chartTimeLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
   }
 
-  const maxVal = Math.max(1000, ...salesHistory.map(d => d.sales));
-
-  const hasStatCards = activeWidgets.showRevenue || activeWidgets.showSessions || activeWidgets.showTotalOrders || activeWidgets.showConversionRate || activeWidgets.showFulfillment || activeWidgets.showTotalProducts || activeWidgets.showLowStock;
+  // Format total sales helper (e.g. $2.3K, ₹60.9K)
+  const formatCompactVal = (val) => {
+    if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
+    if (val >= 1000) return `₹${(val / 1000).toFixed(1)}K`;
+    return `₹${val}`;
+  };
 
   return (
     <div className="animate-fade-in">
       
-      {/* Welcome header */}
+      {/* Integrated Header Row with Inline Controls */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '800' }}>Admin Command Dashboard</h1>
-          <p style={{ color: 'hsl(var(--text-muted))', fontSize: '0.875rem' }}>Real-time overview of sales, sessions, orders, conversion rate, and inventory.</p>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#0f172a', margin: 0 }}>Admin Command Dashboard</h1>
+          <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '3px 0 0' }}>Real-time overview of store operations, sales performance, and inventory.</p>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button 
-            className="btn btn-outline"
-            onClick={() => setShowWidgetCustomizer(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.825rem', fontWeight: '700', padding: '0.5rem 1rem', borderRadius: '8px', backgroundColor: '#ffffff', borderColor: '#cbd5e1' }}
-          >
-            <Sliders size={16} style={{ color: '#2563eb' }} /> Customize Dashboard Data
-          </button>
-          <div className="badge badge-success" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
-            ● Live Store Sync Enabled
-          </div>
-        </div>
-      </div>
-
-      {/* DATE RANGE FILTER BAR & CUSTOM CALENDAR PICKER */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #cbd5e1',
-        borderRadius: '12px',
-        padding: '0.85rem 1.25rem',
-        marginBottom: '1.5rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.03)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '700', fontSize: '0.85rem', color: '#1e293b' }}>
-            <Calendar size={18} style={{ color: '#2563eb' }} />
-            <span>Timeframe Filter:</span>
-          </div>
-
-          <select
-            value={datePreset}
-            onChange={(e) => setDatePreset(e.target.value)}
-            style={{
-              padding: '0.4rem 0.85rem',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              backgroundColor: '#f8fafc',
-              fontSize: '0.825rem',
-              fontWeight: '700',
-              color: '#0f172a',
-              cursor: 'pointer'
-            }}
-          >
-            <option value="today">📅 Today (Day wise)</option>
-            <option value="yesterday">📅 Yesterday</option>
-            <option value="7days">📆 Last 7 Days (Week wise)</option>
-            <option value="30days">📆 Last 30 Days (Month wise)</option>
-            <option value="this_month">🗓️ This Month</option>
-            <option value="last_month">🗓️ Last Month</option>
-            <option value="all_time">♾️ All Time</option>
-            <option value="custom">⚙️ Custom Date Range (Calendar)</option>
-          </select>
-
+        {/* Top Right Controls: Timeframe Selector & Customize Settings */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+          
           {datePreset === 'custom' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#f1f5f9', padding: '4px 8px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#ffffff', padding: '4px 8px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
               <input
                 type="date"
                 value={customStart}
                 onChange={(e) => setCustomStart(e.target.value)}
-                style={{ padding: '3px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.78rem', fontWeight: '600' }}
+                style={{ padding: '2px 4px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.75rem', fontWeight: '600' }}
               />
-              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700' }}>to</span>
+              <span style={{ fontSize: '0.7rem', color: '#64748b' }}>to</span>
               <input
                 type="date"
                 value={customEnd}
                 onChange={(e) => setCustomEnd(e.target.value)}
-                style={{ padding: '3px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.78rem', fontWeight: '600' }}
+                style={{ padding: '2px 4px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.75rem', fontWeight: '600' }}
               />
             </div>
           )}
-        </div>
 
-        <div style={{ fontSize: '0.78rem', color: '#475569', backgroundColor: '#f0f9ff', padding: '4px 10px', borderRadius: '6px', border: '1px solid #bae6fd', fontWeight: '600' }}>
-          Active Filter: <strong style={{ color: '#0369a1' }}>{activeSpan.label}</strong> ({filteredOrdersCount} orders found)
+          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+            <select
+              value={datePreset}
+              onChange={(e) => setDatePreset(e.target.value)}
+              style={{
+                padding: '0.45rem 1rem 0.45rem 2.2rem',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                fontSize: '0.825rem',
+                fontWeight: '700',
+                color: '#1e293b',
+                cursor: 'pointer',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                outline: 'none'
+              }}
+            >
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="7days">Last 7 days</option>
+              <option value="30days">Last 30 days</option>
+              <option value="this_month">This month</option>
+              <option value="last_month">Last month</option>
+              <option value="all_time">All time</option>
+              <option value="custom">Custom range...</option>
+            </select>
+            <Calendar size={15} style={{ position: 'absolute', left: '0.75rem', color: '#2563eb', pointerEvents: 'none' }} />
+          </div>
+
+          <button 
+            className="btn btn-outline"
+            onClick={() => setShowWidgetCustomizer(true)}
+            title="Customize Dashboard Data"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.825rem', fontWeight: '700', padding: '0.45rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', borderColor: '#cbd5e1' }}
+          >
+            <Sliders size={15} style={{ color: '#64748b' }} /> Customize
+          </button>
         </div>
       </div>
 
-      {/* Primary Key Performance Indicators (Sales, Sessions, Orders, Conversion Rate %) */}
-      {hasStatCards && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+      {/* UNIFIED SHOPIFY ANALYTICS CARD (METRICS HEADER TABS + CURVE CHART) */}
+      {activeWidgets.showSalesChart && (
+        <div style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+          marginBottom: '2rem',
+          overflow: 'hidden'
+        }}>
           
-          {/* 1. TOTAL SALES */}
-          {activeWidgets.showRevenue && (
-            <div className="card" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <div style={{ backgroundColor: '#ecfdf5', color: '#059669', padding: '0.75rem', borderRadius: '12px' }}>
-                <DollarSign size={24} />
+          {/* Top 4 Interactive Metric Tabs (Shopify Style) */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+            borderBottom: '1px solid #e2e8f0',
+            backgroundColor: '#fafafa'
+          }}>
+            
+            {/* Tab 1: Sessions */}
+            {activeWidgets.showSessions && (
+              <div 
+                onClick={() => setActiveMetricTab('sessions')}
+                style={{
+                  padding: '1.25rem 1.5rem',
+                  cursor: 'pointer',
+                  borderRight: '1px solid #e2e8f0',
+                  backgroundColor: activeMetricTab === 'sessions' ? '#ffffff' : 'transparent',
+                  borderBottom: activeMetricTab === 'sessions' ? '3px solid #2563eb' : 'none',
+                  transition: 'all 0.15s ease-in-out'
+                }}
+              >
+                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', marginBottom: '0.35rem', textDecoration: 'underline dotted' }}>
+                  Sessions
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <strong style={{ fontSize: '1.5rem', fontWeight: '800', color: '#0f172a' }}>
+                    {filteredSessions.toLocaleString('en-IN')}
+                  </strong>
+                  <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#dc2626', display: 'inline-flex', alignItems: 'center' }}>
+                    ↘ 7%
+                  </span>
+                </div>
               </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', fontWeight: '700', display: 'block', textTransform: 'uppercase' }}>TOTAL SALES</span>
-                <strong style={{ fontSize: '1.35rem', color: 'hsl(var(--text-main))' }}>₹{filteredSales.toLocaleString('en-IN')}</strong>
-                <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: '600', display: 'block', marginTop: '2px' }}>Filtered by timeframe</span>
-              </div>
-            </div>
-          )}
+            )}
 
-          {/* 2. SESSIONS */}
-          {activeWidgets.showSessions && (
-            <div className="card" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <div style={{ backgroundColor: '#eff6ff', color: '#2563eb', padding: '0.75rem', borderRadius: '12px' }}>
-                <Users size={24} />
+            {/* Tab 2: Total sales */}
+            {activeWidgets.showRevenue && (
+              <div 
+                onClick={() => setActiveMetricTab('sales')}
+                style={{
+                  padding: '1.25rem 1.5rem',
+                  cursor: 'pointer',
+                  borderRight: '1px solid #e2e8f0',
+                  backgroundColor: activeMetricTab === 'sales' ? '#ffffff' : 'transparent',
+                  borderBottom: activeMetricTab === 'sales' ? '3px solid #2563eb' : 'none',
+                  transition: 'all 0.15s ease-in-out'
+                }}
+              >
+                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', marginBottom: '0.35rem', textDecoration: 'underline dotted' }}>
+                  Total sales
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <strong style={{ fontSize: '1.5rem', fontWeight: '800', color: '#0f172a' }}>
+                    {formatCompactVal(filteredSales)}
+                  </strong>
+                  <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#16a34a', display: 'inline-flex', alignItems: 'center' }}>
+                    ↗ 937%
+                  </span>
+                </div>
               </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', fontWeight: '700', display: 'block', textTransform: 'uppercase' }}>STORE SESSIONS</span>
-                <strong style={{ fontSize: '1.35rem', color: 'hsl(var(--text-main))' }}>{filteredSessions.toLocaleString('en-IN')}</strong>
-                <span style={{ fontSize: '0.7rem', color: '#2563eb', fontWeight: '600', display: 'block', marginTop: '2px' }}>Visitor traffic metrics</span>
-              </div>
-            </div>
-          )}
+            )}
 
-          {/* 3. NO OF ORDERS */}
-          {activeWidgets.showTotalOrders && (
-            <div className="card" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <div style={{ backgroundColor: '#fef3c7', color: '#d97706', padding: '0.75rem', borderRadius: '12px' }}>
-                <ShoppingBag size={24} />
+            {/* Tab 3: Total orders */}
+            {activeWidgets.showTotalOrders && (
+              <div 
+                onClick={() => setActiveMetricTab('orders')}
+                style={{
+                  padding: '1.25rem 1.5rem',
+                  cursor: 'pointer',
+                  borderRight: '1px solid #e2e8f0',
+                  backgroundColor: activeMetricTab === 'orders' ? '#ffffff' : 'transparent',
+                  borderBottom: activeMetricTab === 'orders' ? '3px solid #2563eb' : 'none',
+                  transition: 'all 0.15s ease-in-out'
+                }}
+              >
+                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', marginBottom: '0.35rem', textDecoration: 'underline dotted' }}>
+                  Total orders
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <strong style={{ fontSize: '1.5rem', fontWeight: '800', color: '#0f172a' }}>
+                    {filteredOrdersCount}
+                  </strong>
+                  <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#16a34a', display: 'inline-flex', alignItems: 'center' }}>
+                    ↗ 300%
+                  </span>
+                </div>
               </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', fontWeight: '700', display: 'block', textTransform: 'uppercase' }}>NO. OF ORDERS</span>
-                <strong style={{ fontSize: '1.35rem', color: 'hsl(var(--text-main))' }}>{filteredOrdersCount} Orders</strong>
-                <span style={{ fontSize: '0.7rem', color: '#d97706', fontWeight: '600', display: 'block', marginTop: '2px' }}>{pendingFulfillCount} pending fulfillment</span>
-              </div>
-            </div>
-          )}
+            )}
 
-          {/* 4. CONVERSION VALUE % */}
-          {activeWidgets.showConversionRate && (
-            <div className="card" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <div style={{ backgroundColor: '#f3e8ff', color: '#9333ea', padding: '0.75rem', borderRadius: '12px' }}>
-                <Target size={24} />
+            {/* Tab 4: Conversion rate */}
+            {activeWidgets.showConversionRate && (
+              <div 
+                onClick={() => setActiveMetricTab('conversion')}
+                style={{
+                  padding: '1.25rem 1.5rem',
+                  cursor: 'pointer',
+                  backgroundColor: activeMetricTab === 'conversion' ? '#ffffff' : 'transparent',
+                  borderBottom: activeMetricTab === 'conversion' ? '3px solid #2563eb' : 'none',
+                  transition: 'all 0.15s ease-in-out'
+                }}
+              >
+                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', marginBottom: '0.35rem', textDecoration: 'underline dotted' }}>
+                  Conversion rate
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <strong style={{ fontSize: '1.5rem', fontWeight: '800', color: '#0f172a' }}>
+                    {filteredConversionRate}%
+                  </strong>
+                  <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#16a34a', display: 'inline-flex', alignItems: 'center' }}>
+                    ↗ 168%
+                  </span>
+                </div>
               </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', fontWeight: '700', display: 'block', textTransform: 'uppercase' }}>CONVERSION VALUE %</span>
-                <strong style={{ fontSize: '1.35rem', color: 'hsl(var(--text-main))' }}>{filteredConversionRate}%</strong>
-                <span style={{ fontSize: '0.7rem', color: '#9333ea', fontWeight: '600', display: 'block', marginTop: '2px' }}>Avg Order: ₹{filteredAvgOrderValue.toLocaleString('en-IN')}</span>
-              </div>
-            </div>
-          )}
+            )}
 
-          {activeWidgets.showFulfillment && (
-            <div className="card" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <div style={{ backgroundColor: 'hsl(var(--secondary))', color: 'hsl(var(--secondary-foreground))', padding: '0.75rem', borderRadius: '12px' }}>
-                <Inbox size={24} />
-              </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', fontWeight: '600', display: 'block' }}>AWAITING FULFILLMENT</span>
-                <strong style={{ fontSize: '1.35rem', color: 'hsl(var(--text-main))' }}>{pendingFulfillCount} Orders</strong>
-              </div>
-            </div>
-          )}
+          </div>
 
-          {activeWidgets.showTotalProducts && (
-            <div className="card" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <div style={{ backgroundColor: 'hsl(var(--warning-bg))', color: 'hsl(var(--warning))', padding: '0.75rem', borderRadius: '12px' }}>
-                <ShoppingBag size={24} />
-              </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', fontWeight: '600', display: 'block' }}>TOTAL PRODUCTS</span>
-                <strong style={{ fontSize: '1.35rem', color: 'hsl(var(--text-main))' }}>{products.length} Items</strong>
-              </div>
-            </div>
-          )}
+          {/* SVG Smooth Curve Line Chart Area */}
+          <div style={{ padding: '1.75rem 1.5rem 1rem', position: 'relative' }}>
+            
+            <svg viewBox="0 0 800 220" style={{ width: '100%', height: '220px', overflow: 'visible' }}>
+              
+              {/* Background Horizontal Grid Lines */}
+              <line x1="0" y1="20" x2="800" y2="20" stroke="#f1f5f9" strokeWidth="1" />
+              <line x1="0" y1="70" x2="800" y2="70" stroke="#f1f5f9" strokeWidth="1" />
+              <line x1="0" y1="120" x2="800" y2="120" stroke="#f1f5f9" strokeWidth="1" />
+              <line x1="0" y1="170" x2="800" y2="170" stroke="#cbd5e1" strokeWidth="1" />
 
-          {activeWidgets.showLowStock && (
-            <div className="card" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <div style={{ backgroundColor: 'hsl(var(--destructive-bg))', color: 'hsl(var(--destructive))', padding: '0.75rem', borderRadius: '12px' }}>
-                <ShieldAlert size={24} />
+              {/* Y-Axis Value Labels */}
+              <text x="0" y="25" fill="#94a3b8" fontSize="10" fontWeight="600">15</text>
+              <text x="0" y="75" fill="#94a3b8" fontSize="10" fontWeight="600">10</text>
+              <text x="0" y="125" fill="#94a3b8" fontSize="10" fontWeight="600">5</text>
+              <text x="0" y="175" fill="#94a3b8" fontSize="10" fontWeight="600">0</text>
+
+              {/* Previous Period Dotted Curve Line */}
+              <path
+                d="M 30 170 Q 80 170 120 120 T 210 170 T 300 20 T 390 140 T 480 20 T 570 140 T 660 130 T 770 170"
+                fill="none"
+                stroke="#38bdf8"
+                strokeWidth="2"
+                strokeDasharray="4,4"
+              />
+
+              {/* Current Period Solid Smooth Curve Line */}
+              <path
+                d="M 30 150 Q 80 170 120 170 T 210 110 T 300 90 T 390 130 T 480 130 T 570 100 T 660 100 T 770 150"
+                fill="none"
+                stroke="#0284c7"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+              
+              {/* Curve Fill Area Shadow */}
+              <path
+                d="M 30 150 Q 80 170 120 170 T 210 110 T 300 90 T 390 130 T 480 130 T 570 100 T 660 100 T 770 150 L 770 170 L 30 170 Z"
+                fill="rgba(56, 189, 248, 0.08)"
+              />
+
+              {/* X-Axis Time Labels */}
+              {chartTimeLabels.map((lbl, idx) => {
+                const xPos = 30 + (idx * (740 / (chartTimeLabels.length - 1)));
+                return (
+                  <text key={idx} x={xPos} y="195" fill="#94a3b8" fontSize="11" fontWeight="600" textAnchor="middle">
+                    {lbl}
+                  </text>
+                );
+              })}
+
+            </svg>
+
+            {/* Bottom Right Legend comparison dates */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#475569', backgroundColor: '#f8fafc', padding: '3px 8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                <span style={{ display: 'inline-block', width: '12px', height: '3px', backgroundColor: '#0284c7' }}></span>
+                <span>Current Period ({activeSpan.label})</span>
               </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', fontWeight: '600', display: 'block' }}>LOW STOCK ITEMS</span>
-                <strong style={{ fontSize: '1.35rem', color: 'hsl(var(--text-main))' }}>{lowStockProducts.length} Alerts</strong>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#64748b', backgroundColor: '#f8fafc', padding: '3px 8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                <span style={{ display: 'inline-block', width: '12px', borderTop: '2px dashed #38bdf8' }}></span>
+                <span>Previous Period</span>
               </div>
             </div>
-          )}
+
+          </div>
 
         </div>
       )}
 
-      {/* Main Charts & Action splits */}
-      {(activeWidgets.showSalesChart || activeWidgets.showTaskCenter || activeWidgets.showInventoryCheck) && (
+      {/* SECONDARY STAT CARDS (Awaiting Fulfillment, Total Catalog Products, Low Stock Alerts) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+        
+        {activeWidgets.showFulfillment && (
+          <div className="card" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ backgroundColor: 'hsl(var(--secondary))', color: 'hsl(var(--secondary-foreground))', padding: '0.75rem', borderRadius: '12px' }}>
+              <Inbox size={24} />
+            </div>
+            <div>
+              <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', fontWeight: '600', display: 'block' }}>AWAITING FULFILLMENT</span>
+              <strong style={{ fontSize: '1.35rem', color: 'hsl(var(--text-main))' }}>{pendingFulfillCount} Orders</strong>
+            </div>
+          </div>
+        )}
+
+        {activeWidgets.showTotalProducts && (
+          <div className="card" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ backgroundColor: 'hsl(var(--warning-bg))', color: 'hsl(var(--warning))', padding: '0.75rem', borderRadius: '12px' }}>
+              <ShoppingBag size={24} />
+            </div>
+            <div>
+              <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', fontWeight: '600', display: 'block' }}>TOTAL PRODUCTS</span>
+              <strong style={{ fontSize: '1.35rem', color: 'hsl(var(--text-main))' }}>{products.length} Items</strong>
+            </div>
+          </div>
+        )}
+
+        {activeWidgets.showLowStock && (
+          <div className="card" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ backgroundColor: 'hsl(var(--destructive-bg))', color: 'hsl(var(--destructive))', padding: '0.75rem', borderRadius: '12px' }}>
+              <ShieldAlert size={24} />
+            </div>
+            <div>
+              <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', fontWeight: '600', display: 'block' }}>LOW STOCK ITEMS</span>
+              <strong style={{ fontSize: '1.35rem', color: 'hsl(var(--text-main))' }}>{lowStockProducts.length} Alerts</strong>
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* STORE ACTIONS & RECENT TRANSACTIONS GRID */}
+      {(activeWidgets.showTaskCenter || activeWidgets.showInventoryCheck) && (
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: activeWidgets.showSalesChart && (activeWidgets.showTaskCenter || activeWidgets.showInventoryCheck) ? '1.6fr 1fr' : '1fr', 
-          gap: '2rem', 
-          marginBottom: '2rem', 
-          alignItems: 'start' 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+          gap: '1.5rem', 
+          marginBottom: '2rem'
         }}>
           
-          {/* Left Column: Sales SVG bar chart */}
-          {activeWidgets.showSalesChart && (
-            <div className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: '800' }}>Store Sales Performance (Last 7 Days)</h3>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', color: 'hsl(var(--success))', fontWeight: '700' }}>
-                  <TrendingUp size={16} /> +18.4% this week
-                </span>
-              </div>
-
-              <div style={{ height: '240px', width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '1rem 0' }}>
-                {salesHistory.map((item, i) => {
-                  const heightPct = Math.max(10, Math.round((item.sales / maxVal) * 80));
-                  return (
-                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'hsl(var(--text-muted))' }}>₹{Math.round(item.sales/1000)}k</span>
-                      <div style={{
-                        width: '60%',
-                        height: `${heightPct}%`,
-                        backgroundColor: 'hsl(var(--primary))',
-                        borderRadius: '4px 4px 0 0',
-                        transition: 'height 0.4s ease-out'
-                      }}></div>
-                      <span style={{ fontSize: '0.75rem', fontWeight: '700' }}>{item.day}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Right Column: Alerts and Recent Task Centers */}
-          {(activeWidgets.showTaskCenter || activeWidgets.showInventoryCheck) && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              
-              {/* Action Tasks */}
-              {activeWidgets.showTaskCenter && (
+          {/* Action Tasks */}
+          {activeWidgets.showTaskCenter && (
                 <div className="card">
                   <h3 style={{ fontSize: '1rem', fontWeight: '800', marginBottom: '1rem', borderBottom: '1px solid hsl(var(--border))', paddingBottom: '0.5rem' }}>Store Actions Task Center</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -442,9 +509,6 @@ export default function Dashboard({ setActiveAdminTab }) {
                   <p style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))' }}>Monitor stock levels and restock items to prevent out-of-stock listings.</p>
                 </div>
               )}
-
-            </div>
-          )}
 
         </div>
       )}
