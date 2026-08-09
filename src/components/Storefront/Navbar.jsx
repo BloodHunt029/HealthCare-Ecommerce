@@ -220,11 +220,11 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
             <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1.5rem', display: 'flex', gap: '2rem', overflowX: 'auto' }}>
               {(layout.navigationTabs || [
                 { id: 'home', label: 'Home', collection: 'home' },
-                { id: 'catalog', label: 'Shop Catalog', collection: 'All' },
+                { id: 'wheelchairs', label: 'Wheelchairs', collection: 'Wheelchairs' },
                 { id: 'hospital_bed', label: 'Hospital Bed Collection', collection: 'Hospital Bed' },
                 { id: 'walkers_stick', label: 'Walkers & Walkstick Collection', collection: 'Walkers & Walkstick' },
                 { id: 'services', label: 'Care Services', collection: 'services' },
-                { id: 'blog', label: 'Blog & FAQs', collection: 'blog' },
+                { id: 'blog', label: 'Help & FAQs', collection: 'blog' },
                 { id: 'userPortal', label: 'My Account', collection: 'userPortal' }
               ]).map((tab, idx) => {
                 let target = tab.collection;
@@ -242,7 +242,7 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
                     target = 'services';
                   } else if (labelLower.includes('home')) {
                     target = 'home';
-                  } else if (labelLower.includes('blog') || labelLower.includes('faq')) {
+                  } else if (labelLower.includes('blog') || labelLower.includes('faq') || labelLower.includes('help')) {
                     target = 'blog';
                   } else if (labelLower.includes('account') || labelLower.includes('userportal')) {
                     target = 'userPortal';
@@ -254,8 +254,8 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
                 }
 
                 const handleNavClick = () => {
-                  if (target === 'home' || target === 'services' || target === 'blog' || target === 'userPortal') {
-                    setActiveTab(target);
+                  if (target === 'home' || target === 'services' || target === 'blog' || target === 'faq' || target === 'userPortal') {
+                    setActiveTab(target === 'faq' ? 'blog' : target);
                   } else {
                     const catTarget = target || 'All';
                     if (typeof window !== 'undefined') window.__pendingCategory = catTarget;
@@ -265,11 +265,11 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
                   }
                 };
 
-                const isStorePage = target === 'home' || target === 'services' || target === 'blog' || target === 'userPortal';
+                const isStorePage = target === 'home' || target === 'services' || target === 'blog' || target === 'faq' || target === 'userPortal';
 
                 let isActive = false;
                 if (isStorePage) {
-                  isActive = activeTab === target;
+                  isActive = activeTab === target || (activeTab === 'blog' && (target === 'faq' || target === 'blog')) || (activeTab === 'faq' && (target === 'faq' || target === 'blog'));
                 } else if (activeTab === 'catalog') {
                   const normCurr = (currentCategory || 'All').toLowerCase().replace(/[^a-z0-9]/g, '');
                   const normTgt = (target || 'All').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -281,9 +281,9 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
                     isActive = normCurr === normTgt || 
                                (normCurr.length > 3 && normTgt.includes(normCurr)) || 
                                (normTgt.length > 3 && normCurr.includes(normTgt)) ||
-                               (normCurr.startsWith('wheelchair') && normTgt.startsWith('wheelchair')) ||
-                               (normCurr.startsWith('hospitalbed') && normTgt.startsWith('hospitalbed')) ||
-                               (normCurr.includes('walker') && normTgt.includes('walker'));
+                               (normCurr.includes('wheelchair') && (normTgt.includes('wheelchair') || normLabel.includes('wheelchair'))) ||
+                               (normCurr.includes('hospitalbed') && (normTgt.includes('hospitalbed') || normLabel.includes('hospitalbed'))) ||
+                               (normCurr.includes('walker') && (normTgt.includes('walker') || normLabel.includes('walker')));
                   }
                 }
 

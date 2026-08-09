@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../../context/AppContext';
 import { HelpCircle, ChevronDown, BookOpen, User, Calendar, Tag, ArrowRight, Plus, Trash, Search, X, Sparkles, Edit3 } from 'lucide-react';
 

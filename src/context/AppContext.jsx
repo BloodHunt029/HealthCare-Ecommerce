@@ -399,11 +399,11 @@ const initialLayout = {
   hiddenSections: [],
   navigationTabs: [
     { id: 'home', label: 'Home', collection: 'home' },
-    { id: 'catalog', label: 'Shop Catalog', collection: 'All' },
+    { id: 'wheelchairs', label: 'Wheelchairs', collection: 'Wheelchairs' },
     { id: 'hospital_bed', label: 'Hospital Bed Collection', collection: 'Hospital Bed' },
     { id: 'walkers_stick', label: 'Walkers & Walkstick Collection', collection: 'Walkers & Walkstick' },
     { id: 'services', label: 'Care Services', collection: 'services' },
-    { id: 'blog', label: 'Caregiver Blog', collection: 'blog' },
+    { id: 'blog', label: 'Help & FAQs', collection: 'blog' },
     { id: 'userPortal', label: 'My Account', collection: 'userPortal' }
   ],
   sectionsOrder: ['hero', 'trust', 'collections', 'banner', 'featured', 'video', 'faq', 'blog', 'cta'],
