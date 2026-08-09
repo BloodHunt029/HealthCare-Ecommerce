@@ -57,6 +57,16 @@
 }
 
 /* Theme presets that can be swapped by App state */
+/* Theme presets that can be swapped by App state */
+.theme-teal {
+  --primary-h: 174;
+  --primary-s: 65%;
+  --primary-l: 38%;
+  --secondary-h: 198;
+  --secondary-s: 75%;
+  --secondary-l: 96%;
+}
+
 .theme-emerald {
   --primary-h: 150;
   --primary-s: 70%;
@@ -84,6 +94,24 @@
   --secondary-l: 96%;
 }
 
+.theme-crimson {
+  --primary-h: 348;
+  --primary-s: 83%;
+  --primary-l: 47%;
+  --secondary-h: 348;
+  --secondary-s: 80%;
+  --secondary-l: 96%;
+}
+
+.theme-amber {
+  --primary-h: 38;
+  --primary-s: 92%;
+  --primary-l: 45%;
+  --secondary-h: 38;
+  --secondary-s: 80%;
+  --secondary-l: 95%;
+}
+
 .theme-dark {
   --background: 224 71% 4%;
   --card: 224 71% 7%;
@@ -94,6 +122,55 @@
   --text-muted-light: 224 71% 10%;
   --glass: rgba(15, 23, 42, 0.8);
   --glass-border: rgba(255, 255, 255, 0.05);
+}
+
+/* Product List Card Color Themes */
+.product-list-white .product-card,
+.product-card-white {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+.product-list-slate .product-card,
+.product-card-slate {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+.product-list-mint .product-card,
+.product-card-mint {
+  background-color: #f0fdf4 !important;
+  border-color: #bbf7d0 !important;
+}
+
+.product-list-ice .product-card,
+.product-card-ice {
+  background-color: #f0f9ff !important;
+  border-color: #bae6fd !important;
+}
+
+.product-list-cream .product-card,
+.product-card-cream {
+  background-color: #fffbeb !important;
+  border-color: #fde68a !important;
+}
+
+.product-list-dark .product-card,
+.product-card-dark {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+/* Default 1080x1080 Square Product Image Sizing (Aspect Ratio 1:1) */
+.product-img-1080,
+.img-1080,
+.product-card img,
+.pdp-main-image img {
+  aspect-ratio: 1 / 1 !important;
+  width: 100%;
+  object-fit: contain !important;
+  background-color: #ffffff;
 }
 
 /* Global Reset */

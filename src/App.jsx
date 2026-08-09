@@ -102,7 +102,7 @@ function AppContent() {
   }, [activeTab, selectedProductId, viewMode, layout.navigationTabs]);
 
   // Apply theme classes from layout
-  const themeClass = `app-container theme-${layout.themeColors}`;
+  const themeClass = `app-container theme-${layout.themeColors || 'teal'} product-list-${layout.productListColor || 'white'}`;
 
   const toggleCartOpen = () => setIsCartOpen(!isCartOpen);
 
@@ -690,6 +690,54 @@ function CollectionsManager() {
     alert(`Successfully linked ${tempSelectedIds.length} product(s) to collection "${targetName}"!`);
   };
 
+  const handleUnselectSingleProduct = (productId) => {
+    const targetName = editColName.trim() || collections[editingIndex]?.name || '';
+    if (!targetName || !productId) return;
+
+    const updatedProducts = products.map(p => {
+      if (p.id === productId) {
+        const existingColls = Array.isArray(p.collections) ? p.collections : [];
+        const newColls = existingColls.filter(c => String(c).toLowerCase().trim() !== targetName.toLowerCase().trim());
+        const newCat = (p.category && p.category.toLowerCase().trim() === targetName.toLowerCase().trim()) 
+          ? (newColls[0] || 'Home Care') 
+          : p.category;
+        return { ...p, category: newCat, collections: newColls };
+      }
+      return p;
+    });
+
+    if (updateProductsBatch) {
+      updateProductsBatch(updatedProducts);
+    } else {
+      setProducts(updatedProducts);
+    }
+  };
+
+  const handleUnselectAllProductsFromCollection = () => {
+    const targetName = editColName.trim() || collections[editingIndex]?.name || '';
+    if (!targetName) return;
+
+    if (window.confirm(`Are you sure you want to unselect all products from collection "${targetName}"?`)) {
+      const updatedProducts = products.map(p => {
+        if (isProductInCollection(p, targetName)) {
+          const existingColls = Array.isArray(p.collections) ? p.collections : [];
+          const newColls = existingColls.filter(c => String(c).toLowerCase().trim() !== targetName.toLowerCase().trim());
+          const newCat = (p.category && p.category.toLowerCase().trim() === targetName.toLowerCase().trim()) 
+            ? (newColls[0] || 'Home Care') 
+            : p.category;
+          return { ...p, category: newCat, collections: newColls };
+        }
+        return p;
+      });
+
+      if (updateProductsBatch) {
+        updateProductsBatch(updatedProducts);
+      } else {
+        setProducts(updatedProducts);
+      }
+    }
+  };
+
   const toggleModalProduct = (id) => {
     setTempSelectedIds(prev => 
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
@@ -833,11 +881,34 @@ function CollectionsManager() {
                   {products
                     .filter(p => isProductInCollection(p, editColName.trim() || collections[editingIndex]?.name || ''))
                     .map(p => (
-                      <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' }}>
-                        <img src={p.image} alt={p.title} style={{ width: '36px', height: '36px', objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: '4px' }} />
-                        <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#334155' }}>{p.title}</span>
+                      <div key={p.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, overflow: 'hidden' }}>
+                          <img src={p.image} alt={p.title} style={{ width: '36px', height: '36px', aspectRatio: '1 / 1', objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: '4px', backgroundColor: 'white', flexShrink: 0 }} />
+                          <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#334155', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{p.title}</span>
+                        </div>
+                        <button 
+                          type="button"
+                          className="btn btn-outline" 
+                          style={{ padding: '2px 8px', fontSize: '0.7rem', color: '#ef4444', borderColor: '#fecdd3', flexShrink: 0 }}
+                          onClick={() => handleUnselectSingleProduct(p.id)}
+                          title="Remove product from this collection"
+                        >
+                          ✕ Unselect
+                        </button>
                       </div>
                     ))}
+
+                  {products.filter(p => isProductInCollection(p, editColName.trim() || collections[editingIndex]?.name || '')).length > 0 && (
+                    <button 
+                      type="button"
+                      className="btn btn-outline" 
+                      style={{ marginTop: '0.75rem', padding: '0.4rem 0.75rem', fontSize: '0.75rem', color: '#ef4444', borderColor: '#fecdd3', width: '100%' }}
+                      onClick={handleUnselectAllProductsFromCollection}
+                    >
+                      ✕ Unselect All Products
+                    </button>
+                  )}
+
                   {products.filter(p => isProductInCollection(p, editColName.trim() || collections[editingIndex]?.name || '')).length === 0 && (
                     <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic' }}>No products linked to this collection yet.</span>
                   )}
@@ -918,7 +989,7 @@ function CollectionsManager() {
             </div>
 
             {/* Right details summary */}
-            <div className="card" style={{ backgroundColor: 'white', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            <div className="card" style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
               <h4 style={{ fontSize: '0.8rem', fontWeight: '800', color: '#1e293b', marginBottom: '0.5rem' }}>Status</h4>
               <div style={{ fontSize: '0.75rem', color: '#475569', fontWeight: '600' }}>Active on Storefront</div>
             </div>
@@ -1003,7 +1074,7 @@ function CollectionsManager() {
                             onChange={() => {}} // toggled by row click
                             style={{ width: '16px', height: '16px', accentColor: '#2563eb', pointerEvents: 'none' }} 
                           />
-                          <img src={p.image} alt={p.title} style={{ width: '40px', height: '40px', objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: '4px', backgroundColor: 'white' }} />
+                          <img src={p.image} alt={p.title} style={{ width: '40px', height: '40px', aspectRatio: '1 / 1', objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: '4px', backgroundColor: 'white' }} />
                           <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                             <span style={{ fontSize: '0.825rem', fontWeight: '600', color: '#1e293b' }}>{p.title}</span>
                             <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Category: {p.category}</span>
@@ -1017,9 +1088,18 @@ function CollectionsManager() {
                 </div>
 
                 {/* Modal Footer */}
-                <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', backgroundColor: '#f8fafc' }}>
-                  <button className="btn btn-outline" style={{ padding: '0.4rem 1.25rem' }} onClick={() => setIsModalOpen(false)}>Cancel</button>
-                  <button className="btn btn-primary" style={{ padding: '0.4rem 1.25rem' }} onClick={handleApplyProductsToCollection}>Add</button>
+                <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: '#ef4444', borderColor: '#fecdd3' }} 
+                    onClick={() => setTempSelectedIds([])}
+                  >
+                    ✕ Unselect All
+                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button className="btn btn-outline" style={{ padding: '0.4rem 1.25rem' }} onClick={() => setIsModalOpen(false)}>Cancel</button>
+                    <button className="btn btn-primary" style={{ padding: '0.4rem 1.25rem' }} onClick={handleApplyProductsToCollection}>Save Selection</button>
+                  </div>
                 </div>
 
               </div>

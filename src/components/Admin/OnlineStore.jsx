@@ -34,6 +34,7 @@ export default function OnlineStore() {
   const [bannerImage, setBannerImage] = useState(layout.bannerImage || '');
   const [collectionsList, setCollectionsList] = useState(layout.collectionsList || []);
   const [themeColors, setThemeColors] = useState(layout.themeColors || 'teal');
+  const [productListColor, setProductListColor] = useState(layout.productListColor || 'white');
   const [promoVideoUrl, setPromoVideoUrl] = useState(layout.promoVideoUrl || '');
   const [footerText, setFooterText] = useState(layout.footerText || 'Trusted home patient care support, mobility aids, clinical diagnostic devices sales and supply hub in Chennai.');
   const [footerSupportTitle, setFooterSupportTitle] = useState(layout.footerSupportTitle || 'Support Hub');
@@ -897,37 +898,71 @@ export default function OnlineStore() {
                 )}
                 {selectedSection === 'branding' && (
                   <div>
-                    <h4 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '1rem', color: '#1e293b' }}>Style Hues Palette</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <h4 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.75rem', color: '#1e293b' }}>Primary Theme Color</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.5rem' }}>
                       {[
                         { id: 'teal', label: 'Healing Teal', hex: '#1b8a7a' },
                         { id: 'emerald', label: 'Emerald Health', hex: '#10b981' },
                         { id: 'blue', label: 'Clinical Blue', hex: '#3b82f6' },
                         { id: 'purple', label: 'Slate Purple', hex: '#8b5cf6' },
-                        { id: 'dark', label: 'Modern Slate Dark', hex: '#1e293b' }
+                        { id: 'crimson', label: 'Crimson Red', hex: '#ef4444' },
+                        { id: 'amber', label: 'Warm Amber', hex: '#f59e0b' },
+                        { id: 'dark', label: 'Modern Dark', hex: '#1e293b' }
                       ].map(opt => (
                         <button
                           key={opt.id}
+                          type="button"
                           onClick={() => setThemeColors(opt.id)}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: '0.6rem 0.75rem',
+                            gap: '0.5rem',
+                            padding: '0.5rem 0.65rem',
                             border: '1px solid',
                             borderColor: themeColors === opt.id ? '#2563eb' : '#e2e8f0',
                             backgroundColor: themeColors === opt.id ? '#eff6ff' : '#ffffff',
                             borderRadius: '6px',
                             cursor: 'pointer',
-                            fontSize: '0.8rem',
+                            fontSize: '0.75rem',
                             fontWeight: '600'
                           }}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: opt.hex }}></span>
-                            <span>{opt.label}</span>
-                          </div>
-                          {themeColors === opt.id && <span style={{ color: '#2563eb', fontSize: '0.7rem' }}>Selected</span>}
+                          <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: opt.hex, flexShrink: 0 }}></span>
+                          <span style={{ flex: 1, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{opt.label}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <h4 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.75rem', color: '#1e293b' }}>Product List / Card Color</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      {[
+                        { id: 'white', label: 'Pure White', hex: '#ffffff' },
+                        { id: 'slate', label: 'Soft Slate', hex: '#f8fafc' },
+                        { id: 'mint', label: 'Mint Warmth', hex: '#f0fdf4' },
+                        { id: 'ice', label: 'Ice Blue', hex: '#f0f9ff' },
+                        { id: 'cream', label: 'Warm Cream', hex: '#fffbeb' },
+                        { id: 'dark', label: 'Dark Slate', hex: '#1e293b' }
+                      ].map(opt => (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => setProductListColor(opt.id)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.5rem 0.65rem',
+                            border: '1px solid',
+                            borderColor: productListColor === opt.id ? '#2563eb' : '#e2e8f0',
+                            backgroundColor: productListColor === opt.id ? '#eff6ff' : '#ffffff',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontWeight: '600'
+                          }}
+                        >
+                          <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: opt.hex, border: '1px solid #cbd5e1', flexShrink: 0 }}></span>
+                          <span style={{ flex: 1, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{opt.label}</span>
                         </button>
                       ))}
                     </div>
@@ -962,18 +997,46 @@ export default function OnlineStore() {
                             <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#475569', textTransform: 'uppercase' }}>
                               Item #{idx + 1} ({tab.id})
                             </span>
-                            {navigationTabs.length > 1 && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                               <button 
                                 type="button"
-                                className="btn btn-ghost" 
-                                style={{ padding: '2px 6px', color: '#ef4444', fontSize: '0.75rem' }}
+                                disabled={idx === 0} 
                                 onClick={() => {
-                                  setNavigationTabs(prev => prev.filter((_, i) => i !== idx));
+                                  const updated = [...navigationTabs];
+                                  const [moved] = updated.splice(idx, 1);
+                                  updated.splice(idx - 1, 0, moved);
+                                  setNavigationTabs(updated);
                                 }}
+                                className="btn btn-ghost" style={{ padding: '2px 6px', fontSize: '0.72rem', cursor: idx === 0 ? 'not-allowed' : 'pointer', opacity: idx === 0 ? 0.4 : 1 }} title="Move Up"
                               >
-                                ✕ Delete
+                                ▲ Up
                               </button>
-                            )}
+                              <button 
+                                type="button"
+                                disabled={idx === navigationTabs.length - 1} 
+                                onClick={() => {
+                                  const updated = [...navigationTabs];
+                                  const [moved] = updated.splice(idx, 1);
+                                  updated.splice(idx + 1, 0, moved);
+                                  setNavigationTabs(updated);
+                                }}
+                                className="btn btn-ghost" style={{ padding: '2px 6px', fontSize: '0.72rem', cursor: idx === navigationTabs.length - 1 ? 'not-allowed' : 'pointer', opacity: idx === navigationTabs.length - 1 ? 0.4 : 1 }} title="Move Down"
+                              >
+                                ▼ Down
+                              </button>
+                              {navigationTabs.length > 1 && (
+                                <button 
+                                  type="button"
+                                  className="btn btn-ghost" 
+                                  style={{ padding: '2px 6px', color: '#ef4444', fontSize: '0.72rem' }}
+                                  onClick={() => {
+                                    setNavigationTabs(prev => prev.filter((_, i) => i !== idx));
+                                  }}
+                                >
+                                  ✕ Delete
+                                </button>
+                              )}
+                            </div>
                           </div>
 
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
