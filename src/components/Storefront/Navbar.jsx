@@ -2,7 +2,7 @@ import React, { useState, useContext, useRef, useEffect } from 'react';
 import { AppContext } from '../../context/AppContext';
 import { Search, ShoppingCart, User, Phone, MessageSquare, ShieldCheck, Heart, LogOut } from 'lucide-react';
 
-export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCartOpen, layoutOverride }) {
+export default function Navbar({ activeTab, setActiveTab, setSelectedProductId, setViewMode, toggleCartOpen, layoutOverride }) {
   const { layout: contextLayout, products, cart, userRole, storeSettings } = useContext(AppContext);
   const layout = layoutOverride || contextLayout;
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,15 +48,11 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
 
     // Synonym map: e.g. "cot" -> "hospital bed", "diaper" -> "incontinence", "bp" -> "blood pressure"
     const synonyms = {
-      'cot': 'bed',
-      'cots': 'bed',
-      'beds': 'bed',
-      'diaper': 'incontinence',
-      'diapers': 'incontinence',
-      'pads': 'incontinence',
-      'bp': 'monitor',
-      'sphygmomanometer': 'monitor',
-      'wheel chair': 'wheelchair',
+      'cot': 'hospital bed',
+      'diaper': 'adult diaper',
+      'bp': 'blood pressure',
+      'sugar': 'glucometer',
+      'cushion': 'air mattress',
       'chairs': 'wheelchair',
       'walker': 'mobility',
       'temp': 'thermometer',
@@ -95,13 +91,14 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
   const handleSuggestionClick = (product) => {
     setSearchQuery('');
     setShowSuggestions(false);
+    if (setSelectedProductId) {
+      setSelectedProductId(product.id);
+    }
     setActiveTab('catalog');
     
     // Dispatch custom event to select product and open its detail page
-    setTimeout(() => {
-      const event = new CustomEvent('selectProduct', { detail: product.id });
-      window.dispatchEvent(event);
-    }, 50);
+    const event = new CustomEvent('selectProduct', { detail: product.id });
+    window.dispatchEvent(event);
   };
 
   const handleSearchSubmit = (e) => {

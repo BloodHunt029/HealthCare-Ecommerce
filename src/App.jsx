@@ -113,6 +113,18 @@ function AppContent() {
     return () => window.removeEventListener('openLivePreviewModal', handleOpenPreview);
   }, []);
 
+  // Global listener for selectProduct custom event (dispatched from search dropdown or custom links)
+  React.useEffect(() => {
+    const handleSelectProduct = (e) => {
+      if (e && e.detail) {
+        setSelectedProductId(e.detail);
+        setActiveTab('catalog');
+      }
+    };
+    window.addEventListener('selectProduct', handleSelectProduct);
+    return () => window.removeEventListener('selectProduct', handleSelectProduct);
+  }, []);
+
   // Apply theme classes from layout
   const themeClass = `app-container theme-${layout.themeColors || 'teal'} product-list-${layout.productListColor || 'white'}`;
 
@@ -128,6 +140,7 @@ function AppContent() {
           <Navbar 
             activeTab={activeTab} 
             setActiveTab={setActiveTab} 
+            setSelectedProductId={setSelectedProductId}
             setViewMode={setViewMode} 
             toggleCartOpen={toggleCartOpen} 
           />
@@ -685,7 +698,7 @@ function AppContent() {
               position: 'relative'
             }}>
               <div className={`theme-${layout?.themeColors || 'teal'} product-list-${layout?.productListColor || 'white'}`}>
-                <Navbar activeTab={activeTab} setActiveTab={setActiveTab} toggleCartOpen={toggleCartOpen} />
+                <Navbar activeTab={activeTab} setActiveTab={setActiveTab} setSelectedProductId={setSelectedProductId} toggleCartOpen={toggleCartOpen} />
                 <main style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                   {activeTab === 'home' && <Home setActiveTab={setActiveTab} setSelectedProductId={setSelectedProductId} />}
                   {activeTab === 'catalog' && (
