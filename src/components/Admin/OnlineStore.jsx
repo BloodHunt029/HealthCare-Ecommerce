@@ -639,6 +639,13 @@ export default function OnlineStore() {
                     <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#334155' }}>Palette & Theme Presets</span>
                     <ChevronRight size={14} style={{ color: '#94a3b8' }} />
                   </button>
+                  <button 
+                    onClick={() => setSelectedSection('admin_dashboard_widgets')}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '0.65rem', border: '1px solid #e2e8f0', borderRadius: '6px', backgroundColor: selectedSection === 'admin_dashboard_widgets' ? '#eff6ff' : '#ffffff', cursor: 'pointer', textAlign: 'left' }}
+                  >
+                    <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#334155' }}>Admin Home Dashboard Data</span>
+                    <ChevronRight size={14} style={{ color: '#94a3b8' }} />
+                  </button>
                   <div 
                     onClick={() => setSelectedSection('header_branding')}
                     style={{ 
@@ -1013,6 +1020,61 @@ export default function OnlineStore() {
                           <span style={{ flex: 1, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{opt.label}</span>
                         </button>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Admin Dashboard Widgets Form */}
+                {selectedSection === 'admin_dashboard_widgets' && (
+                  <div>
+                    <h4 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.35rem', color: '#1e293b' }}>Admin Home Dashboard Data Widgets</h4>
+                    <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '1.25rem' }}>Customize which cards & metrics to show on your Admin Home Page.</p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                      {[
+                        { key: 'showRevenue', label: 'Revenue Total Stat Card' },
+                        { key: 'showFulfillment', label: 'Awaiting Fulfillment Stat Card' },
+                        { key: 'showTotalProducts', label: 'Total Products Stat Card' },
+                        { key: 'showLowStock', label: 'Low Stock Alerts Stat Card' },
+                        { key: 'showSalesChart', label: 'Sales Performance (7 Days)' },
+                        { key: 'showTaskCenter', label: 'Store Actions Task Center' },
+                        { key: 'showInventoryCheck', label: 'Inventory Status Check' },
+                        { key: 'showRecentTransactions', label: 'Recent Transactions Table' }
+                      ].map(w => {
+                        const activeWidgets = {
+                          showRevenue: true, showFulfillment: true, showTotalProducts: true, showLowStock: true,
+                          showSalesChart: true, showTaskCenter: true, showInventoryCheck: true, showRecentTransactions: true,
+                          ...(layout?.adminDashboardWidgets || {})
+                        };
+                        const isEnabled = activeWidgets[w.key] !== false;
+
+                        return (
+                          <div key={w.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.75rem', border: '1px solid #e2e8f0', borderRadius: '6px', backgroundColor: isEnabled ? '#ffffff' : '#f8fafc' }}>
+                            <span style={{ fontSize: '0.78rem', fontWeight: '600', color: isEnabled ? '#1e293b' : '#94a3b8' }}>{w.label}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = { ...activeWidgets, [w.key]: !isEnabled };
+                                updateLayout({ adminDashboardWidgets: updated });
+                                markDirty();
+                              }}
+                              style={{
+                                padding: '2px 8px',
+                                borderRadius: '12px',
+                                border: '1px solid',
+                                borderColor: isEnabled ? '#2563eb' : '#cbd5e1',
+                                backgroundColor: isEnabled ? '#eff6ff' : '#f1f5f9',
+                                color: isEnabled ? '#1d4ed8' : '#64748b',
+                                fontWeight: '700',
+                                fontSize: '0.7rem',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {isEnabled ? 'Shown' : 'Hidden'}
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
