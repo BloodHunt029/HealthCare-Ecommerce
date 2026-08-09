@@ -271,14 +271,19 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
                 if (isStorePage) {
                   isActive = activeTab === target;
                 } else if (activeTab === 'catalog') {
-                  const normCurr = (currentCategory || 'All').toLowerCase().trim();
-                  const normTgt = (target || 'All').toLowerCase().trim();
-                  const normLabel = labelLower.trim();
+                  const normCurr = (currentCategory || 'All').toLowerCase().replace(/[^a-z0-9]/g, '');
+                  const normTgt = (target || 'All').toLowerCase().replace(/[^a-z0-9]/g, '');
+                  const normLabel = labelLower.replace(/[^a-z0-9]/g, '');
 
-                  if (normTgt === 'all' || normTgt === 'catalog' || tab.id === 'catalog' || normLabel.includes('all products') || normLabel.includes('shop catalog')) {
+                  if (normTgt === 'all' || normTgt === 'catalog' || tab.id === 'catalog' || normLabel.includes('allproducts') || normLabel.includes('shopcatalog')) {
                     isActive = normCurr === 'all' || normCurr === 'catalog';
                   } else {
-                    isActive = normCurr === normTgt || (normCurr.length > 2 && normTgt.includes(normCurr)) || (normTgt.length > 2 && normCurr.includes(normTgt));
+                    isActive = normCurr === normTgt || 
+                               (normCurr.length > 3 && normTgt.includes(normCurr)) || 
+                               (normTgt.length > 3 && normCurr.includes(normTgt)) ||
+                               (normCurr.startsWith('wheelchair') && normTgt.startsWith('wheelchair')) ||
+                               (normCurr.startsWith('hospitalbed') && normTgt.startsWith('hospitalbed')) ||
+                               (normCurr.includes('walker') && normTgt.includes('walker'));
                   }
                 }
 

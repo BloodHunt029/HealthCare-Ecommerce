@@ -66,27 +66,42 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
 
   const [selectedSubCategory, setSelectedSubCategory] = useState('All');
 
-  const categories = ['All', 'Home Care', 'Mobility Aid', 'Rehab & Ortho', 'Medical Devices', 'Surgicals & PPE', 'Hospital Supplies', 'Mother & Baby Care'];
-  
-  const subCategoryMap = {
-    'Home Care': ['All', 'Hospital Beds', 'Bed Accessories', 'Diapers & Pads', 'Bathroom Assist'],
-    'Mobility Aid': ['All', 'Wheelchairs', 'Commode Wheelchairs', 'Walkers & Crutches', 'Transfer Aids'],
-    'Rehab & Ortho': ['All', 'Head & Neck', 'Back & Abdomen', 'Leg & Foot', 'Fitness'],
-    'Medical Devices': ['All', 'BP Monitor', 'Glucometer', 'Thermometer', 'Stethoscope', 'Respiratory Care'],
-    'Surgicals & PPE': ['All', 'Masks & Gloves', 'Disinfectants', 'First Aid'],
-    'Hospital Supplies': ['All', 'Coats & Scrubs', 'Lab Supplies', 'Stretchers'],
-    'Mother & Baby Care': ['All']
-  };
+  const defaultCategories = [
+    'All',
+    'Hospital Bed',
+    'Wheelchairs',
+    'Walkers & Walkstick',
+    'Home Care',
+    'Mobility Aid',
+    'Respiratory Care',
+    'Diagnostics',
+    'Rehab & Ortho',
+    'Surgicals & PPE',
+    'Hospital Supplies',
+    'Mother & Baby Care'
+  ];
+
+  const categories = defaultCategories.includes(selectedCategory)
+    ? defaultCategories
+    : [...defaultCategories, selectedCategory];
 
   const brands = ['All', 'CareQuip', 'Vissco', 'Accu-Chek', 'Seni', 'Dyna', 'AEONCARE'];
 
   // Category Description Maps matching AeonCare DTC theme
   const categoryDescriptions = {
     'All': 'Discover our comprehensive catalog of premium medical and home-care products. Explore mobility solutions, diagnostics monitors, hospital cots and daily patient hygiene support.',
+    'Hospital Bed': 'Discover manual and 5-function electric hospital beds, medical mattresses, guard rails, and ICU cot accessories for home recovery.',
+    'Hospital Bed Collection': 'Discover manual and 5-function electric hospital beds, medical mattresses, guard rails, and ICU cot accessories for home recovery.',
+    'Wheelchairs': 'Find lightweight folding wheelchairs, electric motorized wheelchairs, commode chairs, and mobility transit equipment.',
+    'Wheelchair': 'Find lightweight folding wheelchairs, electric motorized wheelchairs, commode chairs, and mobility transit equipment.',
+    'Walkers & Walkstick': 'Browse height-adjustable aluminum patient walkers, quad cane walking sticks, elbow crutches, and mobility balance aids.',
+    'Walkers & Walkstick Collection': 'Browse height-adjustable aluminum patient walkers, quad cane walking sticks, elbow crutches, and mobility balance aids.',
     'Home Care': 'Discover hospital beds, bed accessories, incontinence diapers, and bathroom assist safety handles for patient comfort.',
     'Mobility Aid': 'Find lightweight folding wheelchairs, commode chairs, walkers, and transfer aids engineered for mobility assistance.',
     'Rehab & Ortho': 'Explore neck braces, lumbar supports, shoulder immobilizers, and rehabilitation aids.',
     'Medical Devices': 'Track blood pressure, body temperature, blood glucose, and respiratory oxygen metrics with certified monitors.',
+    'Respiratory Care': 'Continuous 10L medical oxygen concentrators, nebulizers, pulse oximeters, and respiratory care equipment.',
+    'Diagnostics': 'Digital blood pressure monitors, glucose meters, clinical thermometers, and diagnostic tools.',
     'Surgicals & PPE': 'Acquire certified high-filtration face masks, nitrile gloves, isolation gowns, and disinfectants.',
     'Hospital Supplies': 'Professional lab scrubs, clinical linen, and patient transfer stretchers.',
     'Mother & Baby Care': 'Gentle maternal hygiene, postpartum support, and infant care equipment.'
@@ -103,30 +118,25 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
 
       const pCat = (p.category || '').toLowerCase().trim();
       const pTitle = (p.title || '').toLowerCase().trim();
-      const pDesc = (p.description || '').toLowerCase().trim();
       const pCollections = Array.isArray(p.collections) ? p.collections.map(c => String(c).toLowerCase().trim()) : [];
       const pTags = Array.isArray(p.tags) ? p.tags.map(t => String(t).toLowerCase().trim()) : [];
 
-      // Direct exact or substring match
-      const catMatch = pCat === rawTarget || pCat === cleanTarget || (cleanTarget.length > 3 && (pCat === cleanTarget || pCat.startsWith(cleanTarget)));
-      const colMatch = pCollections.some(c => c === rawTarget || c === cleanTarget || (cleanTarget.length > 3 && c.includes(cleanTarget)));
-      const tagMatch = pTags.some(t => t === rawTarget || t === cleanTarget || (cleanTarget.length > 3 && (t.includes(cleanTarget) || cleanTarget.includes(t))));
+      let matched = false;
 
-      // Specialized product keyword search for targeted equipment collections
-      let termMatch = false;
-
-      if (cleanTarget.includes('hospital bed') || cleanTarget.includes('bed') || cleanTarget.includes('cot')) {
-        termMatch = pTitle.includes('bed') || pTitle.includes('cot') || pTags.some(t => t.includes('bed') || t.includes('cot')) || pCollections.some(c => c.includes('bed') || c.includes('cot'));
-      } else if (cleanTarget.includes('walker') || cleanTarget.includes('walkstick') || cleanTarget.includes('stick') || cleanTarget.includes('crutch')) {
-        termMatch = pTitle.includes('walker') || pTitle.includes('stick') || pTitle.includes('crutch') || pTags.some(t => t.includes('walker') || t.includes('stick') || t.includes('crutch')) || pCollections.some(c => c.includes('walker') || c.includes('stick'));
+      if (cleanTarget.includes('hospital bed') || cleanTarget.includes('bed') || cleanTarget === 'cot') {
+        matched = pTitle.includes('bed') || pTitle.includes('cot') || pTags.some(t => t.includes('bed') || t.includes('cot')) || pCollections.some(c => c.includes('bed') || c.includes('cot')) || pCat.includes('hospital bed');
       } else if (cleanTarget.includes('wheelchair') || cleanTarget.includes('wheel chair')) {
-        termMatch = pTitle.includes('wheelchair') || pTitle.includes('wheel chair') || pTags.some(t => t.includes('wheelchair')) || pCollections.some(c => c.includes('wheelchair'));
-      } else if (cleanTarget.length > 3 && !['all', 'home care', 'mobility aid', 'medical devices'].includes(cleanTarget)) {
-        const terms = cleanTarget.split(/[\s&,/]+/).filter(t => t.length > 3);
-        termMatch = terms.length > 0 && terms.some(t => pTitle.includes(t) || pTags.some(tag => tag.includes(t)) || pCollections.some(c => c.includes(t)));
+        matched = pTitle.includes('wheelchair') || pTitle.includes('wheel chair') || pTags.some(t => t.includes('wheelchair')) || pCollections.some(c => c.includes('wheelchair')) || pCat.includes('wheelchair');
+      } else if (cleanTarget.includes('walker') || cleanTarget.includes('walkstick') || cleanTarget.includes('stick') || cleanTarget.includes('crutch')) {
+        matched = pTitle.includes('walker') || pTitle.includes('stick') || pTitle.includes('crutch') || pTags.some(t => t.includes('walker') || t.includes('stick') || t.includes('crutch')) || pCollections.some(c => c.includes('walker') || c.includes('stick')) || pCat.includes('walker');
+      } else {
+        const catMatch = pCat === rawTarget || pCat === cleanTarget || (cleanTarget.length > 3 && pCat.includes(cleanTarget));
+        const colMatch = pCollections.some(c => c === rawTarget || c === cleanTarget || (cleanTarget.length > 3 && c.includes(cleanTarget)));
+        const tagMatch = pTags.some(t => t === rawTarget || t === cleanTarget || (cleanTarget.length > 3 && (t.includes(cleanTarget) || cleanTarget.includes(t))));
+        matched = catMatch || colMatch || tagMatch;
       }
 
-      if (!catMatch && !colMatch && !tagMatch && !termMatch) return false;
+      if (!matched) return false;
     }
     
     // Brand filter
