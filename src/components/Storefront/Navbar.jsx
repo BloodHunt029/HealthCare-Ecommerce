@@ -119,7 +119,7 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
   const cartItemsCount = cart.reduce((acc, curr) => acc + curr.qty, 0);
 
   return (
-    <header className="animate-fade-in">
+    <header className="animate-fade-in" style={{ position: 'relative', zIndex: 1000 }}>
       {!layout?.hiddenSections?.includes('announcementBar') && (
         <div style={{ backgroundColor: 'hsl(var(--primary))', color: 'white', fontSize: '0.8rem', padding: '0.4rem 1rem', textAlign: 'center', fontWeight: '500' }}>
           {layout.announcementBar}
@@ -141,7 +141,7 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
           </div>
 
           {/* Autocomplete Search Bar */}
-          <form onSubmit={handleSearchSubmit} style={{ flex: 1, maxWidth: '500px', position: 'relative' }} ref={suggestionRef}>
+          <form onSubmit={handleSearchSubmit} style={{ flex: 1, maxWidth: '500px', position: 'relative', zIndex: 1001 }} ref={suggestionRef}>
             <div style={{ position: 'relative' }}>
               <input
                 type="text"
