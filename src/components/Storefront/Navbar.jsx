@@ -155,21 +155,34 @@ export default function Navbar({ activeTab, setActiveTab, setViewMode, toggleCar
               <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--text-muted))' }} />
             </div>
 
-            {/* Suggestions Modal */}
+            {/* Suggestions Dropdown Box */}
             {showSuggestions && suggestions.length > 0 && (
               <div className="suggestions-box">
-                {suggestions.map(p => (
-                  <div key={p.id} className="suggestion-item" onClick={() => handleSuggestionClick(p)}>
-                    <img src={p.image} alt={p.title} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: '600', color: 'hsl(var(--text-main))' }}>{p.title}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))' }}>
-                        {p.category} • <span style={{ color: 'hsl(var(--primary))', fontWeight: '600' }}>₹{p.price}</span>
-                        {p.isRentable && <span style={{ color: 'hsl(var(--accent))', marginLeft: '6px' }}>[Rentable]</span>}
+                {suggestions.map(p => {
+                  const catParts = String(p.category || '').split('>').map(c => c.trim()).filter(Boolean);
+                  const leafCategory = catParts.length > 0 ? catParts[catParts.length - 1] : (p.category || 'Equipment');
+
+                  return (
+                    <div key={p.id} className="suggestion-item" onClick={() => handleSuggestionClick(p)}>
+                      <img src={p.image} alt={p.title} style={{ width: '44px', height: '44px', objectFit: 'contain', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', flexShrink: 0 }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: '700', fontSize: '0.825rem', color: 'hsl(var(--text-main))', lineHeight: '1.35', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {p.title}
+                        </div>
+                        <div style={{ fontSize: '0.725rem', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                          <span>{leafCategory}</span>
+                          <span>•</span>
+                          <span style={{ color: 'hsl(var(--primary))', fontWeight: '700' }}>₹{Number(p.price).toLocaleString('en-IN')}</span>
+                          {p.isRentable && (
+                            <span style={{ backgroundColor: '#fff7ed', color: '#c2410c', fontSize: '0.65rem', fontWeight: '700', padding: '1px 5px', borderRadius: '3px', border: '1px solid #ffedd5' }}>
+                              Rentable
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </form>
