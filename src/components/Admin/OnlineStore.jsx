@@ -6,13 +6,13 @@ import {
   Save, Smartphone, Monitor, ChevronRight, Image as ImageIcon, 
   Sliders, Type, FileText, HelpCircle, Palette, Layers, ShoppingCart,
   ArrowLeft, Plus, Trash, Video, ArrowUp, ArrowDown, Search, X, AppWindow,
-  Eye, EyeOff, Maximize2, ExternalLink
+  Eye, EyeOff, Maximize2, ExternalLink, CheckCircle2
 } from 'lucide-react';
 
 export default function OnlineStore() {
   const { 
     layout, updateLayout, blogs, addBlog, deleteBlog, 
-    faqs, addFAQ, deleteFAQ, storeSettings 
+    faqs, addFAQ, deleteFAQ, storeSettings, showToast 
   } = useContext(AppContext);
   
   const [selectedSection, setSelectedSection] = useState(null); // header_branding | hero | trust | collections | slideshow | featured_collection | video | faq | blog | footer | branding | image_banner | collection_with_image | rich_text
@@ -65,8 +65,47 @@ export default function OnlineStore() {
   // Section Sizes & Spacing State
   const [sectionSizes, setSectionSizes] = useState(layout.sectionSizes || {});
 
+  // Dynamic Unsaved Changes state
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const markDirty = () => setHasUnsavedChanges(true);
+
   const isInitialized = useRef(false);
   const lastSyncedUpdatedAt = useRef(null);
+
+  const resetFormFromLayout = () => {
+    setLogoText(layout.logoText || 'AeonCare');
+    setAnnouncementBar(layout.announcementBar || '');
+    setHeroTitle(layout.heroTitle || '');
+    setHeroSubtitle(layout.heroSubtitle || '');
+    setBannerTitle(layout.bannerTitle || '');
+    setBannerSubtitle(layout.bannerSubtitle || '');
+    setBannerImage(layout.bannerImage || '');
+    setCollectionsList(layout.collectionsList || []);
+    setThemeColors(layout.themeColors || 'teal');
+    setProductListColor(layout.productListColor || 'white');
+    setPromoVideoUrl(layout.promoVideoUrl || '');
+    setFooterText(layout.footerText || storeSettings?.slogan || 'Trusted home patient care support, mobility aids, clinical diagnostic devices sales and supply hub in Chennai.');
+    setFooterSupportTitle(layout.footerSupportTitle || 'Support Hub');
+    setFooterContactTitle(layout.footerContactTitle || 'Contact Info');
+    setFooterContactAddress(layout.footerContactAddress || (storeSettings?.addressLine1 ? `${storeSettings.storeName}, ${storeSettings.addressLine1}, ${storeSettings.addressLine2 ? storeSettings.addressLine2 + ', ' : ''}${storeSettings.city}, ${storeSettings.state} - ${storeSettings.pincode}` : 'Aeon Healthcare Pvt Ltd, Besant Nagar, Chennai, TN 600090'));
+    setFooterContactPhone(layout.footerContactPhone || storeSettings?.storePhone || '+91 98401 23456');
+    setFooterContactEmail(layout.footerContactEmail || storeSettings?.storeEmail || 'support@aeoncare.in');
+    setFooterCopyrightText(layout.footerCopyrightText || '© 2026 AeonCare. Partner of AeonCare.in. India CDSCO labeling compliant. All rights reserved.');
+    setNavigationTabs(layout.navigationTabs || []);
+    setSectionsOrderList(layout.sectionsOrder || ['hero', 'trust', 'collections', 'featured', 'video', 'blog']);
+    setHiddenSections(layout.hiddenSections || []);
+    setImageBannerImage(layout.imageBannerImage || '');
+    setImageBannerTitle(layout.imageBannerTitle || '');
+    setImageBannerSubtitle(layout.imageBannerSubtitle || '');
+    setColWithImageImage(layout.colWithImageImage || '');
+    setColWithImageTitle(layout.colWithImageTitle || '');
+    setColWithImageCategory(layout.colWithImageCategory || 'Mobility Aid');
+    setRichTextHeading(layout.richTextHeading || '');
+    setRichTextBody(layout.richTextBody || '');
+    setProductsPerPage(layout.productsPerPage || 20);
+    setSectionSizes(layout.sectionSizes || {});
+    setHasUnsavedChanges(false);
+  };
 
   // Sync layout form state on initial mount or when a new Firestore update arrives
   useEffect(() => {
@@ -75,40 +114,54 @@ export default function OnlineStore() {
       if (!isInitialized.current || isNewDbUpdate) {
         isInitialized.current = true;
         if (layout.updatedAt) lastSyncedUpdatedAt.current = layout.updatedAt;
-
-        setLogoText(layout.logoText || 'AeonCare');
-        setAnnouncementBar(layout.announcementBar || '');
-        setHeroTitle(layout.heroTitle || '');
-        setHeroSubtitle(layout.heroSubtitle || '');
-        setBannerTitle(layout.bannerTitle || '');
-        setBannerSubtitle(layout.bannerSubtitle || '');
-        setBannerImage(layout.bannerImage || '');
-        setCollectionsList(layout.collectionsList || []);
-        setThemeColors(layout.themeColors || 'teal');
-        setPromoVideoUrl(layout.promoVideoUrl || '');
-        setFooterText(layout.footerText || storeSettings?.slogan || 'Trusted home patient care support, mobility aids, clinical diagnostic devices sales and supply hub in Chennai.');
-        setFooterSupportTitle(layout.footerSupportTitle || 'Support Hub');
-        setFooterContactTitle(layout.footerContactTitle || 'Contact Info');
-        setFooterContactAddress(layout.footerContactAddress || (storeSettings?.addressLine1 ? `${storeSettings.storeName}, ${storeSettings.addressLine1}, ${storeSettings.addressLine2 ? storeSettings.addressLine2 + ', ' : ''}${storeSettings.city}, ${storeSettings.state} - ${storeSettings.pincode}` : 'Aeon Healthcare Pvt Ltd, Besant Nagar, Chennai, TN 600090'));
-        setFooterContactPhone(layout.footerContactPhone || storeSettings?.storePhone || '+91 98401 23456');
-        setFooterContactEmail(layout.footerContactEmail || storeSettings?.storeEmail || 'support@aeoncare.in');
-        setFooterCopyrightText(layout.footerCopyrightText || '© 2026 AeonCare. Partner of AeonCare.in. India CDSCO labeling compliant. All rights reserved.');
-        setNavigationTabs(layout.navigationTabs || []);
-        setSectionsOrderList(layout.sectionsOrder || ['hero', 'trust', 'collections', 'featured', 'video', 'blog']);
-        setHiddenSections(layout.hiddenSections || []);
-        setImageBannerImage(layout.imageBannerImage || '');
-        setImageBannerTitle(layout.imageBannerTitle || '');
-        setImageBannerSubtitle(layout.imageBannerSubtitle || '');
-        setColWithImageImage(layout.colWithImageImage || '');
-        setColWithImageTitle(layout.colWithImageTitle || '');
-        setColWithImageCategory(layout.colWithImageCategory || 'Mobility Aid');
-        setRichTextHeading(layout.richTextHeading || '');
-        setRichTextBody(layout.richTextBody || '');
-        setProductsPerPage(layout.productsPerPage || 20);
-        setSectionSizes(layout.sectionSizes || {});
+        resetFormFromLayout();
       }
     }
   }, [layout, storeSettings]);
+
+  const handleDiscardChanges = () => {
+    resetFormFromLayout();
+    showToast?.('Unsaved theme changes discarded.', 'info');
+  };
+
+  const handleSaveAll = (e) => {
+    if (e) e.preventDefault();
+    updateLayout({
+      logoText,
+      announcementBar,
+      heroTitle,
+      heroSubtitle,
+      bannerTitle,
+      bannerSubtitle,
+      bannerImage,
+      collectionsList,
+      themeColors,
+      productListColor,
+      promoVideoUrl,
+      footerText,
+      footerSupportTitle,
+      footerContactTitle,
+      footerContactAddress,
+      footerContactPhone,
+      footerContactEmail,
+      footerCopyrightText,
+      sectionsOrder: sectionsOrderList,
+      hiddenSections,
+      sectionSizes,
+      imageBannerImage,
+      imageBannerTitle,
+      imageBannerSubtitle,
+      colWithImageImage,
+      colWithImageTitle,
+      colWithImageCategory,
+      richTextHeading,
+      richTextBody,
+      productsPerPage: Number(productsPerPage) || 20,
+      navigationTabs
+    });
+    setHasUnsavedChanges(false);
+    showToast?.('Theme settings saved and synced successfully to the live storefront!', 'success');
+  };
 
   // FAQ local form state
   const [faqQ, setFaqQ] = useState('');
@@ -378,43 +431,6 @@ export default function OnlineStore() {
     reader.readAsDataURL(file);
   };
 
-  const handleSaveAll = (e) => {
-    if (e) e.preventDefault();
-    updateLayout({
-      logoText,
-      announcementBar,
-      heroTitle,
-      heroSubtitle,
-      bannerTitle,
-      bannerSubtitle,
-      bannerImage,
-      collectionsList,
-      themeColors,
-      promoVideoUrl,
-      footerText,
-      footerSupportTitle,
-      footerContactTitle,
-      footerContactAddress,
-      footerContactPhone,
-      footerContactEmail,
-      footerCopyrightText,
-      sectionsOrder: sectionsOrderList,
-      hiddenSections,
-      sectionSizes,
-      imageBannerImage,
-      imageBannerTitle,
-      imageBannerSubtitle,
-      colWithImageImage,
-      colWithImageTitle,
-      colWithImageCategory,
-      richTextHeading,
-      richTextBody,
-      productsPerPage: Number(productsPerPage) || 20,
-      navigationTabs
-    });
-    alert('Theme settings saved and synced successfully to the live storefront!');
-  };
-
   // Section List Mutation Helpers
   const shiftSectionUp = (idx, e) => {
     e.stopPropagation();
@@ -575,12 +591,31 @@ export default function OnlineStore() {
         </div>
 
         <div>
-          <button 
-            onClick={handleSaveAll}
-            style={{ backgroundColor: '#2563eb', color: '#ffffff', border: 'none', padding: '0.45rem 1.25rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer' }}
-          >
-            Save Theme
-          </button>
+          {hasUnsavedChanges ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: '700', color: '#ea580c', display: 'flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#fff7ed', padding: '4px 10px', borderRadius: '6px', border: '1px solid #ffedd5' }}>
+                ⚠️ Unsaved changes
+              </span>
+              <button 
+                type="button"
+                onClick={handleDiscardChanges}
+                style={{ backgroundColor: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1', padding: '0.4rem 0.85rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer' }}
+              >
+                Discard
+              </button>
+              <button 
+                type="button"
+                onClick={handleSaveAll}
+                style={{ backgroundColor: '#2563eb', color: '#ffffff', border: 'none', padding: '0.4rem 1.15rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)' }}
+              >
+                Save Theme
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#16a34a', fontSize: '0.78rem', fontWeight: '700', backgroundColor: '#f0fdf4', padding: '4px 12px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
+              <CheckCircle2 size={15} /> All changes saved
+            </div>
+          )}
         </div>
       </div>
 
@@ -920,6 +955,7 @@ export default function OnlineStore() {
                           onClick={() => {
                             setThemeColors(opt.id);
                             updateLayout({ themeColors: opt.id });
+                            markDirty();
                           }}
                           style={{
                             display: 'flex',
@@ -957,6 +993,7 @@ export default function OnlineStore() {
                           onClick={() => {
                             setProductListColor(opt.id);
                             updateLayout({ productListColor: opt.id });
+                            markDirty();
                           }}
                           style={{
                             display: 'flex',
