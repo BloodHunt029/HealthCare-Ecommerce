@@ -160,78 +160,81 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
       <div className="pdp-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '3rem', marginBottom: '3rem' }}>
         
         {/* Left Column: Image Gallery + Cursor Zoom */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="pdp-gallery-container" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
           
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-            
-            {/* Gallery Thumbnails */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '60px', flexShrink: 0 }}>
+          {/* Main Interactive Zoom Box (Centered) */}
+          <div 
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            className="pdp-main-img-box"
+            style={{
+              width: '100%',
+              maxWidth: '500px',
+              height: '400px',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              backgroundColor: 'white',
+              position: 'relative',
+              cursor: 'zoom-in',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto'
+            }}
+          >
+            <img 
+              src={galleryImages[activeImageIndex] || product.image} 
+              alt={product.title} 
+              style={{
+                maxWidth: '90%',
+                maxHeight: '90%',
+                objectFit: 'contain',
+                transition: isZoomed ? 'transform 0.08s ease-out' : 'transform 0.25s ease-out',
+                transform: isZoomed ? 'scale(2.2)' : 'scale(1)',
+                transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`
+              }} 
+            />
+          </div>
+
+          {/* Gallery Thumbnails Row (Centered Directly Underneath Main Image) */}
+          {galleryImages.length > 1 && (
+            <div className="pdp-thumbnails-row" style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', width: '100%', marginTop: '0.25rem' }}>
               {galleryImages.map((imgUrl, i) => (
                 <div 
                   key={i}
                   onClick={() => setActiveImageIndex(i)}
+                  className={`pdp-thumbnail-item ${activeImageIndex === i ? 'active' : ''}`}
                   style={{
-                    width: '56px',
-                    height: '56px',
-                    borderRadius: '6px',
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '8px',
                     overflow: 'hidden',
                     border: activeImageIndex === i ? '2px solid hsl(var(--primary))' : '1px solid hsl(var(--border))',
                     cursor: 'pointer',
                     backgroundColor: '#ffffff',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    boxShadow: activeImageIndex === i ? '0 0 0 2px hsl(var(--primary) / 0.2)' : 'none',
+                    transition: 'all 0.2s ease-in-out'
                   }}
                 >
                   <img 
                     src={imgUrl} 
                     alt={`Thumbnail ${i + 1}`} 
-                    style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }} 
+                    style={{ maxWidth: '92%', maxHeight: '92%', objectFit: 'contain' }} 
                   />
                 </div>
               ))}
             </div>
-
-            {/* Main Interactive Zoom Box */}
-            <div 
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
-              className="pdp-main-img-box"
-              style={{
-                flex: 1,
-                height: '400px',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                backgroundColor: 'white',
-                position: 'relative',
-                cursor: 'zoom-in',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <img 
-                src={galleryImages[activeImageIndex] || product.image} 
-                alt={product.title} 
-                style={{
-                  maxWidth: '90%',
-                  maxHeight: '90%',
-                  objectFit: 'contain',
-                  transition: isZoomed ? 'transform 0.08s ease-out' : 'transform 0.25s ease-out',
-                  transform: isZoomed ? 'scale(2.2)' : 'scale(1)',
-                  transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`
-                }} 
-              />
-            </div>
-
-          </div>
+          )}
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'hsl(var(--text-muted))' }}>
             <Search size={14} /> Roll over image to zoom in
           </div>
 
-          <div style={{ border: '1px solid hsl(var(--border))', padding: '1rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'hsl(var(--text-muted-light) / 0.3)' }}>
+          <div style={{ width: '100%', border: '1px solid hsl(var(--border))', padding: '1rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'hsl(var(--text-muted-light) / 0.3)' }}>
             <ShieldAlert size={20} style={{ color: 'hsl(var(--primary))', flexShrink: 0 }} />
             <div style={{ fontSize: '0.8rem', color: 'hsl(var(--text-muted))' }}>
               <strong>Certified Sterilization:</strong> AeonCare assets undergo full hospital-grade chemical washing & diagnostic load testing prior to shipping.

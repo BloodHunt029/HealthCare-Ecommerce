@@ -1162,8 +1162,33 @@ input:checked + .toggle-slider:before {
     margin-bottom: 2rem !important;
   }
 
+  .pdp-gallery-container {
+    width: 100% !important;
+  }
+
   .pdp-main-img-box {
-    height: 280px !important;
+    height: 300px !important;
+    max-width: 100% !important;
+  }
+
+  .pdp-thumbnails-row {
+    justify-content: center !important;
+    overflow-x: auto !important;
+    padding: 0.25rem 0 !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+  }
+
+  .pdp-thumbnail-item {
+    width: 58px !important;
+    height: 58px !important;
+    flex-shrink: 0 !important;
+    border-radius: 8px !important;
+  }
+
+  .pdp-thumbnail-item.active {
+    border: 2.5px solid #ef4444 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
   }
 
   .pdp-title {
