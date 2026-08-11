@@ -125,10 +125,10 @@ export default function Navbar({ activeTab, setActiveTab, setSelectedProductId, 
 
       {/* Main Navigation Row */}
       <div style={{ borderBottom: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--card))' }}>
-        <div className="navbar-container" style={{ maxWidth: '1280px', margin: '0 auto' }}>
+        <div className="navbar-container" style={{ maxWidth: '1280px', margin: '0 auto', padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
           
           {/* Logo */}
-          <div className="navbar-logo" onClick={() => setActiveTab('home')}>
+          <div className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => setActiveTab('home')}>
             <span style={{ display: 'inline-block', backgroundColor: 'hsl(var(--primary))', color: 'white', borderRadius: '8px', padding: '6px' }}>
               <ShieldCheck size={24} />
             </span>
@@ -138,12 +138,12 @@ export default function Navbar({ activeTab, setActiveTab, setSelectedProductId, 
           </div>
 
           {/* Autocomplete Search Bar */}
-          <form onSubmit={handleSearchSubmit} className="navbar-search-form" ref={suggestionRef}>
+          <form onSubmit={handleSearchSubmit} className="navbar-search-form" style={{ flex: 1, maxWidth: '500px', position: 'relative', zIndex: 1001 }} ref={suggestionRef}>
             <div style={{ position: 'relative' }}>
               <input
                 type="text"
                 className="form-input"
-                placeholder="Search wheelchairs, electric beds, BP monitors..."
+                placeholder="Search wheelchairs, electric beds, BP monitors (e.g., 'cot')..."
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onFocus={() => searchQuery.trim() && setShowSuggestions(true)}
@@ -185,33 +185,46 @@ export default function Navbar({ activeTab, setActiveTab, setSelectedProductId, 
           </form>
 
           {/* Support Widget & Action Indicators */}
-          <div className="navbar-actions">
-            <a 
-              href={`tel:${storeSettings?.storePhone || '+919840123456'}`} 
-              className="navbar-call-btn" 
-              title={storeSettings?.storePhone ? `Call ${storeSettings.storePhone}` : 'Call Support'}
-            >
-              <Phone size={18} />
+          <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+            <a href={`tel:${storeSettings?.storePhone || '+919840123456'}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '600', color: 'hsl(var(--text-main))' }} className="navbar-call-btn btn-ghost btn" title="Call Us Support">
+              <Phone size={18} style={{ color: 'hsl(var(--primary))' }} />
               <span className="hide-mobile">{storeSettings?.storePhone ? `Call ${storeSettings.storePhone}` : 'Call Support'}</span>
             </a>
 
             <button 
-              className="navbar-account-btn" 
+              className="navbar-account-btn btn btn-ghost" 
+              style={{ position: 'relative', padding: '0.5rem' }} 
               onClick={() => setActiveTab('userPortal')}
               title="My Account"
             >
-              <User size={20} />
+              <User size={22} style={{ color: 'hsl(var(--text-main))' }} />
             </button>
 
             <button 
-              className="navbar-cart-btn" 
+              className="navbar-cart-btn btn btn-primary" 
+              style={{ position: 'relative', borderRadius: '99px', padding: '0.6rem 1rem' }} 
               onClick={toggleCartOpen}
               title="Cart"
             >
               <ShoppingCart size={18} />
-              <span className="hide-mobile">Cart</span>
+              <span className="hide-mobile" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Cart</span>
               {cartItemsCount > 0 && (
-                <span className="navbar-cart-badge">
+                <span className="navbar-cart-badge" style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  right: '-5px',
+                  backgroundColor: 'hsl(var(--accent))',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  fontSize: '0.75rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '700',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                }}>
                   {cartItemsCount}
                 </span>
               )}

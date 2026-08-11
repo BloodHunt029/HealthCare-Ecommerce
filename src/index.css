@@ -933,40 +933,13 @@ input:checked + .toggle-slider:before {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Navbar Layout Rules */
-@media (min-width: 769px) {
-  .navbar-container {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 1.5rem !important;
-    padding: 0.85rem 1.5rem !important;
-  }
+/* Helper classes for visibility */
+.hide-mobile {
+  display: inline-block;
+}
 
-  .navbar-logo {
-    order: 1 !important;
-    flex: 0 0 auto !important;
-  }
-
-  .navbar-search-form {
-    order: 2 !important;
-    flex: 1 !important;
-    max-width: 520px !important;
-    margin: 0 auto !important;
-  }
-
-  .navbar-actions {
-    order: 3 !important;
-    flex: 0 0 auto !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 1.25rem !important;
-    margin-left: auto !important;
-  }
-
-  .hide-mobile {
-    display: inline-block !important;
-  }
+.show-mobile-only {
+  display: none;
 }
 
 @media (max-width: 768px) {
