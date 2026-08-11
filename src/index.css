@@ -823,21 +823,125 @@ input:checked + .toggle-slider:before {
   background-color: #f1f5f9;
 }
 
-/* Global Mobile Responsiveness & Overflow Prevention */
-html, body {
-  overflow-x: hidden !important;
-  max-width: 100vw !important;
-  width: 100% !important;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Helper classes for visibility */
+.hide-mobile {
+  display: inline-block;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
+.show-mobile-only {
+  display: none;
+}
+
+/* Navbar Action Items (Call, Login, Cart) */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  order: 3;
+}
+
+.navbar-logo {
+  order: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.navbar-search-form {
+  order: 2;
+  flex: 1;
+  max-width: 500px;
+  position: relative;
+  z-index: 1001;
+}
+
+.navbar-call-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 99px;
+  color: hsl(var(--text-main));
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.navbar-call-btn:hover {
+  background-color: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+}
+
+.navbar-account-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 50%;
+  color: hsl(var(--text-main));
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+.navbar-account-btn:hover {
+  background-color: hsl(var(--text-muted-light));
+  color: hsl(var(--primary));
+}
+
+.navbar-cart-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 99px;
+  padding: 0.55rem 1.1rem;
+  background-color: hsl(var(--primary));
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  border: none;
+}
+
+.navbar-cart-btn:hover {
+  background-color: hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) - 6%));
+  box-shadow: 0 4px 12px hsl(var(--primary) / 0.25);
+}
+
+.navbar-cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: hsl(var(--accent));
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 @media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .show-mobile-only {
+    display: inline-block !important;
+  }
+
   /* Prevent horizontal page overflow on mobile devices */
   .app-container {
     max-width: 100vw !important;
@@ -856,16 +960,67 @@ html, body {
 
   /* Main Navigation Row on Mobile */
   .navbar-container {
-    padding: 0.75rem 1rem !important;
-    gap: 0.75rem !important;
+    padding: 0.6rem 0.85rem !important;
+    gap: 0.5rem !important;
     flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  .navbar-logo {
+    order: 1 !important;
+    flex: 0 0 auto !important;
+  }
+
+  .navbar-actions {
+    order: 2 !important;
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.45rem !important;
+  }
+
+  .navbar-call-btn {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    background-color: hsl(var(--primary) / 0.12) !important;
+    color: hsl(var(--primary)) !important;
+  }
+
+  .navbar-account-btn {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    background-color: hsl(var(--text-muted-light)) !important;
+    color: hsl(var(--text-main)) !important;
+  }
+
+  .navbar-cart-btn {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    background-color: hsl(var(--primary)) !important;
+    color: white !important;
+  }
+
+  .navbar-cart-badge {
+    top: -3px !important;
+    right: -3px !important;
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 0.65rem !important;
   }
 
   /* Mobile Search Form Container */
   .navbar-search-form {
+    order: 3 !important;
     max-width: 100% !important;
     width: 100% !important;
-    order: 3 !important;
+    margin-top: 0.2rem !important;
   }
 
   /* Floating Action Buttons on Mobile */
