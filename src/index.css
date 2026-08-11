@@ -1183,12 +1183,12 @@ input:checked + .toggle-slider:before {
     font-size: 0.68rem !important;
   }
 }
-  /* Floating Action Buttons on Mobile */
-  .floating-action-btn, .whatsapp-float {
-    bottom: 80px !important; /* Elevate above mobile bottom navigation bar */
-  }
+/* Default mobile-bottom-nav hidden on Desktop PC */
+.mobile-bottom-nav {
+  display: none !important;
+}
 
-  /* Sticky Mobile Bottom Navigation Bar */
+@media (max-width: 768px) {
   .mobile-bottom-nav {
     position: fixed !important;
     bottom: 0 !important;
@@ -1206,4 +1206,5 @@ input:checked + .toggle-slider:before {
     align-items: center !important;
     padding: 0.5rem 0.25rem !important;
   }
+}
 
