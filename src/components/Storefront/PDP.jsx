@@ -145,7 +145,7 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
     : [product.image];
 
   return (
-    <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2rem 1.5rem', flex: 1 }} className="animate-fade-in">
+    <div style={{ maxWidth: '1280px', margin: '0 auto', flex: 1 }} className="pdp-container animate-fade-in">
       
       {/* Back to catalog breadcrumb */}
       <button 
@@ -157,7 +157,7 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
       </button>
 
       {/* Main product box */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '3rem', marginBottom: '3rem' }}>
+      <div className="pdp-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '3rem', marginBottom: '3rem' }}>
         
         {/* Left Column: Image Gallery + Cursor Zoom */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -196,6 +196,7 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
             <div 
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
+              className="pdp-main-img-box"
               style={{
                 flex: 1,
                 height: '400px',
@@ -244,7 +245,7 @@ export default function PDP({ productId, setSelectedProductId, setActiveTab }) {
           <div style={{ fontSize: '0.85rem', color: 'hsl(var(--text-muted))', fontWeight: '600', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
             {product.brand} • {product.category}
           </div>
-          <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '1.25rem' }}>{product.title}</h1>
+          <h1 className="pdp-title" style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '1.25rem' }}>{product.title}</h1>
 
           {/* Pricing Box */}
           <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid hsl(var(--primary))', marginBottom: '1.5rem' }}>

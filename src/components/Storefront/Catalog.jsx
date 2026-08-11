@@ -230,14 +230,14 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
   const paginatedProducts = sortedProducts.slice(startIndex, startIndex + perPage);
 
   return (
-    <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2.5rem 1.5rem', flex: 1 }} className="animate-fade-in">
+    <div className="catalog-container animate-fade-in">
       
       {/* Category Heading & Description at the Top */}
-      <div style={{ marginBottom: '2.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: '#1e293b', marginBottom: '0.75rem' }}>
+      <div className="catalog-header">
+        <h1 className="catalog-title">
           {selectedCategory === 'All' ? 'Healthcare Equipment Store' : selectedCategory}
         </h1>
-        <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: '1.6', maxWidth: '900px' }}>
+        <p className="catalog-desc">
           {categoryDescriptions[selectedCategory] || categoryDescriptions['All']}
         </p>
       </div>
@@ -273,22 +273,11 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
       )}
 
       {/* Horizontal Toolbar: Filters & Sort Controls Bar */}
-      <div style={{ 
-        borderTop: '1px solid #e2e8f0', 
-        borderBottom: '1px solid #e2e8f0', 
-        padding: '0.75rem 0.5rem', 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        flexWrap: 'wrap',
-        gap: '1rem',
-        marginBottom: '2rem',
-        backgroundColor: '#ffffff'
-      }}>
+      <div className="catalog-toolbar">
         
         {/* Left Side: Product Counter & Quick Search */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>
+        <div className="catalog-toolbar-info">
+          <span style={{ fontWeight: '600', color: '#475569' }}>
             Showing {sortedProducts.length > 0 ? startIndex + 1 : 0} - {endIndex} of {sortedProducts.length} products
           </span>
           {searchQuery && (
@@ -299,12 +288,12 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
         </div>
 
         {/* Center: Dropdown Inline Filters */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div className="catalog-toolbar-selects">
           {/* Brand Selector */}
           <select 
             value={selectedBrand} 
             onChange={(e) => setSelectedBrand(e.target.value)}
-            style={{ padding: '0.4rem 0.8rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600', outline: 'none' }}
+            style={{ padding: '0.4rem 0.8rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600', outline: 'none', backgroundColor: '#ffffff' }}
           >
             <option value="All">All Brands</option>
             {brands.filter(b => b !== 'All').map(brand => (
@@ -316,17 +305,28 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
           <select 
             value={selectedCategory} 
             onChange={(e) => setSelectedCategory(e.target.value)}
-            style={{ padding: '0.4rem 0.8rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600', outline: 'none' }}
+            style={{ padding: '0.4rem 0.8rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600', outline: 'none', backgroundColor: '#ffffff' }}
           >
             {categories.map(cat => (
               <option key={cat} value={cat}>{cat === 'All' ? 'All Collections' : cat}</option>
             ))}
           </select>
+
+          {/* Sort Selector */}
+          <select 
+            value={sortBy} 
+            onChange={(e) => setSortBy(e.target.value)}
+            style={{ padding: '0.4rem 0.8rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600', outline: 'none', backgroundColor: '#ffffff' }}
+          >
+            <option value="popular">Popularity & Relevance</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="discount">Biggest Savings</option>
+          </select>
         </div>
 
-        {/* Right Side: Sort, Per-Page, Grid/List view Switchers */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          
+        {/* Right Side: Per-Page, Grid/List view Switchers */}
+        <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
             <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Display:</span>
             <select 
@@ -338,20 +338,6 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
               <option value="24">24 per page (6 rows)</option>
               <option value="40">40 per page (10 rows)</option>
               <option value="60">60 per page (15 rows)</option>
-            </select>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Sort by:</span>
-            <select 
-              value={sortBy} 
-              onChange={(e) => setSortBy(e.target.value)}
-              style={{ border: 'none', background: 'transparent', fontSize: '0.8rem', fontWeight: '700', outline: 'none', cursor: 'pointer' }}
-            >
-              <option value="popular">Popularity & Relevance</option>
-              <option value="price-low">Price: low to high</option>
-              <option value="price-high">Price: high to low</option>
-              <option value="discount">Biggest Savings</option>
             </select>
           </div>
 
@@ -369,7 +355,6 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
               <List size={18} />
             </button>
           </div>
-
         </div>
       </div>
 
@@ -382,18 +367,10 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
             <button className="btn btn-primary" onClick={clearAllFilters}>Reset Filter Settings</button>
           </div>
         ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: viewModeType === 'grid' ? 'repeat(auto-fill, minmax(260px, 1fr))' : '1fr',
-            gap: 0,
-            borderTop: '1px solid #e2e8f0',
-            borderLeft: '1px solid #e2e8f0',
-            backgroundColor: '#ffffff'
-          }}>
+          <div className={`catalog-products-grid ${viewModeType === 'list' ? 'list-view' : ''}`}>
             {paginatedProducts.map(p => {
               const discountValue = p.mrp - p.price;
               const hasDiscount = p.mrp > p.price;
-              const isBedItem = p.title.toLowerCase().includes('bed') || p.title.toLowerCase().includes('cot') || p.title.toLowerCase().includes('mattress');
 
               return (
                 <div 
@@ -415,7 +392,7 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
                 >
                   {/* Red Save Badge or Custom Offer Tag */}
                   {(p.offerTag || hasDiscount) && (
-                    <div style={{
+                    <div className="product-card-save-badge" style={{
                       position: 'absolute',
                       top: '1rem',
                       left: '1rem',
@@ -433,7 +410,7 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
                   )}
 
                   {/* Image area */}
-                  <div style={{
+                  <div className="product-card-img-box" style={{
                     height: '200px',
                     width: viewModeType === 'grid' ? '100%' : '200px',
                     display: 'flex',
@@ -467,7 +444,7 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
                     </span>
 
                     {/* Title */}
-                    <h3 style={{ 
+                    <h3 className="product-card-title" style={{ 
                       fontSize: '0.85rem', 
                       fontWeight: '600', 
                       color: '#1e293b', 
@@ -480,7 +457,7 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
                     </h3>
 
                     {/* Price and Strikeout MRP */}
-                    <div style={{ 
+                    <div className="product-card-price-box" style={{ 
                       display: 'flex', 
                       alignItems: 'baseline', 
                       gap: '0.5rem', 
@@ -489,7 +466,7 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
                       justifyContent: 'space-between'
                     }}>
                       <div>
-                        <span style={{ 
+                        <span className="product-card-price" style={{ 
                           color: '#ef4444', 
                           fontSize: '1.05rem', 
                           fontWeight: '800' 
@@ -497,7 +474,7 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
                           Rs. {p.price.toLocaleString('en-IN')}.00
                         </span>
                         {hasDiscount && (
-                          <span style={{ 
+                          <span className="product-card-mrp" style={{ 
                             color: '#94a3b8', 
                             textDecoration: 'line-through', 
                             fontSize: '0.8rem',
@@ -511,7 +488,7 @@ export default function Catalog({ selectedProductId, setSelectedProductId, initi
                       <button 
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setQuickViewProduct(p); }}
-                        className="btn btn-outline"
+                        className="btn btn-outline hide-mobile"
                         style={{ padding: '0.25rem 0.5rem', fontSize: '0.7rem', fontWeight: '700' }}
                       >
                         Quick View
