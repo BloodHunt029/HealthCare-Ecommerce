@@ -1868,17 +1868,20 @@ export default function OnlineStore() {
 
           return (
             <div style={{ flex: 1, backgroundColor: '#cbd5e1', overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: viewportMode === 'mobile' ? '2rem' : '0' }}>
-              <div style={{
-                width: viewportMode === 'desktop' ? '100%' : '375px',
-                minHeight: viewportMode === 'desktop' ? '100%' : '667px',
-                backgroundColor: '#ffffff',
-                borderRadius: viewportMode === 'desktop' ? '0' : '32px',
-                border: viewportMode === 'desktop' ? 'none' : '10px solid #1e293b',
-                boxShadow: viewportMode === 'desktop' ? 'none' : '0 10px 30px rgba(0,0,0,0.15)',
-                overflowY: 'auto',
-                transition: 'all 0.3s ease-in-out',
-                position: 'relative'
-              }}>
+              <div 
+                className={viewportMode === 'mobile' ? 'is-mobile-preview' : ''}
+                style={{
+                  width: viewportMode === 'desktop' ? '100%' : '375px',
+                  minHeight: viewportMode === 'desktop' ? '100%' : '667px',
+                  backgroundColor: '#ffffff',
+                  borderRadius: viewportMode === 'desktop' ? '0' : '32px',
+                  border: viewportMode === 'desktop' ? 'none' : '10px solid #1e293b',
+                  boxShadow: viewportMode === 'desktop' ? 'none' : '0 10px 30px rgba(0,0,0,0.15)',
+                  overflowY: 'auto',
+                  transition: 'all 0.3s ease-in-out',
+                  position: 'relative'
+                }}
+              >
                 <Navbar 
                   activeTab="home" 
                   setActiveTab={() => {}} 
