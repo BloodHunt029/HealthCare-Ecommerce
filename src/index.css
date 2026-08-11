@@ -958,9 +958,9 @@ input:checked + .toggle-slider:before {
     text-overflow: ellipsis !important;
   }
 
-  /* Main Navigation Row on Mobile */
+  /* Main Navigation Header Row on Mobile */
   .navbar-container {
-    padding: 0.6rem 0.85rem !important;
+    padding: 0.55rem 0.75rem !important;
     gap: 0.5rem !important;
     flex-wrap: wrap !important;
     justify-content: space-between !important;
@@ -972,57 +972,99 @@ input:checked + .toggle-slider:before {
     flex: 0 0 auto !important;
   }
 
+  .navbar-logo span:last-child {
+    font-size: 1.25rem !important;
+  }
+
+  /* Action Buttons Aligned Straight in Top Rightside Corner */
   .navbar-actions {
     order: 2 !important;
     flex: 0 0 auto !important;
     display: flex !important;
     align-items: center !important;
-    gap: 0.45rem !important;
+    justify-content: flex-end !important;
+    gap: 0.35rem !important;
+    margin-left: auto !important;
+    flex-wrap: nowrap !important;
   }
 
   .navbar-call-btn {
-    width: 40px !important;
-    height: 40px !important;
-    padding: 0 !important;
-    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.3rem !important;
+    padding: 0.35rem 0.6rem !important;
+    border-radius: 99px !important;
     background-color: hsl(var(--primary) / 0.12) !important;
     color: hsl(var(--primary)) !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    text-decoration: none !important;
   }
 
   .navbar-account-btn {
-    width: 40px !important;
-    height: 40px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    height: 34px !important;
     padding: 0 !important;
     border-radius: 50% !important;
     background-color: hsl(var(--text-muted-light)) !important;
     color: hsl(var(--text-main)) !important;
+    flex-shrink: 0 !important;
   }
 
   .navbar-cart-btn {
-    width: 40px !important;
-    height: 40px !important;
-    padding: 0 !important;
-    border-radius: 50% !important;
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.25rem !important;
+    padding: 0.35rem 0.7rem !important;
+    border-radius: 99px !important;
     background-color: hsl(var(--primary)) !important;
     color: white !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
 
   .navbar-cart-badge {
-    top: -3px !important;
-    right: -3px !important;
-    width: 18px !important;
-    height: 18px !important;
+    top: -4px !important;
+    right: -4px !important;
+    width: 17px !important;
+    height: 17px !important;
     font-size: 0.65rem !important;
   }
 
-  /* Mobile Search Form Container */
+  /* Full Width Mobile Search Form Container below Top Row */
   .navbar-search-form {
     order: 3 !important;
     max-width: 100% !important;
     width: 100% !important;
     margin-top: 0.2rem !important;
   }
+}
 
+@media (max-width: 360px) {
+  .navbar-container {
+    padding: 0.45rem 0.4rem !important;
+    gap: 0.25rem !important;
+  }
+  .navbar-actions {
+    gap: 0.25rem !important;
+  }
+  .navbar-call-btn {
+    padding: 0.3rem 0.45rem !important;
+    font-size: 0.68rem !important;
+  }
+  .navbar-cart-btn {
+    padding: 0.3rem 0.55rem !important;
+    font-size: 0.68rem !important;
+  }
+}
   /* Floating Action Buttons on Mobile */
   .floating-action-btn, .whatsapp-float {
     bottom: 80px !important; /* Elevate above mobile bottom navigation bar */
@@ -1046,4 +1088,4 @@ input:checked + .toggle-slider:before {
     align-items: center !important;
     padding: 0.5rem 0.25rem !important;
   }
-}
+
