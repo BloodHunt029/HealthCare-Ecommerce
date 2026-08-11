@@ -127,17 +127,54 @@ export default function Navbar({ activeTab, setActiveTab, setSelectedProductId, 
       <div style={{ borderBottom: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--card))' }}>
         <div className="navbar-container" style={{ maxWidth: '1280px', margin: '0 auto' }}>
           
-          {/* Logo */}
-          <div className="navbar-logo" onClick={() => setActiveTab('home')}>
-            <span style={{ display: 'inline-block', backgroundColor: 'hsl(var(--primary))', color: 'white', borderRadius: '8px', padding: '6px' }}>
-              <ShieldCheck size={24} />
-            </span>
-            <span style={{ fontSize: '1.4rem', fontWeight: '800', color: 'hsl(var(--primary))', letterSpacing: '-0.03em' }}>
-              {layout?.logoText || storeSettings?.storeName || 'Health Care'}
-            </span>
+          {/* Top Header Bar: Logo on Left, Actions on Right (Opposite to Logo) */}
+          <div className="navbar-header-top">
+            {/* Logo */}
+            <div className="navbar-logo" onClick={() => setActiveTab('home')}>
+              <span style={{ display: 'inline-block', backgroundColor: 'hsl(var(--primary))', color: 'white', borderRadius: '8px', padding: '6px' }}>
+                <ShieldCheck size={24} />
+              </span>
+              <span style={{ fontSize: '1.4rem', fontWeight: '800', color: 'hsl(var(--primary))', letterSpacing: '-0.03em' }}>
+                {layout?.logoText || storeSettings?.storeName || 'Health Care'}
+              </span>
+            </div>
+
+            {/* Support Widget & Action Indicators (Opposite to Logo) */}
+            <div className="navbar-actions">
+              <a 
+                href={`tel:${storeSettings?.storePhone || '+919840123456'}`} 
+                className="navbar-call-btn" 
+                title={storeSettings?.storePhone ? `Call ${storeSettings.storePhone}` : 'Call Support'}
+              >
+                <Phone size={18} />
+                <span className="hide-mobile">{storeSettings?.storePhone ? `Call ${storeSettings.storePhone}` : 'Call Support'}</span>
+              </a>
+
+              <button 
+                className="navbar-account-btn" 
+                onClick={() => setActiveTab('userPortal')}
+                title="My Account"
+              >
+                <User size={20} />
+              </button>
+
+              <button 
+                className="navbar-cart-btn" 
+                onClick={toggleCartOpen}
+                title="Cart"
+              >
+                <ShoppingCart size={18} />
+                <span className="hide-mobile">Cart</span>
+                {cartItemsCount > 0 && (
+                  <span className="navbar-cart-badge">
+                    {cartItemsCount}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
 
-          {/* Autocomplete Search Bar */}
+          {/* Autocomplete Search Bar (Row 2 on Mobile) */}
           <form onSubmit={handleSearchSubmit} className="navbar-search-form" ref={suggestionRef}>
             <div style={{ position: 'relative' }}>
               <input
@@ -183,40 +220,6 @@ export default function Navbar({ activeTab, setActiveTab, setSelectedProductId, 
               </div>
             )}
           </form>
-
-          {/* Support Widget & Action Indicators */}
-          <div className="navbar-actions">
-            <a 
-              href={`tel:${storeSettings?.storePhone || '+919840123456'}`} 
-              className="navbar-call-btn" 
-              title={storeSettings?.storePhone ? `Call ${storeSettings.storePhone}` : 'Call Support'}
-            >
-              <Phone size={18} />
-              <span className="hide-mobile">{storeSettings?.storePhone ? `Call ${storeSettings.storePhone}` : 'Call Support'}</span>
-            </a>
-
-            <button 
-              className="navbar-account-btn" 
-              onClick={() => setActiveTab('userPortal')}
-              title="My Account"
-            >
-              <User size={20} />
-            </button>
-
-            <button 
-              className="navbar-cart-btn" 
-              onClick={toggleCartOpen}
-              title="Cart"
-            >
-              <ShoppingCart size={18} />
-              <span className="hide-mobile">Cart</span>
-              {cartItemsCount > 0 && (
-                <span className="navbar-cart-badge">
-                  {cartItemsCount}
-                </span>
-              )}
-            </button>
-          </div>
         </div>
 
         {/* Tab Selection Navigation */}

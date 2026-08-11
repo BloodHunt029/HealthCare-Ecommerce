@@ -933,6 +933,27 @@ input:checked + .toggle-slider:before {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* Navbar Layout Rules */
+@media (min-width: 769px) {
+  .navbar-container {
+    display: grid !important;
+    grid-template-columns: auto 1fr auto !important;
+    align-items: center !important;
+    gap: 1.5rem !important;
+    padding: 0.85rem 1.5rem !important;
+  }
+
+  .navbar-header-top {
+    display: contents !important;
+  }
+
+  .navbar-search-form {
+    max-width: 520px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .hide-mobile {
     display: none !important;
@@ -960,91 +981,94 @@ input:checked + .toggle-slider:before {
 
   /* Main Navigation Header Row on Mobile */
   .navbar-container {
-    padding: 0.55rem 0.75rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0.6rem 0.85rem !important;
     gap: 0.5rem !important;
-    flex-wrap: wrap !important;
-    justify-content: space-between !important;
+  }
+
+  .navbar-header-top {
+    display: flex !important;
     align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
   }
 
   .navbar-logo {
-    order: 1 !important;
     flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
   }
 
   .navbar-logo span:last-child {
-    font-size: 1.25rem !important;
+    font-size: 1.3rem !important;
   }
 
-  /* Action Buttons Aligned Straight in Top Rightside Corner */
+  /* Action Buttons Aligned Straight in Top Rightside Corner Opposite to Logo */
   .navbar-actions {
-    order: 2 !important;
     flex: 0 0 auto !important;
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
-    gap: 0.35rem !important;
+    gap: 0.5rem !important;
     margin-left: auto !important;
     flex-wrap: nowrap !important;
   }
 
   .navbar-call-btn {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.3rem !important;
-    padding: 0.35rem 0.6rem !important;
-    border-radius: 99px !important;
+    width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
     background-color: hsl(var(--primary) / 0.12) !important;
     color: hsl(var(--primary)) !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    white-space: nowrap !important;
-    text-decoration: none !important;
-  }
-
-  .navbar-account-btn {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 34px !important;
-    height: 34px !important;
+  }
+
+  .navbar-account-btn {
+    width: 38px !important;
+    height: 38px !important;
     padding: 0 !important;
     border-radius: 50% !important;
     background-color: hsl(var(--text-muted-light)) !important;
     color: hsl(var(--text-main)) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     flex-shrink: 0 !important;
   }
 
   .navbar-cart-btn {
     position: relative !important;
+    width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    background-color: hsl(var(--primary)) !important;
+    color: white !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 0.25rem !important;
-    padding: 0.35rem 0.7rem !important;
-    border-radius: 99px !important;
-    background-color: hsl(var(--primary)) !important;
-    color: white !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    white-space: nowrap !important;
     flex-shrink: 0 !important;
   }
 
   .navbar-cart-badge {
-    top: -4px !important;
-    right: -4px !important;
-    width: 17px !important;
-    height: 17px !important;
+    position: absolute !important;
+    top: -3px !important;
+    right: -3px !important;
+    width: 18px !important;
+    height: 18px !important;
     font-size: 0.65rem !important;
   }
 
   /* Full Width Mobile Search Form Container below Top Row */
   .navbar-search-form {
-    order: 3 !important;
     max-width: 100% !important;
     width: 100% !important;
-    margin-top: 0.2rem !important;
+    margin-top: 0.15rem !important;
   }
 }
 
